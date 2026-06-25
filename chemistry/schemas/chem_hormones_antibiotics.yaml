@@ -1,0 +1,38 @@
+# Hormones and Antibiotics 2025 — 5 paired analytes with 'LIMT' (sic) as the
+# limit column header (lab typo, retained as-is).
+section: hormones_antibiotics
+applies_to:
+  2025: "Copy of Hormones and Antibiotics 2025.xlsx"
+
+skip_sheets: []
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  sampling_date:    ["Sampling Date"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+
+paired_columns:
+  - { result_alias: "Amoxicillin",      result_key: amoxicillin,      limit_key: amoxicillin_limit,      limit_alias: "LIMT" }
+  - { result_alias: "Sufamerazine",     result_key: sulfamerazine,    limit_key: sulfamerazine_limit,    limit_alias: "LIMT" }
+  - { result_alias: "Sulfamethoxazole", result_key: sulfamethoxazole, limit_key: sulfamethoxazole_limit, limit_alias: "LIMT" }
+  - { result_alias: "Testosterone",     result_key: testosterone,     limit_key: testosterone_limit,     limit_alias: "LIMT" }
+  - { result_alias: "Progesterone",     result_key: progesterone,     limit_key: progesterone_limit,     limit_alias: "LIMT" }
+
+tests:
+  - { name: "Amoxicillin",      result: amoxicillin,      limit: amoxicillin_limit }
+  - { name: "Sulfamerazine",    result: sulfamerazine,    limit: sulfamerazine_limit }
+  - { name: "Sulfamethoxazole", result: sulfamethoxazole, limit: sulfamethoxazole_limit }
+  - { name: "Testosterone",     result: testosterone,     limit: testosterone_limit }
+  - { name: "Progesterone",     result: progesterone,     limit: progesterone_limit }

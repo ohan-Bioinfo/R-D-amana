@@ -1,0 +1,82 @@
+# Food chemistry — Moisture, Ash, Concentration, Refractive index, Acidity,
+# Rancidity, pH, Peroxide, Acid number, plus 4 sensory tests; dairy tests
+# (Fat / Total Solids / SNF) appear in some months only.
+section: food_chemistry
+applies_to:
+  2024: "Food chemistry section.xlsx"
+  2025: "Copy of Food chemistry section 2025.xlsx"
+
+skip_sheets:
+  - invalid samples
+  - draft
+  - jams
+  - honey
+  - ajal
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  receiving_date:   ["Receiving Date"]
+  sampling_date:    ["Sampling Date"]
+  testing_date:     ["Testing date"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid",
+                     "Matched/not matched", "Matched/ not matched",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+  sample_notes:     ["Sample Notes"]
+  testing_notes:    ["Testing Notes", "Testing notes"]
+  # Numeric tests + their inline limits.
+  moisture:                ["Moisture"]
+  moisture_limit:          ["Moisture limit"]
+  ash:                     ["Ash"]
+  ash_limit:               ["Ash limit"]
+  concentration:           ["Concentration"]
+  concentration_limit:     ["Concentration limit"]
+  refractive_index:        ["Refractive index"]
+  refractive_index_limit:  ["Refractive index limit"]
+  acidity:                 ["الحموضة"]
+  acidity_limit:           ["حدود الحموضة"]
+  rancidity:               ["التزنخ"]
+  rancidity_limit:         ["حدود التزنخ"]
+  ph:                      ["الرقم الهيدروجيني pH"]
+  ph_limit:                ["pH limit حدود الرقم الهيدروجيني"]
+  peroxide:                ["بيروكسيد"]
+  peroxide_limit:          ["حدود بيروكسيد"]
+  acid_number:             ["الرقم لحامض"]
+  # Dairy (appear in May–Aug only).
+  fat:                  ["الدهون"]
+  total_solids:         ["الجوامد الكلية"]
+  total_solids_nonfat:  ["الجوامد الكلية اللادهنية"]
+  # Sensory tests — 4 columns share English-half 'اختبار حسي' but differ in
+  # Arabic suffix. The cleaner's full-bilingual match distinguishes them.
+  sensory_texture: ["اختبار حسي القوام"]
+  sensory_color:   ["اختبار حسي اللون"]
+  sensory_smell:   ["اختبار حسي الرائحة"]
+  sensory_taste:   ["اختبار حسي الطعم"]
+
+tests:
+  - { name: "Moisture",          result: moisture,         limit: moisture_limit,         unit: "%" }
+  - { name: "Ash",               result: ash,              limit: ash_limit,              unit: "%" }
+  - { name: "Concentration",     result: concentration,    limit: concentration_limit,    unit: "%" }
+  - { name: "Refractive index",  result: refractive_index, limit: refractive_index_limit, unit: "" }
+  - { name: "Acidity",           result: acidity,          limit: acidity_limit,          unit: "%" }
+  - { name: "Rancidity",         result: rancidity,        limit: rancidity_limit,        unit: "" }
+  - { name: "pH",                result: ph,               limit: ph_limit,               unit: "" }
+  - { name: "Peroxide",          result: peroxide,         limit: peroxide_limit,         unit: "" }
+  - { name: "Acid number",       result: acid_number,      limit: null,                   unit: "" }
+  - { name: "Fat",               result: fat,              limit: null,                   unit: "%" }
+  - { name: "Total solids",      result: total_solids,     limit: null,                   unit: "%" }
+  - { name: "Total solids non-fat", result: total_solids_nonfat, limit: null,             unit: "%" }
+  - { name: "Sensory texture",   result: sensory_texture, kind: string }
+  - { name: "Sensory color",     result: sensory_color,   kind: string }
+  - { name: "Sensory smell",     result: sensory_smell,   kind: string }
+  - { name: "Sensory taste",     result: sensory_taste,   kind: string }

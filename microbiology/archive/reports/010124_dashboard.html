@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab report — 010124.xlsx</title>
+<style>
+    :root {
+        --bg: #f6f8fa;
+        --card: #ffffff;
+        --border: #e1e4e8;
+        --border-strong: #d0d7de;
+        --fg: #1f2328;
+        --fg-muted: #57606a;
+        --accent: #0969da;
+        --success: #1a7f37;
+        --success-bg: #dafbe1;
+        --danger: #cf222e;
+        --danger-bg: #ffebe9;
+        --warning: #9a6700;
+        --warning-bg: #fff8c5;
+        --neutral: #6e7781;
+        --neutral-bg: #eaeef2;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+                  font-size: 14px; line-height: 1.5; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Header */
+    header.topbar { background: white; border-bottom: 1px solid var(--border);
+                     padding: 16px 32px; display: flex; align-items: center; gap: 24px; }
+    header.topbar .brand { display: flex; align-items: center; gap: 12px; }
+    header.topbar .brand .logo { width: 36px; height: 36px; border-radius: 8px;
+                                   background: linear-gradient(135deg, var(--accent), #0550ae);
+                                   display: grid; place-items: center; color: white; font-weight: 700; }
+    header.topbar .brand h1 { font-size: 16px; margin: 0; font-weight: 600; }
+    header.topbar .brand .sub { font-size: 12px; color: var(--fg-muted); }
+    header.topbar .meta { margin-left: auto; text-align: right; font-size: 12px; color: var(--fg-muted); }
+    header.topbar .meta b { color: var(--fg); }
+
+    main { padding: 24px 32px 64px; max-width: 1400px; margin: 0 auto; }
+
+    h2.section { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em;
+                  color: var(--fg-muted); margin: 32px 0 12px; font-weight: 600; }
+    h2.section:first-of-type { margin-top: 8px; }
+
+    /* KPI cards */
+    .kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .kpi { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 16px 18px; }
+    .kpi .label { font-size: 12px; color: var(--fg-muted); text-transform: uppercase;
+                   letter-spacing: 0.04em; }
+    .kpi .value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    .kpi .delta { font-size: 12px; color: var(--fg-muted); margin-top: 2px; }
+    .kpi.success .value { color: var(--success); }
+    .kpi.danger .value { color: var(--danger); }
+    .kpi.warning .value { color: var(--warning); }
+
+    /* Two-up grid */
+    .two-up { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
+    .panel { background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+              padding: 20px; }
+    .panel > .panel-title { font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+    .panel > .panel-sub { font-size: 12px; color: var(--fg-muted); margin-bottom: 14px; }
+    .panel.compact { padding: 16px; }
+
+    /* Tables */
+    table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.data th { text-align: left; padding: 8px 10px; background: var(--bg);
+                     border-bottom: 1px solid var(--border); font-weight: 600;
+                     color: var(--fg-muted); font-size: 12px; text-transform: uppercase;
+                     letter-spacing: 0.03em; }
+    table.data td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    table.data tr:hover td { background: var(--bg); }
+    td.ar { direction: rtl; text-align: right; font-size: 14px; }
+    td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 999px;
+              font-size: 11px; font-weight: 600; }
+    .badge.success { background: var(--success-bg); color: var(--success); }
+    .badge.danger  { background: var(--danger-bg); color: var(--danger); }
+    .badge.warning { background: var(--warning-bg); color: var(--warning); }
+    .badge.neutral { background: var(--neutral-bg); color: var(--neutral); }
+    .pill-row { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+    .pill { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px;
+             background: var(--neutral-bg); color: var(--fg-muted); border: 1px solid var(--border); }
+
+    /* Status dot */
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px;
+            vertical-align: middle; }
+    .dot.success { background: var(--success); }
+    .dot.danger  { background: var(--danger); }
+    .dot.neutral { background: var(--neutral); }
+
+    /* Test stats per-test bar */
+    .test-row { display: grid; grid-template-columns: 200px 1fr 56px; align-items: center;
+                 gap: 10px; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+    .test-row:last-child { border-bottom: 0; }
+    .test-row .name { font-size: 13px; }
+    .test-row .name small { display: block; color: var(--fg-muted); font-size: 11px; }
+    .test-row .bar-wrap { position: relative; height: 14px; background: var(--bg);
+                           border-radius: 4px; overflow: hidden; }
+    .test-row .bar { height: 100%; background: var(--accent); border-radius: 4px; }
+    .test-row .bar.fail { background: var(--danger); position: absolute; top: 0; left: 0; }
+    .test-row .count { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--fg-muted);
+                        text-align: right; }
+
+    /* Donut legend */
+    .legend { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+    .legend-row { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; }
+    .legend-row .swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+    /* Detail rows under sample */
+    details.sample { border-bottom: 1px solid var(--border); }
+    details.sample > summary { cursor: pointer; padding: 10px 0; list-style: none;
+                                display: grid; grid-template-columns: 60px 60px 80px 1fr 90px 110px 120px auto;
+                                gap: 12px; align-items: center; font-size: 13px; }
+    details.sample > summary::-webkit-details-marker { display: none; }
+    details.sample > summary:hover { background: var(--bg); }
+    details.sample > summary .chev { color: var(--fg-muted); transition: transform 0.15s; }
+    details.sample[open] > summary .chev { transform: rotate(90deg); }
+    details.sample > .detail { padding: 0 0 12px 60px; }
+    details.sample > .detail table.data { background: var(--bg); border-radius: 6px; overflow: hidden; }
+
+    /* Footer */
+    footer.bottom { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);
+                     font-size: 11px; color: var(--fg-muted); display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">L</div>
+    <div>
+      <h1>Microbiology Lab — Daily report</h1>
+      <div class="sub">GSO 1016 standard · sample &amp; test results</div>
+    </div>
+  </div>
+  <div class="meta">
+    <div><b>Monday, 01 January 2024</b></div>
+    <div>Source: <code>010124.xlsx</code> · 31 samples · 99 tests</div>
+  </div>
+</header>
+
+<main>
+
+<h2 class="section">Overview</h2>
+
+    <div class="kpis">
+      <div class="kpi"><div class="label">Samples tested</div><div class="value">31</div><div class="delta">on Monday, 01 January 2024</div></div>
+      <div class="kpi"><div class="label">Tests performed</div><div class="value">99</div><div class="delta">3.2 tests / sample</div></div>
+      <div class="kpi success"><div class="label">Pass rate</div><div class="value">79.8%</div><div class="delta">79 valid · 20 invalid</div></div>
+      <div class="kpi danger"><div class="label">Samples failed</div><div class="value">14</div><div class="delta">17 fully clean</div></div>
+      <div class="kpi warning"><div class="label">Rows flagged</div><div class="value">58</div><div class="delta">7 distinct issue types</div></div>
+    </div>
+    
+
+<h2 class="section">Test distribution &amp; outcome</h2>
+<div class="two-up">
+  <div class="panel">
+    <div class="panel-title">Tests performed by category</div>
+    <div class="panel-sub">Blue bar = total, red bar = invalid (overlay). Hover labels are English equivalents.</div>
+    
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">السالمونيلا</span>
+            <small>Salmonella</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 100.00%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">19</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">ايشيريشيا كولاي</span>
+            <small>E. coli</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 94.74%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">18</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">العدد الكلي للبكتيريا</span>
+            <small>Total bacterial count</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 94.74%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">18</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">استافيلوكوكس اورياس</span>
+            <small>Staphylococcus aureus</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 84.21%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">16</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">الخمائر والاعفان</span>
+            <small>Yeasts &amp; moulds</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 73.68%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">14</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">انتيروباكتريسي</span>
+            <small>Enterobacteriaceae</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 47.37%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">9</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">سيدومومناس</span>
+            <small>Pseudomonas</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 10.53%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">2</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">كوليفورم</span>
+            <small>Coliform</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 10.53%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">2</div>
+        </div>
+        <div class="test-row">
+          <div class="name" dir="auto">
+            <span dir="rtl">باصلص سيرز</span>
+            <small>Bacillus cereus</small>
+          </div>
+          <div class="bar-wrap">
+            <div class="bar" style="width: 5.26%;"></div>
+            <div class="bar fail" style="width: 0.00%;"></div>
+          </div>
+          <div class="count">1</div>
+        </div>
+  </div>
+  <div class="panel compact">
+    <div class="panel-title">Validity rollup</div>
+    <div class="panel-sub">All tests on this sheet</div>
+    <div style="display:flex; align-items:center; gap:18px; margin-top:8px;">
+      <div><svg viewBox="0 0 200 200" width="200" height="200"><circle cx="100.0" cy="100.0" r="84.0" fill="none" stroke="#eaeef2" stroke-width="32"/><path d="M 100.00 16.00 A 84.00 84.00 0 1 1 19.79 75.06" fill="none" stroke="#1a7f37" stroke-width="32" stroke-linecap="butt"/><path d="M 19.79 75.06 A 84.00 84.00 0 0 1 100.00 16.00" fill="none" stroke="#cf222e" stroke-width="32" stroke-linecap="butt"/><text x="100.0" y="96.0" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2328">99</text><text x="100.0" y="118.0" text-anchor="middle" font-size="11" fill="#57606a">tests</text></svg></div>
+      <div style="flex:1">
+    <div class="legend">
+      <div class="legend-row"><span class="swatch" style="background:#1a7f37"></span><span>Valid tests</span><b>79</b></div>
+      <div class="legend-row"><span class="swatch" style="background:#cf222e"></span><span>Invalid tests</span><b>20</b></div>
+    </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section">Failures by reason</h2>
+<div class="panel">
+  <div class="panel-title">Final-report code distribution (excluding "Valid")</div>
+  <div class="panel-sub">Mapped from the lab's free-text final-report column. 47 invalid tests across 8 categories.</div>
+  <svg viewBox="0 0 620 236" width="100%" height="236" preserveAspectRatio="xMinYMin meet">
+            <g transform="translate(0,0)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Multiple</text>
+                <rect x="220" y="0" width="340" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="566" y="15.0" font-size="12" fill="#57606a">12</text>
+            </g>
+            <g transform="translate(0,30)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Total bacteria</text>
+                <rect x="220" y="0" width="283" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="509" y="15.0" font-size="12" fill="#57606a">10</text>
+            </g>
+            <g transform="translate(0,60)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Water coliform</text>
+                <rect x="220" y="0" width="170" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="396" y="15.0" font-size="12" fill="#57606a">6</text>
+            </g>
+            <g transform="translate(0,90)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Salmonella</text>
+                <rect x="220" y="0" width="170" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="396" y="15.0" font-size="12" fill="#57606a">6</text>
+            </g>
+            <g transform="translate(0,120)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Enterobact.</text>
+                <rect x="220" y="0" width="170" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="396" y="15.0" font-size="12" fill="#57606a">6</text>
+            </g>
+            <g transform="translate(0,150)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — E. coli</text>
+                <rect x="220" y="0" width="85" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="311" y="15.0" font-size="12" fill="#57606a">3</text>
+            </g>
+            <g transform="translate(0,180)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Yeast &amp; mould</text>
+                <rect x="220" y="0" width="57" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="283" y="15.0" font-size="12" fill="#57606a">2</text>
+            </g>
+            <g transform="translate(0,210)">
+                <text x="210" y="15.0" text-anchor="end"
+                      font-size="12" fill="#1f2328">Invalid — Entero. + Salm.</text>
+                <rect x="220" y="0" width="57" height="22"
+                      fill="#cf222e" rx="3"></rect>
+                <text x="283" y="15.0" font-size="12" fill="#57606a">2</text>
+            </g></svg>
+</div>
+
+<h2 class="section">Samples (31)</h2>
+<div class="panel" style="padding: 8px 16px;">
+  <div style="display:grid; grid-template-columns: 60px 60px 80px 1fr 90px 110px 120px auto; gap:12px;
+              padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px;
+              text-transform: uppercase; color: var(--fg-muted); letter-spacing:0.04em; font-weight:600;">
+    <span></span><span>S.No</span><span>M.S.No</span><span>GSO</span><span>Sample</span>
+    <span># tests</span><span>Status</span><span>Final code</span><span>Flags</span>
+  </div>
+  
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">1</span>
+            <span class="num">4520</span>
+            <span dir="auto">E-1</span>
+            <span dir="rtl">بيض مسلوق</span>
+            <span class="num">2</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Entero. + Salm.</span></span>
+            <span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي والسالمونيلا">Invalid — Entero. + Salm.</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">170</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي والسالمونيلا">Invalid — Entero. + Salm.</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">2</span>
+            <span class="num">4521</span>
+            <span dir="auto"><span class="badge warning">missing</span></span>
+            <span dir="rtl">طاولة تحضير</span>
+            <span class="num">4</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="gso_code_was_iso_placeholder">GSO code missing (was &#x27;ISO&#x27;)</span> <span class="pill" title="limit_numeric_comparison_prefix:&lt;">Limit has &#x27;&lt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">&lt;100/25cm2</td>
+                <td class="ar" dir="rtl">32</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>gso_code_was_iso_placeholder|limit_numeric_comparison_prefix:&lt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">3</span>
+            <span class="num">4522</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">طماطم شرايح</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Salmonella</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">4</span>
+            <span class="num">4223</span>
+            <span dir="auto">J-7</span>
+            <span dir="rtl">مخلل خيار</span>
+            <span class="num">2</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Yeast &amp; mould</span></span>
+            <span><span class="pill" title="msno_value_4223_suspect_typo">M.S.No suspected typo</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">2</td>
+                <td class="ar" dir="rtl">1700</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الخمائر">Invalid — Yeast &amp; mould</span></td>
+                <td>msno_value_4223_suspect_typo</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الخمائر">Invalid — Yeast &amp; mould</span></td>
+                <td>msno_value_4223_suspect_typo</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">5</span>
+            <span class="num">4524</span>
+            <span dir="auto">J-7</span>
+            <span dir="rtl">مخلل لفت</span>
+            <span class="num">2</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">2</td>
+                <td class="ar" dir="rtl">0</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">6</span>
+            <span class="num">4525</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">ملفوف</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">7</span>
+            <span class="num">4526</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">خس</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">8</span>
+            <span class="num">4527</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">بقدونس</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">9</span>
+            <span class="num">4528</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">زهرة</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">10</span>
+            <span class="num">4529</span>
+            <span dir="auto">G-3</span>
+            <span dir="rtl">شطة</span>
+            <span class="num">6</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">11</span>
+            <span class="num">4530</span>
+            <span dir="auto">G-3</span>
+            <span dir="rtl">شطة شامية</span>
+            <span class="num">6</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">190</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">12</span>
+            <span class="num">4531</span>
+            <span dir="auto">P-6/4</span>
+            <span dir="rtl">حمص</span>
+            <span class="num">2</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Total bacteria</span></span>
+            <span><span class="pill" title="dilution_value_nonstandard">Non-standard dilution value</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000000</td>
+                <td class="ar" dir="rtl">24800000</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>dilution_value_nonstandard</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000000</td>
+                <td class="ar" dir="rtl">24800000</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>dilution_value_nonstandard</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">13</span>
+            <span class="num">4532</span>
+            <span dir="auto">P-6/1</span>
+            <span dir="rtl">فلافل</span>
+            <span class="num">1</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">1080</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">14</span>
+            <span class="num">4533</span>
+            <span dir="auto">J-8</span>
+            <span dir="rtl">بطاطس</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">100000</td>
+                <td class="ar" dir="rtl">100</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">باصلص سيرز</span><br><small style="color:var(--fg-muted)">Bacillus cereus</small></td>
+                <td class="ar" dir="rtl">100000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">15</span>
+            <span class="num">1</span>
+            <span dir="auto">N-1</span>
+            <span dir="rtl">موية فلتر</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Water coliform</span></span>
+            <span><span class="pill" title="pseudomonas_spelling_unverified">Pseudomonas spelling unverified</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">سيدومومناس</span><br><small style="color:var(--fg-muted)">Pseudomonas</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td>pseudomonas_spelling_unverified</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">كوليفورم</span><br><small style="color:var(--fg-muted)">Coliform</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">16</span>
+            <span class="num">4534</span>
+            <span dir="auto">O-4</span>
+            <span dir="rtl">نكهة توت احمر</span>
+            <span class="num">2</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">17</span>
+            <span class="num">4535</span>
+            <span dir="auto">O-4</span>
+            <span dir="rtl">شاي بالخوخ</span>
+            <span class="num">2</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">18</span>
+            <span class="num">4536</span>
+            <span dir="auto">O-4</span>
+            <span dir="rtl">نكهة فراولة</span>
+            <span class="num">2</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">19</span>
+            <span class="num">4537</span>
+            <span dir="auto">O-4</span>
+            <span dir="rtl">نكهة توت ازرق</span>
+            <span class="num">2</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">20</span>
+            <span class="num">4538</span>
+            <span dir="auto">L-1</span>
+            <span dir="rtl">صوص كراميل</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">1000000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">21</span>
+            <span class="num">4539</span>
+            <span dir="auto">L-1</span>
+            <span dir="rtl">صوص بندق</span>
+            <span class="num">3</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">1000000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">26</span>
+            <span class="num">2</span>
+            <span dir="auto">N-1</span>
+            <span dir="rtl">موية فلتر</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Water coliform</span></span>
+            <span><span class="pill" title="final_report_truncation">Final-report text truncation</span> <span class="pill" title="pseudomonas_spelling_unverified">Pseudomonas spelling unverified</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td>final_report_truncation</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">سيدومومناس</span><br><small style="color:var(--fg-muted)">Pseudomonas</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td>final_report_truncation|pseudomonas_spelling_unverified</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">كوليفورم</span><br><small style="color:var(--fg-muted)">Coliform</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليه">Invalid — Water coliform</span></td>
+                <td>final_report_truncation</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">29</span>
+            <span class="num">4540</span>
+            <span dir="auto">G-3</span>
+            <span dir="rtl">صوص خاص</span>
+            <span class="num">6</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Multiple</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">4500</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">29900</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">881</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">30</span>
+            <span class="num">4541</span>
+            <span dir="auto">G-3</span>
+            <span dir="rtl">صوص بستو</span>
+            <span class="num">6</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Multiple</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">1200</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">29200</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">370</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان">Invalid — Multiple</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">31</span>
+            <span class="num">4542</span>
+            <span dir="auto">P-6/1</span>
+            <span dir="rtl">فلافل</span>
+            <span class="num">1</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Total bacteria</span></span>
+            <span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">28500</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">32</span>
+            <span class="num">4543</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">سلطة خضار</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Total bacteria</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">33</span>
+            <span class="num">4544</span>
+            <span dir="auto">A-3</span>
+            <span dir="rtl">سلطة زبادي</span>
+            <span class="num">4</span>
+            <span class="badge success">Pass</span>
+            <span><span class="badge" style="background:#dafbe1; color:#1a7f37">Valid</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">1118</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات">Valid</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">34</span>
+            <span class="num">4545</span>
+            <span dir="auto">G-3</span>
+            <span dir="rtl">شطة حارة</span>
+            <span class="num">6</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Enterobact.</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">الخمائر والاعفان</span><br><small style="color:var(--fg-muted)">Yeasts &amp; moulds</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">10000</td>
+                <td class="ar" dir="rtl">927</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">انتيروباكتريسي</span><br><small style="color:var(--fg-muted)">Enterobacteriaceae</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">540</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">10</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الانتيروباكتيرييسي">Invalid — Enterobact.</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">35</span>
+            <span class="num">4546</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">جرجير</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — E. coli</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الايشيريشيا كولاي">Invalid — E. coli</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الايشيريشيا كولاي">Invalid — E. coli</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">230</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من الايشيريشيا كولاي">Invalid — E. coli</span></td>
+                <td></td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">36</span>
+            <span class="num">4547</span>
+            <span dir="auto">J-1</span>
+            <span dir="rtl">سلطة خضروات</span>
+            <span class="num">3</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Salmonella</span></span>
+            <span><span class="pill" title="result_numeric_comparison_prefix:&gt;">Result has &#x27;&gt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">1000</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">موجوده</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">100</td>
+                <td class="ar" dir="rtl">&gt;10</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود السالمونيلا">Invalid — Salmonella</span></td>
+                <td>result_numeric_comparison_prefix:&gt;</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+        <details class="sample">
+          <summary>
+            <span class="chev">▸</span>
+            <span class="num">37</span>
+            <span class="num">4548</span>
+            <span dir="auto"><span class="badge warning">missing</span></span>
+            <span dir="rtl">مسحة ادوات</span>
+            <span class="num">4</span>
+            <span class="badge danger">Fail</span>
+            <span><span class="badge" style="background:#ffebe9; color:#cf222e">Invalid — Total bacteria</span></span>
+            <span><span class="pill" title="gso_code_was_iso_placeholder">GSO code missing (was &#x27;ISO&#x27;)</span> <span class="pill" title="limit_numeric_comparison_prefix:&lt;">Limit has &#x27;&lt;&#x27; prefix</span></span>
+          </summary>
+          <div class="detail">
+            <table class="data">
+              <thead><tr>
+                <th>Test</th><th>GSO 1016 limit</th><th>Result</th><th>Validity</th>
+                <th>Final report</th><th>Flags</th>
+              </tr></thead>
+              <tbody>
+              <tr>
+                <td class="ar"><span dir="rtl">استافيلوكوكس اورياس</span><br><small style="color:var(--fg-muted)">Staphylococcus aureus</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">السالمونيلا</span><br><small style="color:var(--fg-muted)">Salmonella</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">العدد الكلي للبكتيريا</span><br><small style="color:var(--fg-muted)">Total bacterial count</small></td>
+                <td class="ar" dir="rtl">&lt;100/25cm2</td>
+                <td class="ar" dir="rtl">621</td>
+                <td><span class="badge danger">Invalid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>gso_code_was_iso_placeholder|limit_numeric_comparison_prefix:&lt;</td>
+              </tr>
+              <tr>
+                <td class="ar"><span dir="rtl">ايشيريشيا كولاي</span><br><small style="color:var(--fg-muted)">E. coli</small></td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td class="ar" dir="rtl">غير موجودة</td>
+                <td><span class="badge success">Valid</span></td>
+                <td class="ar"><span dir="rtl" title="بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير صالحه لوجود عدد كبير من العدد الكلي للبكتيريا">Invalid — Total bacteria</span></td>
+                <td>gso_code_was_iso_placeholder</td>
+              </tr></tbody>
+            </table>
+          </div>
+        </details>
+        
+</div>
+
+<h2 class="section">Data quality</h2>
+<div class="two-up">
+  <div class="panel">
+    <div class="panel-title">Flags raised during cleaning</div>
+    <div class="panel-sub">Each flag is a row-level note about something the cleaner couldn't decide on its own. Source-file values are preserved verbatim alongside the canonical fields.</div>
+    
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>Result has &#x27;&gt;&#x27; prefix</span>
+          <b>42</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>GSO code missing (was &#x27;ISO&#x27;)</span>
+          <b>8</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>Final-report text truncation</span>
+          <b>3</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>Pseudomonas spelling unverified</span>
+          <b>2</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>M.S.No suspected typo</span>
+          <b>2</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>Limit has &#x27;&lt;&#x27; prefix</span>
+          <b>2</b>
+        </div>
+        <div class="legend-row" style="grid-template-columns:1fr auto;">
+          <span><span class="dot warning" style="background:var(--warning)"></span>Non-standard dilution value</span>
+          <b>2</b>
+        </div>
+  </div>
+  <div class="panel compact">
+    <div class="panel-title">Sheet info</div>
+    <div class="panel-sub">Trace back to the source workbook</div>
+    <table class="data" style="margin-top:8px">
+      <tr><td>File</td><td><code>010124.xlsx</code></td></tr>
+      <tr><td>Sheet date</td><td>2024-01-01</td></tr>
+      <tr><td>Schema</td><td><code>lab_data_v1</code></td></tr>
+      <tr><td>Rows out</td><td>99</td></tr>
+      <tr><td>Distinct samples</td><td>31</td></tr>
+      <tr><td>Distinct tests run</td><td>9</td></tr>
+    </table>
+  </div>
+</div>
+
+<footer class="bottom">
+  <div>Lab dashboard prototype · single-file build · generated from <code>010124.parquet</code></div>
+  <div>Schema lab_data_v1 · GSO 1016</div>
+</footer>
+
+</main>
+</body>
+</html>

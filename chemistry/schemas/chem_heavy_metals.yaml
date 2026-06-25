@@ -1,0 +1,91 @@
+# Heavy metals 2025 — 21 metals each tested per sample. Each metal column is
+# followed by 'Limit (ppb)' and 'QC.RC%'. Ca/K/Mg/Na are NOT in the 2025 panel.
+section: heavy_metals
+applies_to:
+  2024: "Heavy metals.xlsx"
+  2025: "Copy of Heavy metals 2025.xlsx"
+
+skip_sheets:
+  - invalid samples
+  - study
+  - edited
+  - sheet
+  - خطاب
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  receiving_date:   ["Receiving Date"]
+  sampling_date:    ["Sampling Date"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_notes:     ["Sample Notes"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid",
+                     "Matched/not matched", "Matched/ not matched",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+  qc_for_invalid:   ["QC for invalid test", "Limit Invalid test ( ppb )"]
+  qc_result:        ["Result QC for invalid test", "Result for invalid test"]
+
+paired_columns:
+  - { result_alias: "Silver",        result_key: silver,        limit_key: silver_limit,        qc_key: silver_qc }
+  - { result_alias: "Aluminum",      result_key: aluminum,      limit_key: aluminum_limit,      qc_key: aluminum_qc }
+  - { result_alias: "Total arsenic", result_key: arsenic,       limit_key: arsenic_limit,       qc_key: arsenic_qc }
+  - { result_alias: "barium",        result_key: barium,        limit_key: barium_limit,        qc_key: barium_qc }
+  - { result_alias: "beryllium",     result_key: beryllium,     limit_key: beryllium_limit,     qc_key: beryllium_qc }
+  - { result_alias: "cadmium",       result_key: cadmium,       limit_key: cadmium_limit,       qc_key: cadmium_qc }
+  - { result_alias: "cobalt",        result_key: cobalt,        limit_key: cobalt_limit,        qc_key: cobalt_qc }
+  - { result_alias: "chromium",      result_key: chromium,      limit_key: chromium_limit,      qc_key: chromium_qc }
+  - { result_alias: "cesium",        result_key: cesium,        limit_key: cesium_limit,        qc_key: cesium_qc }
+  - { result_alias: "copper",        result_key: copper,        limit_key: copper_limit,        qc_key: copper_qc }
+  - { result_alias: "iron",          result_key: iron,          limit_key: iron_limit,          qc_key: iron_qc }
+  - { result_alias: "manganese",     result_key: manganese,     limit_key: manganese_limit,     qc_key: manganese_qc }
+  - { result_alias: "nickle",        result_key: nickel,        limit_key: nickel_limit,        qc_key: nickel_qc }
+  - { result_alias: "lead",          result_key: lead,          limit_key: lead_limit,          qc_key: lead_qc }
+  - { result_alias: "Rubidium",      result_key: rubidium,      limit_key: rubidium_limit,      qc_key: rubidium_qc }
+  - { result_alias: "Selenium",      result_key: selenium,      limit_key: selenium_limit,      qc_key: selenium_qc }
+  - { result_alias: "Strontium",     result_key: strontium,     limit_key: strontium_limit,     qc_key: strontium_qc }
+  - { result_alias: "Uranium",       result_key: uranium,       limit_key: uranium_limit,       qc_key: uranium_qc }
+  - { result_aliases: ["Mercury", "Total Mercury"],
+      result_key: mercury, limit_key: mercury_limit, qc_key: mercury_qc }
+  - { result_alias: "Vanadium",      result_key: vanadium,      limit_key: vanadium_limit,      qc_key: vanadium_qc }
+  - { result_alias: "Zinc",          result_key: zinc,          limit_key: zinc_limit,          qc_key: zinc_qc }
+  # 2024-only metals (lab removed these from the 2025 panel).
+  - { result_alias: "calcium",       result_key: calcium,       limit_key: calcium_limit,       qc_key: calcium_qc }
+  - { result_alias: "potassium",     result_key: potassium,     limit_key: potassium_limit,     qc_key: potassium_qc }
+  - { result_alias: "magnesium",     result_key: magnesium,     limit_key: magnesium_limit,     qc_key: magnesium_qc }
+  - { result_alias: "sodium",        result_key: sodium,        limit_key: sodium_limit,        qc_key: sodium_qc }
+
+tests:
+  - { name: "Silver",     result: silver,     limit: silver_limit,     unit: ppb }
+  - { name: "Aluminum",   result: aluminum,   limit: aluminum_limit,   unit: ppb }
+  - { name: "Arsenic",    result: arsenic,    limit: arsenic_limit,    unit: ppb }
+  - { name: "Barium",     result: barium,     limit: barium_limit,     unit: ppb }
+  - { name: "Beryllium",  result: beryllium,  limit: beryllium_limit,  unit: ppb }
+  - { name: "Cadmium",    result: cadmium,    limit: cadmium_limit,    unit: ppb }
+  - { name: "Cobalt",     result: cobalt,     limit: cobalt_limit,     unit: ppb }
+  - { name: "Chromium",   result: chromium,   limit: chromium_limit,   unit: ppb }
+  - { name: "Cesium",     result: cesium,     limit: cesium_limit,     unit: ppb }
+  - { name: "Copper",     result: copper,     limit: copper_limit,     unit: ppb }
+  - { name: "Iron",       result: iron,       limit: iron_limit,       unit: ppb }
+  - { name: "Manganese",  result: manganese,  limit: manganese_limit,  unit: ppb }
+  - { name: "Nickel",     result: nickel,     limit: nickel_limit,     unit: ppb }
+  - { name: "Lead",       result: lead,       limit: lead_limit,       unit: ppb }
+  - { name: "Rubidium",   result: rubidium,   limit: rubidium_limit,   unit: ppb }
+  - { name: "Selenium",   result: selenium,   limit: selenium_limit,   unit: ppb }
+  - { name: "Strontium",  result: strontium,  limit: strontium_limit,  unit: ppb }
+  - { name: "Uranium",    result: uranium,    limit: uranium_limit,    unit: ppb }
+  - { name: "Mercury",    result: mercury,    limit: mercury_limit,    unit: ppb }
+  - { name: "Vanadium",   result: vanadium,   limit: vanadium_limit,   unit: ppb }
+  - { name: "Zinc",       result: zinc,       limit: zinc_limit,       unit: ppb }
+  - { name: "Calcium",    result: calcium,    limit: calcium_limit,    unit: ppb }
+  - { name: "Potassium",  result: potassium,  limit: potassium_limit,  unit: ppb }
+  - { name: "Magnesium",  result: magnesium,  limit: magnesium_limit,  unit: ppb }
+  - { name: "Sodium",     result: sodium,     limit: sodium_limit,     unit: ppb }

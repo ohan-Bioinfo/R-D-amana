@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<title>Review — 010124.xlsx</title>
+<style>
+  :root {
+    --bg: #fafbfc;
+    --fg: #1f2328;
+    --muted: #57606a;
+    --accent: #0969da;
+    --border: #d0d7de;
+    --header-bg: #ddf4ff;
+    --legend-bg: #f6f8fa;
+
+    --c-trailing: #fff8c5;        /* yellow */
+    --c-double-space: #fff1b8;    /* yellow-orange */
+    --c-msno: #ff8182;            /* red */
+    --c-near-dup: #ffd8b5;        /* orange */
+    --c-truncation: #ff8182;      /* red */
+    --c-dilution: #d8b9ff;        /* purple */
+    --c-empty: #eaeef2;           /* grey */
+  }
+  html, body { background: var(--bg); color: var(--fg); margin: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; padding: 24px; }
+  h1, h2, h3 { margin: 0 0 8px; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 17px; margin-top: 28px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 14px; margin-top: 20px; color: var(--muted); }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .panel { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .legend-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 16px; font-size: 12px; }
+  .legend-bar span { padding: 3px 8px; border-radius: 3px; border: 1px solid var(--border); }
+  table.xlsx { border-collapse: collapse; font-size: 12px; background: white; direction: rtl; }
+  table.xlsx td { border: 1px solid var(--border); padding: 4px 6px; vertical-align: middle; min-width: 32px; max-width: 360px;
+                   white-space: pre-wrap; word-break: break-word; }
+  table.xlsx td.rownum { background: var(--legend-bg); color: var(--muted); text-align: center; font-family: ui-monospace, monospace;
+                          direction: ltr; min-width: 36px; }
+  table.xlsx td.legend-cell { background: var(--legend-bg); color: var(--muted); font-style: italic; }
+  table.xlsx td.header-cell { background: var(--header-bg); font-weight: 600; }
+  table.xlsx td.empty-cell { background: #fdfdfd; }
+
+  td.issue-trailing-ws { background: var(--c-trailing) !important; }
+  td.issue-internal-double-space { background: var(--c-double-space) !important; }
+  td.issue-msno-typo { background: var(--c-msno) !important; color: white; font-weight: bold; }
+  td.issue-test-near-dup { background: var(--c-near-dup) !important; }
+  td.issue-final-report-truncation { background: var(--c-truncation) !important; color: white; }
+  td.issue-dilution-garbled { background: var(--c-dilution) !important; font-weight: bold; }
+  td.issue-col-empty-in-file { background: var(--c-empty) !important; }
+
+  .scroll { overflow: auto; max-height: 78vh; border: 1px solid var(--border); border-radius: 6px; padding: 4px; background: white; }
+  ul { margin: 4px 0 12px 18px; padding: 0; }
+  li { margin: 6px 0; }
+  code { background: #f6f8fa; padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
+  .q { background: #fff8c5; padding: 8px 12px; border-radius: 6px; margin: 8px 0; }
+  .q b { color: #9a6700; }
+  .answer { display: block; margin-top: 6px; color: var(--muted); font-style: italic; }
+  .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #ddf4ff; color: var(--accent); font-size: 11px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Review — <code>010124.xlsx</code></h1>
+<div class="meta">
+  Sheet <b>Sheet1</b> · 106 rows × 18 cols ·
+  225 merged ranges · no formulas · no hidden rows/cols/sheets · no colour-coded cells.
+  <br>This page preserves the original layout. Cells are coloured by issue. Hover for tooltips.
+</div>
+
+<div class="legend-bar">
+  <span style="background: var(--c-msno); color: white;">M.S.No typo (4223 → 4523?)</span>
+  <span style="background: var(--c-truncation); color: white;">Final Report truncation (م تحليل)</span>
+  <span style="background: var(--c-near-dup);">Test name near-duplicate</span>
+  <span style="background: var(--c-trailing);">Trailing whitespace</span>
+  <span style="background: var(--c-double-space);">Internal double-space</span>
+  <span style="background: var(--c-dilution);">Garbled dilution-column value</span>
+  <span style="background: var(--c-empty);">Column 100% empty in this file</span>
+  <span style="background: var(--header-bg);">Real header row (row 6)</span>
+  <span style="background: var(--legend-bg); font-style: italic;">Legend block (rows 1–7, cols A–D)</span>
+</div>
+
+<h2>The data — exactly as stored</h2>
+<div class="scroll">
+<table class="xlsx">
+<tr><td class="rownum">1</td><td class="legend-cell empty-cell"></td><td class="legend-cell empty-cell"></td><td class="legend-cell empty-cell"></td><td class="legend-cell empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td></tr>
+<tr><td class="rownum">2</td><td class="legend-cell empty-cell"></td><td class="legend-cell empty-cell"></td><td class="legend-cell">باصلص سيرز</td><td class="legend-cell empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td></tr>
+<tr><td class="rownum">3</td><td class="legend-cell empty-cell"></td><td class="legend-cell">ايشيريشيا كولاي</td><td class="legend-cell">&lt;300</td><td class="legend-cell empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td></tr>
+<tr><td class="rownum">4</td><td class="legend-cell empty-cell"></td><td class="legend-cell">استافيلوكوكس اورياس</td><td class="legend-cell">&gt;10</td><td class="legend-cell empty-cell"></td><td rowspan="2" colspan="14">نتائج يوم الاثنين 01/01/2024</td></tr>
+<tr><td class="rownum">5</td><td class="legend-cell empty-cell"></td><td class="legend-cell">انتيروباكتريسي</td><td class="legend-cell empty-cell"></td><td class="legend-cell empty-cell"></td></tr>
+<tr><td class="rownum">6</td><td class="empty-cell"></td><td >السالمونيلا</td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="header-cell">Barcodes</td><td rowspan="2" class="header-cell">M.S.No</td><td rowspan="2" class="header-cell">S.No</td><td rowspan="2" class="header-cell">GSO code</td><td rowspan="2" class="header-cell">Sample Name</td><td rowspan="2" class="header-cell">Restaurant name</td><td rowspan="2" class="header-cell">10 1</td><td rowspan="2" class="header-cell">10 2</td><td rowspan="2" class="header-cell">10 3</td><td rowspan="2" class="header-cell">Test</td><td rowspan="2" class="header-cell">GSO 1016 Limits</td><td rowspan="2" class="header-cell">Results</td><td rowspan="2" class="header-cell">Validity</td><td rowspan="2" class="header-cell">Final Report</td></tr>
+<tr><td class="rownum">7</td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td class="empty-cell"></td><td class="empty-cell"></td></tr>
+<tr><td class="rownum">8</td><td class="empty-cell"></td><td >كوليفورم</td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4520</td><td rowspan="2">1</td><td rowspan="2">E-1</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">بيض مسلوق </td><td rowspan="2" class="empty-cell"></td><td >17</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >170</td><td >غير صالح</td><td rowspan="2" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من الانتيروباكتيرييسي والسالمونيلا</td></tr>
+<tr><td class="rownum">9</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td></tr>
+<tr><td class="rownum">10</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="4" class="empty-cell"></td><td rowspan="4">4521</td><td rowspan="4">2</td><td rowspan="4">ISO</td><td rowspan="4" class="issue-trailing-ws" title="trailing whitespace">طاولة تحضير </td><td rowspan="4" class="empty-cell"></td><td >10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >&lt;100/25cm2</td><td >32</td><td >صالح</td><td rowspan="4">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">11</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">12</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">13</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">14</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4522</td><td rowspan="3">3</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">طماطم شرايح </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود السالمونيلا</td></tr>
+<tr><td class="rownum">15</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">16</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td></tr>
+<tr><td class="rownum">17</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2" class="issue-msno-typo" title="likely typo: 4223 should be 4523?">4223</td><td rowspan="2">4</td><td rowspan="2">J-7</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">مخلل خيار </td><td rowspan="2" class="empty-cell"></td><td >17</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">خمائر</td><td >2</td><td >1700</td><td >غير صالح</td><td rowspan="2" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من الخمائر</td></tr>
+<tr><td class="rownum">18</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">اعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">19</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4524</td><td rowspan="2">5</td><td rowspan="2">J-7</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">مخلل لفت </td><td rowspan="2" class="empty-cell"></td><td >0</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">خمائر</td><td >2</td><td >0</td><td >صالح</td><td rowspan="2">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">20</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">اعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">21</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4525</td><td rowspan="3">6</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">ملفوف </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">22</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">23</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">24</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4526</td><td rowspan="3">7</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">خس </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">25</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">26</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">27</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4527</td><td rowspan="3">8</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">بقدونس </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">28</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">29</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">30</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4528</td><td rowspan="3">9</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">زهرة </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">31</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">32</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">33</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="6" class="empty-cell"></td><td rowspan="6">4529</td><td rowspan="6">10</td><td rowspan="6">G-3</td><td rowspan="6" class="issue-trailing-ws" title="trailing whitespace">شطة </td><td rowspan="6" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >&gt;10</td><td >صالح</td><td rowspan="6">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">34</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">35</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">36</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">37</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">38</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">39</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="6" class="empty-cell"></td><td rowspan="6">4530</td><td rowspan="6">11</td><td rowspan="6">G-3</td><td rowspan="6" class="issue-trailing-ws" title="trailing whitespace">شطة شامية </td><td rowspan="6" class="empty-cell"></td><td >19</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >190</td><td >صالح</td><td rowspan="6">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">40</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">41</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">42</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">43</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">44</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">45</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4531</td><td rowspan="2">12</td><td rowspan="2">P-6/4</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">حمص </td><td rowspan="2" class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2" class="issue-dilution-garbled" title="garbled value in dilution column — meaning unclear">الربع300&lt;</td><td rowspan="2" class="issue-dilution-garbled" title="garbled value in dilution column — meaning unclear">الخامس 248</td><td rowspan="2">العدد الكلي للبكتيريا</td><td rowspan="2">10000000</td><td rowspan="2">24800000</td><td rowspan="2">غير صالح</td><td rowspan="2" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا</td></tr>
+<tr><td class="rownum">46</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td></tr>
+<tr><td class="rownum">47</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >4532</td><td >13</td><td >P-6/1</td><td class="issue-trailing-ws" title="trailing whitespace">فلافل </td><td class="empty-cell"></td><td >108</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >1080</td><td >صالح</td><td >بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">48</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4533</td><td rowspan="3">14</td><td rowspan="3">J-8</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">بطاطس </td><td rowspan="3" class="empty-cell"></td><td >10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >100000</td><td >100</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">49</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;باصلص سيرز&quot;">باصلص سيرس</td><td >100000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">50</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">51</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4534</td><td rowspan="2">16</td><td rowspan="2">O-4</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">نكهة توت احمر </td><td rowspan="2" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="2">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">52</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">الخماير والاعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">53</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4535</td><td rowspan="2">17</td><td rowspan="2">O-4</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">شاي بالخوخ </td><td rowspan="2" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="2">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">54</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">الخماير والاعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">55</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4536</td><td rowspan="2">18</td><td rowspan="2">O-4</td><td rowspan="2" class="issue-trailing-ws" title="trailing whitespace">نكهة فراولة </td><td rowspan="2" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="2">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">56</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">الخماير والاعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">57</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="2" class="empty-cell"></td><td rowspan="2">4537</td><td rowspan="2">19</td><td rowspan="2">O-4</td><td rowspan="2" class="issue-trailing-ws issue-internal-double-space" title="trailing whitespace | internal double space">نكهة  توت ازرق </td><td rowspan="2" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="2">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">58</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;الخمائر والاعفان&quot;">الخماير والاعفان</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">59</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4538</td><td rowspan="3">20</td><td rowspan="3">L-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">صوص كراميل </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >1000000</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">60</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">61</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">62</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4539</td><td rowspan="3">21</td><td rowspan="3">L-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">صوص بندق </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >1000000</td><td >&gt;10</td><td >صالح</td><td rowspan="3">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">63</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">64</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">65</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="6" class="empty-cell"></td><td rowspan="6">4540</td><td rowspan="6">29</td><td rowspan="6">G-3</td><td rowspan="6" class="issue-trailing-ws" title="trailing whitespace">صوص خاص </td><td rowspan="6" class="empty-cell"></td><td >&lt;300</td><td >299</td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >29900</td><td >غير صالح</td><td rowspan="6" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان</td></tr>
+<tr><td class="rownum">66</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >83</td><td >14</td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >881</td><td >غير صالح</td></tr>
+<tr><td class="rownum">67</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">68</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">69</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >45</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >4500</td><td >غير صالح</td></tr>
+<tr><td class="rownum">70</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">71</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="6" class="empty-cell"></td><td rowspan="6">4541</td><td rowspan="6">30</td><td rowspan="6">G-3</td><td rowspan="6" class="issue-trailing-ws" title="trailing whitespace">صوص بستو </td><td rowspan="6" class="empty-cell"></td><td >&lt;300</td><td >292</td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >29200</td><td >غير صالح</td><td rowspan="6" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا والانتيروباكتيرييسي والخمائر والأعفان</td></tr>
+<tr><td class="rownum">72</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >37</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >370</td><td >غير صالح</td></tr>
+<tr><td class="rownum">73</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">74</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">75</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >12</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >1200</td><td >غير صالح</td></tr>
+<tr><td class="rownum">76</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">77</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >4542</td><td >31</td><td >P-6/1</td><td class="issue-trailing-ws" title="trailing whitespace">فلافل </td><td class="empty-cell"></td><td >&lt;300</td><td >285</td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >28500</td><td >غير صالح</td><td class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا</td></tr>
+<tr><td class="rownum">78</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4543</td><td rowspan="3">32</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">سلطة خضار </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا</td></tr>
+<tr><td class="rownum">79</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">80</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td></tr>
+<tr><td class="rownum">81</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="4" class="empty-cell"></td><td rowspan="4">4544</td><td rowspan="4">33</td><td rowspan="4">A-3</td><td rowspan="4" class="issue-trailing-ws" title="trailing whitespace">سلطة زبادي </td><td rowspan="4" class="empty-cell"></td><td >109</td><td >14</td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >10</td><td >1118</td><td >صالح</td><td rowspan="4">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه صالحه بناءا على الحدود المذكوره في المواصفه للإختبارات</td></tr>
+<tr><td class="rownum">82</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">83</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">84</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">85</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="6" class="empty-cell"></td><td rowspan="6">4545</td><td rowspan="6">34</td><td rowspan="6">G-3</td><td rowspan="6" class="issue-trailing-ws" title="trailing whitespace">شطة حارة </td><td rowspan="6" class="empty-cell"></td><td >90</td><td >12</td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >10000</td><td >927</td><td >صالح</td><td rowspan="6" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من الانتيروباكتيرييسي</td></tr>
+<tr><td class="rownum">86</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >54</td><td class="empty-cell"></td><td class="empty-cell"></td><td >انتيروباكتريسي</td><td >100</td><td >540</td><td >غير صالح</td></tr>
+<tr><td class="rownum">87</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >10</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">88</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">89</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >الخمائر والاعفان</td><td >100</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">90</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">91</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4546</td><td rowspan="3">35</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">جرجير </td><td rowspan="3" class="empty-cell"></td><td >23</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >230</td><td >غير صالح</td><td rowspan="3" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من الايشيريشيا كولاي</td></tr>
+<tr><td class="rownum">92</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">93</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">94</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">4547</td><td rowspan="3">36</td><td rowspan="3">J-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">سلطة خضروات </td><td rowspan="3" class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >100</td><td >&gt;10</td><td >صالح</td><td rowspan="3" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود السالمونيلا</td></tr>
+<tr><td class="rownum">95</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >&gt;10</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >1000</td><td >&gt;10</td><td >صالح</td></tr>
+<tr><td class="rownum">96</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td></tr>
+<tr><td class="rownum">97</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="4" class="empty-cell"></td><td rowspan="4">4548</td><td rowspan="4">37</td><td rowspan="4">ISO</td><td rowspan="4" class="issue-trailing-ws" title="trailing whitespace">مسحة ادوات </td><td rowspan="4" class="empty-cell"></td><td >190</td><td class="empty-cell"></td><td class="empty-cell"></td><td >العدد الكلي للبكتيريا</td><td >&lt;100/25cm2</td><td >621</td><td >غير صالح</td><td rowspan="4" class="issue-internal-double-space" title="internal double space">بعد تحليل عينة الغذاء طبقا للمواصفه GSO 1016 العينه غير  صالحه لوجود عدد كبير من العدد الكلي للبكتيريا</td></tr>
+<tr><td class="rownum">98</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">99</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >استافيلوكوكس اورياس</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">100</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >السالمونيلا</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">101</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">1</td><td rowspan="3">15</td><td rowspan="3">N-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">موية فلتر </td><td rowspan="3" class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;كوليفورم&quot;">كولي فورم</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td><td rowspan="3">تم تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليها ومقارنتها بالطرق القياسية بدليل الميكروبيولوجي الخاص بمنظمة الغذاء والدواء وبناء عليه فإن العينة غير صالحة لوجود الكوليفورم</td></tr>
+<tr><td class="rownum">102</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">103</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >سيدومومناس</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">104</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td rowspan="3" class="empty-cell"></td><td rowspan="3">2</td><td rowspan="3">26</td><td rowspan="3">N-1</td><td rowspan="3" class="issue-trailing-ws" title="trailing whitespace">موية فلتر </td><td rowspan="3" class="empty-cell"></td><td >موجوده</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="issue-test-near-dup" title="near-duplicate test name → canonical &quot;كوليفورم&quot;">كولي فورم</td><td >غير موجودة</td><td >موجوده</td><td >غير صالح</td><td rowspan="3" class="issue-final-report-truncation" title="first character truncated (&quot;م تحليل…&quot; should be &quot;تم تحليل…&quot;)">م تحليل عينة المياه ميكروبيولوجيا تبعا للطرق القياسية لفحص وتحليل المياه الواردة بالمواصفات القياسية الخليجية رقم 1016 لعام2015 بالحدود والمعايير التي نصت عليها ومقارنتها بالطرق القياسية بدليل الميكروبيولوجي الخاص بمنظمة الغذاء والدواء وبناء عليه فإن العينة غير صالحة لوجود الكوليفورم</td></tr>
+<tr><td class="rownum">105</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >ايشيريشيا كولاي</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+<tr><td class="rownum">106</td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td class="empty-cell"></td><td >غير موجودة</td><td class="empty-cell"></td><td class="empty-cell"></td><td >سيدومومناس</td><td >غير موجودة</td><td >غير موجودة</td><td >صالح</td></tr>
+</table>
+</div>
+
+<h2>Recommendations &amp; open questions</h2>
+<div class="grid">
+
+  <div class="panel">
+    <h3>Structural recommendations <span class="pill">need confirm</span></h3>
+    <ul>
+      <li><b>Drop the legend block.</b> Rows 1–7, cols A–D are decoration (test names + reference limits). They duplicate info that's already in the data block. → ignore on import.</li>
+      <li><b>Pin the header row to row 6 (Excel) / index 5 (pandas).</b> Auto-detected confirmed.</li>
+      <li><b>Extract the date</b> from the title banner cell <code>E4</code> (<code>'نتائج يوم الاثنين 01/01/2024'</code>) — that's the only place it lives inside the file. Filename gives <code>010124</code> as a backup.</li>
+      <li><b>Forward-fill sample-level columns</b> (<code>M.S.No</code>, <code>S.No</code>, <code>GSO code</code>, <code>Sample Name</code>, <code>Restaurant name</code>, <code>Barcodes</code>, <code>Final Report</code>) down across their merged test rows. Without this, 60–70% of those cells read as <code>NaN</code>.</li>
+      <li><b>Reshape to long format</b>: one row per <em>(sample, test)</em> with columns <code>date, m_s_no, s_no, gso_code, sample_name, restaurant, test, limit, result, validity, final_report</code>. The current wide layout exists only for printing.</li>
+    </ul>
+
+    <h3>Per-column proposals</h3>
+    <ul>
+      <li><code>M.S.No</code> → <code>int64 nullable</code>; flag <code>4223</code> for review.</li>
+      <li><code>S.No</code> → <code>int64 nullable</code>; document the 6 missing numbers (1–37 with gaps).</li>
+      <li><code>GSO code</code> → string categorical; allowed pattern <code>^[A-Z]-\d+(/\d+)?$</code> + literal <code>ISO</code>.</li>
+      <li><code>Sample Name</code> → string, <code>strip()</code> + collapse internal whitespace; preserve Arabic as-is.</li>
+      <li><code>Test</code> → categorical against the legend's 7 canonical names + Pseudomonas; map all variants.</li>
+      <li><code>GSO 1016 Limits</code> → keep as <code>string</code>. Cannot be coerced to numeric (mixes <code>100</code>, <code>&lt;100/25cm2</code>, <code>غير موجودة</code>).</li>
+      <li><code>Results</code> → keep as <code>string</code> for the same reason; add a derived <code>result_numeric</code> column where parseable.</li>
+      <li><code>Validity</code> → boolean: <code>صالح</code> = True, <code>غير صالح</code> = False.</li>
+      <li><code>Final Report</code> → string; map the 10 unique phrases to a finite set <code>final_report_code</code>; fix the <code>'م تحليل'</code> truncation.</li>
+      <li><code>Barcodes</code>, <code>Restaurant name</code> → keep in schema as nullable strings; populated in other files probably.</li>
+    </ul>
+
+    <h3>Test-name canonicalization (proposed)</h3>
+    <ul>
+      <li><code>كولي فورم</code> → <code>كوليفورم</code></li>
+      <li><code>باصلص سيرس</code> → <code>باصلص سيرز</code></li>
+      <li><code>الخماير والاعفان</code> → <code>الخمائر والاعفان</code></li>
+      <li><code>خمائر</code> + <code>اعفان</code> → <code>الخمائر والاعفان</code> <em>(only if you confirm — they appear separately on some rows)</em></li>
+      <li><code>سيدومومناس</code> → <em>keep as-is until you confirm canonical Arabic spelling for Pseudomonas</em></li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <h3>Questions for you <span class="pill">blocking Phase 2</span></h3>
+
+    <div class="q"><b>Q1.</b> What do columns <code>10 1</code>, <code>10 2</code>, <code>10 3</code> (K, L, M) actually mean? They look like dilution labels (10¹, 10², 10³) but carry mixed counts and presence/absence words. What are the rules?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q2.</b> Cleaned output shape — <b>long</b> (one row per sample-test) or <b>wide</b> (one row per sample, tests as columns)?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q3.</b> Empty <code>Barcodes</code> &amp; <code>Restaurant name</code> — keep in schema (other files have them?) or drop?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q4.</b> Test-name merges — confirm:
+      <ul>
+        <li>كولي فورم → كوليفورم?</li>
+        <li>باصلص سيرس → باصلص سيرز?</li>
+        <li>الخماير والاعفان → الخمائر والاعفان?</li>
+        <li>خمائر / اعفان (when separate rows) — keep separate, or merge into الخمائر والاعفان?</li>
+        <li>سيدومومناس — canonical Arabic spelling?</li>
+      </ul>
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q5.</b> <code>M.S.No = 4223</code> sitting between 4522 and 4524 — auto-correct to 4523, or just flag and leave?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q6.</b> <code>GSO code = 'ISO'</code> on row 9 — what does it mean? (others follow <code>letter-digit</code>)
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q7.</b> Confirm forward-fill of sample-level columns through merged test rows is correct?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q8.</b> Do you want missing rows in <code>S.No</code> (gaps in 1–37) treated as data-loss flags, or just ignored?
+      <span class="answer">your answer:</span></div>
+
+    <div class="q"><b>Q9.</b> Should <code>Final Report</code> be <em>code-mapped</em> (10 phrases → e.g. <code>VALID</code>, <code>INVALID_SALMONELLA</code>, …) so analysis is easy, while keeping the raw text in a side column?
+      <span class="answer">your answer:</span></div>
+
+    <h3>What I'm <em>not</em> changing without your green light</h3>
+    <ul>
+      <li>Anything in the legend block (rows 1–7).</li>
+      <li>Any value in <code>Final Report</code> beyond the obvious truncation fix.</li>
+      <li>The <code>10 1/10 2/10 3</code> columns until I understand them.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="meta" style="margin-top: 24px;">
+  Source: <code>/home/bioinfo/Documents/Data-Analysis-Muhannad/food_analysis/Iter-2/2024-original/2024/Jan-2024/010124.xlsx</code>.<br>
+  Generated read-only by <code>scripts/render_review_html.py</code>; the workbook itself is untouched.
+</div>
+
+</body>
+</html>

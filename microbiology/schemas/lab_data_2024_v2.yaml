@@ -1,0 +1,535 @@
+# =============================================================================
+# Lab data normalisation schema — 2024, v2
+# Supersedes lab_data_v1.yaml (which was designed against Jan-2024 only).
+# Designed against:  all 183 .xlsx files in 2024-original/2024/
+# Output shape:
+#   - wide per-sample parquet (cleaned/data2024.parquet)  -> stacks with 2025
+#   - long per-(sample,test) parquet (cleaned/data2024_long.parquet) -> companion
+# =============================================================================
+
+schema_version: 2
+schema_name: lab_data_2024_v2
+applies_to: 2024-original/2024/**/*.xlsx
+
+# -----------------------------------------------------------------------------
+# 1. WORKBOOK STRUCTURE
+# Header row is row 6 in Jan-2024 only; row 12 in Feb–Dec.
+# Detect dynamically by scanning for a row containing "M.S.No".
+# -----------------------------------------------------------------------------
+workbook:
+  expected_sheet_name: Sheet1            # warn if different
+  header_detection:
+    strategy: scan_for_marker
+    marker_text: "M.S.No"
+    scan_rows: [1, 20]                   # 1-indexed inclusive
+    on_not_found: skip_file_with_flag    # raise `header_row_not_found`
+  data_starts_offset: 1                  # data row = header_row + 1
+  sub_header_offset: 1                   # confirmatory-method names live one row below the main header
+
+# -----------------------------------------------------------------------------
+# 2. DATE EXTRACTION
+# Jan-2024 banner is at cell E4. Feb–Dec banner is at cell E10 (E above the row-12 header).
+# Strategy: scan column E from row 1 to (header_row - 1) for the Arabic
+# pattern; fall back to filename.
+# -----------------------------------------------------------------------------
+date_extraction:
+  primary:
+    scan_column_excel: E
+    scan_row_range: [1, header_row_minus_1]
+    regex: 'يوم\s+\S+\s*(\d{1,2}/\d{1,2}/\d{4})'   # weekday + dd/mm/yyyy (tolerant of single-digit day/month)
+  fallback:
+    source: filename
+    patterns:                                       # try in order until one matches
+      - regex: '^(\d{2})(\d{2})(\d{2})[a-z]?\.xlsx$'         # ddmmyy[suffix]
+        captures: [dd, mm, yy]
+        century: 2000
+      - regex: '^(\d{2})(\d{2})(\d{4})\.xlsx$'                # ddmmyyyy
+        captures: [dd, mm, yyyy]
+      - regex: '^(\d{2})(\d{2})(\d{2}) ?-?\d*\s*-?\.?xlsx$'   # ddmmyy with split-part / trailing dash
+        captures: [dd, mm, yy]
+        century: 2000
+  on_unparseable: skip_file_with_flag                # raise `sheet_date_unparseable`
+  year_coercion:
+    nominal_year: 2024
+    rule: "if parsed year != 2024, flag `date_year_mismatch` (don't auto-correct)"
+
+# -----------------------------------------------------------------------------
+# 3. COLUMN DETECTION (name-based, not position-based)
+# Header text observed across all 12 months. Each logical column lists the
+# exact header strings the cleaner should match against (whitespace-collapsed).
+# Optional columns may be missing in some months.
+# -----------------------------------------------------------------------------
+column_map:
+
+  - logical: barcode
+    aliases: ["Barcodes"]
+    required: false                       # Jan only had it merged-empty; treat as optional
+
+  - logical: m_s_no
+    aliases: ["M.S.No"]
+    required: true
+
+  - logical: s_no
+    aliases: ["S.No"]
+    required: true
+
+  - logical: gso_code
+    aliases: ["GSO code", "GSO"]              # "GSO" (no suffix) appears in Oct-14 2024
+    required: false                            # Aug–Oct 2023 forms have no GSO code column
+
+  - logical: sample_name
+    aliases: ["Sample Name"]
+    required: true
+
+  - logical: restaurant_name
+    aliases: ["Restaurant name"]
+    required: false                       # only present in Jan-2024 files
+
+  - logical: conc_10_1
+    aliases: ["10 1"]
+    required: false
+
+  - logical: conc_10_2
+    aliases: ["10 2"]
+    required: false
+
+  - logical: conc_10_3
+    aliases: ["10 3"]
+    required: false
+
+  - logical: conc_10_4
+    aliases: ["104", "10 4"]
+    required: false
+    note: "fourth dilution column; appears in some Apr/Aug files"
+
+  - logical: test
+    aliases: ["Test"]
+    required: true
+
+  - logical: limit_raw
+    aliases: ["GSO 1016 Limits"]
+    required: true
+
+  - logical: result_raw
+    aliases: ["Results"]
+    required: true
+
+  - logical: confirmatory_block
+    aliases: ["الاختبارات التأكيدية"]
+    required: false
+    note: |
+      Header at row=header_row spans 3 columns; sub-headers Vitek/Vidas/RT-PCR
+      live at row=header_row+1. Captured as three separate output columns:
+      confirm_vitek, confirm_vidas, confirm_rt_pcr.
+    sub_headers:
+      - { aliases: ["Vitek"],  logical: confirm_vitek }
+      - { aliases: ["Vidas"],  logical: confirm_vidas }
+      - { aliases: ["RT-PCR"], logical: confirm_rt_pcr }
+
+  - logical: validity
+    aliases: ["Validity"]
+    required: true
+
+  - logical: final_report_raw
+    aliases: ["Final Report"]
+    required: true
+
+# -----------------------------------------------------------------------------
+# 4. VALUE MAPPINGS
+# -----------------------------------------------------------------------------
+mappings:
+
+  test:
+    # Canonical Arabic-first names. New pathogens (Listeria, Clostridium,
+    # Campylobacter, Vibrio, Aeromonas, E.coli O157) appeared in Feb–Dec 2024
+    # files; they were not in the Jan-2024 sample that defined v1.
+    canonical_values:
+      - السالمونيلا
+      - ايشيريشيا كولاي
+      - ايشيريشيا كولاي O157
+      - استافيلوكوكس اورياس
+      - انتيروباكتريسي
+      - العدد الكلي للبكتيريا
+      - كوليفورم
+      - باصلص سيرز
+      - الخمائر والاعفان
+      - سيدومومناس
+      - الليستيريا
+      - كلوستريديوم بيرفرنجنز
+      - كلوستريديوم بوتولينوم
+      - كامبيلوباكتر
+      - فيبريو
+      - Aeromonas
+    aliases:                              # raw -> canonical, after NFKC+whitespace collapse
+      # Coliform variants
+      "كولي فورم": كوليفورم
+      "الكوليفورم": كوليفورم
+      "الكولي فورم": كوليفورم
+      # Salmonella variants
+      "السامونيلا": السالمونيلا
+      # E. coli variants (generic, non-O157)
+      "الايشيريشيا كولاي": ايشيريشيا كولاي
+      "ايشريشيا كولاي": ايشيريشيا كولاي
+      "ايشيريشبا كولاي": ايشيريشيا كولاي
+      "ايشيرشيا كولاي": ايشيريشيا كولاي
+      "ايشيريشياكولاي": ايشيريشيا كولاي
+      # E. coli O157
+      "E.coli O157": ايشيريشيا كولاي O157
+      "E.Coli O157": ايشيريشيا كولاي O157
+      # Staphylococcus aureus variants
+      "استافيلو كوكس اورياس": استافيلوكوكس اورياس
+      "استافيلوكوكوس اورياس": استافيلوكوكس اورياس
+      "استاقيلوكوكس اورياس": استافيلوكوكس اورياس
+      # Enterobacteriaceae variants
+      "انتيروبكتريسي": انتيروباكتريسي
+      "انتيروباكتيريسي": انتيروباكتريسي
+      "انتيرباكتريسي": انتيروباكتريسي
+      "انتيزوباكتريسي": انتيروباكتريسي
+      # Total bacterial count
+      "العد الكلي للبكتيريا": العدد الكلي للبكتيريا
+      "العد الكليي للبكتيريا": العدد الكلي للبكتيريا
+      # Bacillus cereus variants
+      "باصلص سيرس": باصلص سيرز
+      "باسيلس سيرس": باصلص سيرز
+      "باسلس سيرس": باصلص سيرز
+      "باسبس سيرس": باصلص سيرز
+      "بسليس سيرس": باصلص سيرز
+      # Yeasts & moulds variants
+      "الخماير والاعفان": الخمائر والاعفان
+      "خمائر": الخمائر والاعفان
+      "اعفان": الخمائر والاعفان
+      "الخمائر": الخمائر والاعفان
+      "الاعفان": الخمائر والاعفان
+      "خمائر / اعفان": الخمائر والاعفان
+      "الخمائر و الاعفان": الخمائر والاعفان
+      "الخمائر و الأعفان": الخمائر والاعفان
+      "الخمائلر والاعفان": الخمائر والاعفان
+      "الخمائروالاعفان": الخمائر والاعفان
+      "لعفان": الخمائر والاعفان
+      # Pseudomonas variants
+      "سيدوموناس": سيدومومناس
+      "سيدوموناس اريجونوزا": سيدومومناس
+      # Clostridium perfringens
+      "C.perfringens": كلوستريديوم بيرفرنجنز
+      "C.Perfringens": كلوستريديوم بيرفرنجنز
+      # Clostridium botulinum
+      "C.botulinum": كلوستريديوم بوتولينوم
+      "C.Botulinum": كلوستريديوم بوتولينوم
+      "C.butulinum": كلوستريديوم بوتولينوم
+      "C.Butulinum": كلوستريديوم بوتولينوم
+      "كلستريدوم بوتولينوم": كلوستريديوم بوتولينوم
+      # Campylobacter
+      "CAMPYLOPACTER": كامبيلوباكتر
+      "Campylopacter": كامبيلوباكتر
+      "Campylobacter": كامبيلوباكتر
+      "C.jejuni": كامبيلوباكتر
+      "C.Jejuni": كامبيلوباكتر
+      # Vibrio (genus + species rolled up)
+      "Vibrio sp.": فيبريو
+      "VIbrio sp.": فيبريو
+      "Vibrio sp": فيبريو
+      "V.parahaemolyticus": فيبريو
+      "V.Parahaemolyticus": فيبريو
+      "V.parahaemiyticus": فيبريو
+    on_unknown: flag_keep                  # raise `test_value_unrecognised`; keep raw
+
+    # Values to treat as NON-test rows (data-entry errors / verdicts written
+    # into the Test column). These are dropped from the long output with a
+    # `non_test_value_in_test_col` flag instead of raising `test_value_unrecognised`.
+    non_test_values:
+      - "غير موجودة"
+      - "موجودة"
+      - "العينة مرفوضة"
+      - "مرفوضة"
+
+  validity:
+    # 6 variants observed across 2024 (with/without taa marbouta, with/without
+    # space between "غير" and "صالح", trailing whitespace already collapsed).
+    # All map to a single boolean.
+    map_to_true:
+      - "صالح"
+      - "صالحة"
+    map_to_false:
+      - "غير صالح"
+      - "غير صالحة"
+      - "غيرصالح"
+      - "غيرصالحة"
+    on_unknown: flag_keep_null             # raise `validity_value_unrecognised`; result null
+
+# -----------------------------------------------------------------------------
+# 5. GSO CODE SPECIAL VALUES
+# -----------------------------------------------------------------------------
+gso_code:
+  pattern: '^[A-Z]-\d+(/\d+)?$'
+  special_values:
+    "ISO":
+      action: set_null
+      flag: gso_code_was_iso_placeholder
+
+# -----------------------------------------------------------------------------
+# 6. FINAL REPORT CODE MAP
+# Patterns are matched after _norm_for_match() in clean_2024.py, which folds:
+#   ـة → ـه  ·  العدد → العد  ·  الانتيرو* → انتيرو  ·  استافيلو كوكس → استافيلوكوكس
+#   الاستافيللوكوكس → استافيلوكوكس  ·  الكوليفورم → كوليفورم  ·  المياة → المياه
+#   بكتريا → بكتيريا  ·  الباسيللس سيريس → باصلص سيرز  ·  ال-prefixes stripped on
+#   common test names (ايشيريشيا, خمائر, اعفان, ...).
+# So all needles below should be written in the post-normalisation form.
+# Order matters: most-specific (multi-test) before single-cause; generic INVALID
+# is the last specific rule and UNKNOWN is the fallback.
+# -----------------------------------------------------------------------------
+final_report_code_map:
+  # ---- VALID ----
+  VALID:
+    match_type: contains_all
+    needles: ["العينه صالحه"]
+    not_contains: ["غير"]
+  VALID_WATER:
+    match_type: contains_all
+    needles: ["عينه المياه", "صالحه"]
+    not_contains: ["غير"]
+
+  # ---- Multi-test invalid (more specific; check before single-cause) ----
+  INVALID_MULTIPLE_TBC_ENTERO_YEAST:
+    match_type: contains_all
+    needles: ["كلي للبكتيريا", "انتيروباكتريسي", "خمائر"]
+  INVALID_ENTEROBACTERIACEAE_SALMONELLA:
+    match_type: contains_all
+    needles: ["انتيروباكتريسي", "سالمونيلا"]
+    not_contains: ["كلي للبكتيريا", "خمائر"]
+  INVALID_TBC_ENTERO:
+    match_type: contains_all
+    needles: ["كلي للبكتيريا", "انتيروباكتريسي"]
+    not_contains: ["خمائر", "سالمونيلا", "استافيلوكوكس", "ايشيريشيا"]
+  INVALID_TBC_STAPH:
+    match_type: contains_all
+    needles: ["كلي للبكتيريا", "استافيلوكوكس"]
+    not_contains: ["انتيروباكتريسي", "خمائر", "سالمونيلا"]
+  INVALID_ENTERO_STAPH:
+    match_type: contains_all
+    needles: ["انتيروباكتريسي", "استافيلوكوكس"]
+    not_contains: ["كلي للبكتيريا", "خمائر", "سالمونيلا"]
+
+  # ---- Single-cause invalid ----
+  INVALID_WATER:
+    match_type: contains_all
+    needles: ["عينه المياه", "غير صالحه"]
+  INVALID_WATER_COLIFORM:
+    match_type: contains_all
+    needles: ["عينه المياه", "كوليفورم"]
+  INVALID_TOTAL_BACTERIA:
+    match_type: contains_all
+    needles: ["غير صالحه", "كلي للبكتيريا"]
+    not_contains: ["انتيروباكتريسي", "خمائر", "سالمونيلا", "استافيلوكوكس", "ايشيريشيا"]
+  INVALID_SALMONELLA:
+    match_type: contains_all
+    needles: ["غير صالحه", "سالمونيلا"]
+    not_contains: ["انتيروباكتريسي", "كلي للبكتيريا", "خمائر"]
+  INVALID_ENTEROBACTERIACEAE:
+    match_type: contains_all
+    needles: ["غير صالحه", "انتيروباكتريسي"]
+    not_contains: ["سالمونيلا", "كلي للبكتيريا", "خمائر", "استافيلوكوكس"]
+  INVALID_YEAST_MOULD:
+    match_type: contains_all
+    needles: ["غير صالحه", "خمائر"]
+    not_contains: ["انتيروباكتريسي", "كلي للبكتيريا", "سالمونيلا"]
+  INVALID_STAPHYLOCOCCUS:
+    match_type: contains_all
+    needles: ["غير صالحه", "استافيلوكوكس"]
+    not_contains: ["كلي للبكتيريا", "انتيروباكتريسي", "خمائر"]
+  INVALID_E_COLI:
+    match_type: contains_all
+    needles: ["غير صالحه", "ايشيريشيا"]
+    not_contains: ["كلي للبكتيريا", "انتيروباكتريسي"]
+  INVALID_COLIFORM_FOOD:
+    match_type: contains_all
+    needles: ["غير صالحه", "كوليفورم"]
+    not_contains: ["عينه المياه"]
+  INVALID_BACILLUS_CEREUS:
+    match_type: contains_all
+    needles: ["غير صالحه", "باصلص"]
+  INVALID_LISTERIA:
+    match_type: contains_all
+    needles: ["غير صالحه", "ليستيريا"]
+  INVALID_PSEUDOMONAS:
+    match_type: contains_all
+    needles: ["غير صالحه", "سيدوم"]
+
+  # ---- Generic invalid catch-all (any "غير صالح" not classified above) ----
+  INVALID:
+    match_type: contains
+    needles: ["غير صالحه"]
+
+  # ---- Fallback for everything else ----
+  UNKNOWN:
+    match_type: fallback
+    flag: final_report_unmapped
+
+# -----------------------------------------------------------------------------
+# 7. WIDE OUTPUT (per-sample) — aligns with 2025 schema
+# A sample is identified by (source_file, m_s_no). Multiple test rows of the
+# same sample collapse into one output row.
+# -----------------------------------------------------------------------------
+wide_output:
+  path: cleaned/data2024.parquet
+  primary_key: [source_file, m_s_no]
+  columns:
+    # alignment columns (same names as 2025 wherever feasible)
+    - { name: source_file,        derived_from: input filename }
+    - { name: row_excel,          derived_from: first test-row's Excel row of this sample }
+    - { name: sampling_date,      derived_from: extracted_date }
+    - { name: year_month,         derived_from: sampling_date }          # 'YYYY-MM'
+    - { name: iso_year_week,      derived_from: sampling_date }          # 'YYYY-Www'
+    - { name: quarter,            derived_from: sampling_date }
+    - { name: day_of_week,        derived_from: sampling_date }          # 0=Mon
+    - { name: sample_id,          derived_from: gso_code }               # closest 2024 analog
+    - { name: sample_id_raw,      derived_from: gso_code }
+    - { name: sample_name,        derived_from: sample_name }
+    - { name: category_canonical, value: null }                          # absent in 2024
+    - { name: category_en,        value: null }
+    - { name: category_raw,       value: null }
+    - { name: sample_type,        value: null }
+    - { name: facility_name,      derived_from: restaurant_name }
+    - { name: facility_chain,     value: null }                          # not parsed for 2024
+    - { name: facility_branch,    value: null }
+    - { name: facility_name_raw,  derived_from: restaurant_name }
+    - { name: municipality,       value: null }                          # absent in 2024
+    - { name: municipality_type,  value: null }
+    - { name: municipality_raw,   value: null }
+    - { name: is_valid,           rule: "all per-test validity = true (NaN treated as null)" }
+    - { name: is_failure,         rule: "NOT is_valid (null if is_valid is null)" }
+    - { name: invalid_tests_raw,  rule: "pipe-joined test names where per-test validity = false; 'لا يوجد' if none" }
+    - { name: invalid_tests,      rule: "list[str] of failed test names" }
+    - { name: n_failed_tests,     rule: "len(invalid_tests)" }
+    # 2024-specific identifiers (kept alongside the alignment columns)
+    - { name: m_s_no,             derived_from: m_s_no }
+    - { name: s_no_first,         derived_from: min(s_no) within sample }
+    - { name: gso_code,           derived_from: gso_code }
+    - { name: barcode,            derived_from: barcode }
+    - { name: final_report_raw,   derived_from: final_report_raw (first non-null) }
+    - { name: final_report_code,  derived_from: final_report_code (first non-null) }
+    - { name: data_quality_flags, rule: "pipe-joined union of flags from constituent test rows" }
+    - { name: year,               value: 2024 }                          # convenience for stacking
+
+# -----------------------------------------------------------------------------
+# 8. LONG OUTPUT (per-(sample,test)) — companion for test-level analysis
+# -----------------------------------------------------------------------------
+long_output:
+  path: cleaned/data2024_long.parquet
+  primary_key: [source_file, m_s_no, s_no, test]
+  columns:
+    - source_file
+    - sheet_date          # date type
+    - row_excel
+    - barcode
+    - m_s_no
+    - s_no
+    - gso_code
+    - sample_name
+    - restaurant_name
+    - test
+    - limit_raw
+    - limit_numeric
+    - result_raw
+    - result_numeric
+    - validity            # boolean per test
+    - final_report_raw
+    - final_report_code
+    - conc_10_1
+    - conc_10_2
+    - conc_10_3
+    - conc_10_4
+    - confirm_vitek
+    - confirm_vidas
+    - confirm_rt_pcr
+    - data_quality_flags
+    - year                # =2024
+
+# -----------------------------------------------------------------------------
+# 9. DROP / FLAG POLICY
+# -----------------------------------------------------------------------------
+drop_policy:
+  drop_row_if:
+    - "all of {m_s_no, s_no, gso_code, sample_name, test, result_raw} are null"
+
+flag_policy:
+  preserve_row: true
+  flag_field: data_quality_flags
+  format: pipe_separated
+
+skip_file_policy:
+  skip_if:
+    - empty_workbook                       # max_row is None/0
+    - header_row_not_found
+    - sheet_date_unparseable
+  audit_destination: run_summary.skipped_files
+
+# -----------------------------------------------------------------------------
+# 10. CLEANING RECIPE (deterministic; idempotent on identical input bytes)
+# -----------------------------------------------------------------------------
+cleaning_recipe:
+  - id: 01_iterate_files
+    op: walk_directory
+    root: 2024-original/2024
+    pattern: "**/*.xlsx"
+  - id: 02_open_workbook
+    op: openpyxl.load_workbook
+    params: { data_only: true, read_only: false, keep_links: false }
+    on_empty: skip_with_flag
+  - id: 03_detect_header_row
+    op: scan_for_marker
+    config: $.workbook.header_detection
+  - id: 04_extract_date
+    op: extract_date
+    config: $.date_extraction
+  - id: 05_build_column_map
+    op: map_columns_by_name
+    config: $.column_map
+  - id: 06_unmerge_and_fill
+    op: unmerge_and_fill_from_top_left
+    note: "Materialise sample-level merged values into every covered cell, below header."
+  - id: 07_build_dataframe
+    op: build_dataframe_from_grid
+  - id: 08_drop_empty_rows
+    op: dropna_all_critical
+    subset: [m_s_no, s_no, gso_code, sample_name, test, result_raw]
+  - id: 09_normalise_text
+    op: normalise_strings
+    targets: all_string_columns
+    note: "NFKC, strip RTL/zero-width, collapse whitespace; preserve Arabic diacritics."
+  - id: 10_apply_value_mappings
+    op: map_values
+    config: $.mappings
+  - id: 11_handle_gso_iso
+    op: special_value
+    config: $.gso_code.special_values.ISO
+  - id: 12_derive_numeric
+    op: parse_numeric_best_effort
+    columns: [limit_raw, result_raw]
+    outputs: [limit_numeric, result_numeric]
+  - id: 13_derive_final_report_code
+    op: code_map
+    column: final_report_raw
+    map: $.final_report_code_map
+  - id: 14_write_long
+    op: write_parquet
+    target: $.long_output.path
+  - id: 15_aggregate_to_wide
+    op: groupby_sample
+    config: $.wide_output
+  - id: 16_derive_time_dims
+    op: time_dimensions
+    inputs: [sampling_date]
+    outputs: [year_month, iso_year_week, quarter, day_of_week]
+  - id: 17_write_wide
+    op: write_parquet
+    target: $.wide_output.path
+  - id: 18_write_run_summary
+    op: write_markdown
+    target: reports/data2024_clean_report.md
+
+# -----------------------------------------------------------------------------
+# 11. OUTPUT
+# -----------------------------------------------------------------------------
+output:
+  format: parquet
+  compression: zstd

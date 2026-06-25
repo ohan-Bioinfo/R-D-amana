@@ -1,0 +1,50 @@
+# Aflatoxin (mycotoxin) testing. 4 toxins (G2, G1, B2, B1 in ppb) + Total + Limit.
+section: aflatoxins
+applies_to:
+  2024: "Aflatoxins.xlsx"
+  2025: "Copy of  Aflatoxins 2025.xlsx"
+
+skip_sheets:
+  - draft
+  - invalid samples
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  receiving_date:   ["Receiving Date"]
+  sampling_date:    ["Sampling Date"]
+  testing_date:     ["Testing date"]
+  testing_notes:    ["Testing notes", "Testing Notes"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid",
+                     "Matched/not matched", "Matched/ not matched",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+  sample_notes:     ["Sample Notes"]
+  g2_ppb:           ["G2 (ppb)"]
+  g1_ppb:           ["G1 (ppb)"]
+  b2_ppb:           ["B2 (ppb)"]
+  b1_ppb:           ["B1 (ppb)"]
+  total_ppb:        ["Total conc"]
+  limit_ppb:        ["Limit", "الحدود"]
+  qc_aflatoxin:     ["QC (ppb)", "Qc result"]
+  num_tests:        ["no. of test"]
+
+# Per user 2026-06-25: only Aflatoxin Total has a regulatory limit; the lab's
+# verdict is taken from Total alone. B1/B2/G1/G2 are sub-toxin readings whose
+# sum equals Total — they don't have individual GSO limits and must not flag a
+# sample as failing on their own.
+tests:
+  - { name: "Aflatoxin Total", result: total_ppb, limit: limit_ppb, unit: ppb }
+  - { name: "Aflatoxin G2",    result: g2_ppb,    unit: ppb }
+  - { name: "Aflatoxin G1",    result: g1_ppb,    unit: ppb }
+  - { name: "Aflatoxin B2",    result: b2_ppb,    unit: ppb }
+  - { name: "Aflatoxin B1",    result: b1_ppb,    unit: ppb }

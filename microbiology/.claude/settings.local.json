@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(.venv/bin/pip install *)",
+      "Bash(dpkg -l)",
+      "Bash(apt list *)",
+      "Bash(sudo apt *)",
+      "Bash(sudo -S apt install -y python3-venv python3-pip)",
+      "Bash(.venv/bin/python -c \"import pandas, openpyxl, pyarrow; print\\('pandas', pandas.__version__\\); print\\('openpyxl', openpyxl.__version__\\); print\\('pyarrow', pyarrow.__version__\\)\")",
+      "Bash(.venv/bin/python scripts/explore.py \"2024-original/2024/Jan-2024/010124.xlsx\" \"reports/010124_exploration.md\")",
+      "Bash(echo \"exit=$?\")",
+      "Read(//tmp/**)",
+      "Bash(.venv/bin/python scripts/render_review_html.py \"2024-original/2024/Jan-2024/010124.xlsx\" \"reports/010124_review.html\")",
+      "Bash(.venv/bin/python -c ' *)",
+      "Bash(.venv/bin/python scripts/clean_file.py \"2024-original/2024/Jan-2024/010124.xlsx\" \"cleaned/010124.parquet\" \"reports/010124_diff.md\")",
+      "Bash(cp cleaned/010124.parquet /tmp/run1.parquet)",
+      "Bash(.venv/bin/python scripts/build_dashboard.py \"cleaned/010124.parquet\" \"reports/010124_dashboard.html\")",
+      "Bash(.venv/bin/python scripts/explore.py \"2025-original/Data 2025.xlsx\" \"reports/data2025_exploration.md\")",
+      "Bash(wc -l reports/data2025_exploration.md)",
+      "Bash(ls -la reports/data2025_exploration.md)",
+      "Bash(.venv/bin/python scripts/clean_2025.py \"2025-original/Data 2025.xlsx\" \"cleaned/data2025.parquet\" \"reports/data2025_diff.md\")",
+      "Bash(.venv/bin/python scripts/build_dashboard_2025.py \"cleaned/data2025.parquet\" \"reports/data2025_dashboard.html\")"
+    ]
+  }
+}

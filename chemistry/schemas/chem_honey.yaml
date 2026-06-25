@@ -1,0 +1,62 @@
+# Honey analysis 2025 — single sheet covering the whole year. Tests cover
+# sugars (Glucose, Fructose, Sucrose, Maltose), HMF, Concentration, Moisture,
+# Acidity, plus a qualitative sensory check.
+section: honey
+applies_to:
+  2025: "Copy of Honey analysis 2025.xlsx"
+
+# Honey file has one sheet 'Honey Section' — not monthly.
+skip_sheets: []
+single_sheet: true
+header_row_max: 4
+
+columns:
+  sampling_date:    ["Sampling Date"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid",
+                     "Matched/not matched", "Matched/ not matched",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+  # Sugar tests (most without their own inline limit — only the sum has one).
+  glucose:                  ["Glucose %"]
+  fructose:                 ["Fructose %"]
+  glucose_plus_fructose:    ["(Glucose + Fructose) %"]
+  glucose_plus_fructose_limit: ["(Glucose + Fructose) % limit"]
+  sucrose:                  ["Sucrose"]
+  sucrose_limit:            ["Sucrose limit%"]
+  maltose:                  ["Maltose"]
+  carb_qc:                  ["Carbohydrate QC %"]
+  hmf:                      ["HMF %"]
+  hmf_limit:                ["HMF limit %"]
+  hmf_qc:                   ["HMF QC %"]
+  concentration:            ["Concentration"]
+  concentration_limit:      ["Concentration limit"]
+  moisture:                 ["Moisture"]
+  moisture_limit:           ["Moisture limit"]
+  acidity:                  ["الحموضه", "الحموضة"]
+  acidity_limit:            ["حدود الحموضه", "حدود الحموضة"]
+  # One qualitative sensory column.
+  sensory:                  ["اختبارات حسية"]
+
+tests:
+  - { name: "Glucose",                 result: glucose,                limit: null,                            unit: "%" }
+  - { name: "Fructose",                result: fructose,               limit: null,                            unit: "%" }
+  # Glucose + Fructose: minimum threshold (real honey must be ≥60%).
+  - { name: "Glucose + Fructose",      result: glucose_plus_fructose,  limit: glucose_plus_fructose_limit,     direction: min, unit: "%" }
+  # Sucrose: maximum allowed (added sugar / adulteration indicator).
+  - { name: "Sucrose",                 result: sucrose,                limit: sucrose_limit,                   direction: max, unit: "%" }
+  - { name: "Maltose",                 result: maltose,                limit: null,                            unit: "%" }
+  # HMF / Moisture / Acidity / Concentration: maximum allowed.
+  - { name: "HMF",                     result: hmf,                    limit: hmf_limit,                       direction: max, unit: "%" }
+  - { name: "Concentration",           result: concentration,          limit: concentration_limit,             direction: max, unit: "%" }
+  - { name: "Moisture",                result: moisture,               limit: moisture_limit,                  direction: max, unit: "%" }
+  - { name: "Acidity",                 result: acidity,                limit: acidity_limit,                   direction: max, unit: "%" }
+  - { name: "Sensory",                 result: sensory,                kind: string }

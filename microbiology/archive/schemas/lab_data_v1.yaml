@@ -1,0 +1,498 @@
+# =============================================================================
+# Lab data normalisation schema — version 1
+# Designed against: 2024-original/2024/Jan-2024/010124.xlsx
+# Intended scope:    188 .xlsx files in 2024-original/ (and 2025-original/)
+# Output shape:      LONG format — one row per (sample, test)
+# Determinism:       running clean_file() twice on the same input must produce
+#                    bit-identical output (sort order fixed below)
+# =============================================================================
+
+schema_version: 1
+schema_name: lab_data_v1
+
+# -----------------------------------------------------------------------------
+# 1. WORKBOOK STRUCTURE
+# -----------------------------------------------------------------------------
+workbook:
+  sheet_selection: active            # use ws.active (the only sheet in 010124.xlsx)
+  expected_sheet_name: Sheet1        # warn (not fail) if different
+  header_row_excel: 6                # 1-indexed; row above contains the title banner
+  data_starts_row_excel: 7
+
+# -----------------------------------------------------------------------------
+# 2. DATE EXTRACTION
+# Date lives inside the title banner cell, not in any column.
+# Filename is a backup (format ddmmyy).
+# -----------------------------------------------------------------------------
+date_extraction:
+  primary:
+    cell_excel: E4
+    regex: 'يوم\s+\S+\s+(\d{2}/\d{2}/\d{4})'   # captures dd/mm/yyyy
+    captures: dd/mm/yyyy
+  fallback:
+    source: filename
+    regex: '^(\d{2})(\d{2})(\d{2})[a-z]?\.xlsx$'
+    captures: [dd, mm, yy]
+    century: 2000
+  on_conflict: prefer_primary_warn_if_diff
+
+# -----------------------------------------------------------------------------
+# 3. REGIONS TO IGNORE (decoration / legend / banner)
+# These cells are read-only metadata that duplicates info already in the data
+# block. Drop on import.
+# -----------------------------------------------------------------------------
+drop_regions:
+  - id: legend_block
+    description: "Vertical legend listing test names + reference limits"
+    rows_excel: [1, 7]
+    cols_excel: [A, D]
+  - id: title_banner
+    description: "Date banner — date is extracted separately above"
+    rows_excel: [4, 4]
+    cols_excel: [E, R]
+
+# -----------------------------------------------------------------------------
+# 4. MERGED-CELL HANDLING
+# 010124.xlsx has 225 merged ranges. Sample-level columns are merged across
+# multiple test rows. Strategy: un-merge by writing the top-left value into
+# every covered cell BEFORE building the DataFrame. This is equivalent to a
+# forward-fill scoped to the original merge ranges (safer than blind ffill,
+# which would leak across un-related sample blocks).
+# -----------------------------------------------------------------------------
+merged_cell_strategy: unmerge_and_fill_from_top_left
+
+# -----------------------------------------------------------------------------
+# 5. RAW COLUMN MAP (from data block)
+# These are the column names exactly as they appear in the header row (row 6)
+# in cols E..R (col indices 5..18 1-indexed).
+# -----------------------------------------------------------------------------
+raw_columns:
+  - { excel_col: E, raw_name: Barcodes }
+  - { excel_col: F, raw_name: M.S.No }
+  - { excel_col: G, raw_name: S.No }
+  - { excel_col: H, raw_name: GSO code }
+  - { excel_col: I, raw_name: Sample Name }
+  - { excel_col: J, raw_name: Restaurant name }
+  - { excel_col: K, raw_name: "10 1" }
+  - { excel_col: L, raw_name: "10 2" }
+  - { excel_col: M, raw_name: "10 3" }
+  - { excel_col: N, raw_name: Test }
+  - { excel_col: O, raw_name: GSO 1016 Limits }
+  - { excel_col: P, raw_name: Results }
+  - { excel_col: Q, raw_name: Validity }
+  - { excel_col: R, raw_name: Final Report }
+
+# -----------------------------------------------------------------------------
+# 6. SAMPLE-LEVEL vs TEST-LEVEL
+# Sample-level cells are merged across all test rows of a single sample.
+# Test-level cells are unique per test row.
+# Concentration cells were originally test-level but per user direction
+# (Q1) we keep them as-is (mostly empty).
+# -----------------------------------------------------------------------------
+sample_level_columns:
+  - Barcodes
+  - M.S.No
+  - S.No
+  - GSO code
+  - Sample Name
+  - Restaurant name
+  - Final Report
+
+test_level_columns:
+  - Test
+  - GSO 1016 Limits
+  - Results
+  - Validity
+
+concentration_columns:                 # kept; mostly empty; not interpreted
+  - "10 1"
+  - "10 2"
+  - "10 3"
+
+# -----------------------------------------------------------------------------
+# 7. CANONICAL OUTPUT SCHEMA (long format)
+# Each output row = one (sample, test) pair. Sample-level fields repeat
+# across the test rows of a sample.
+# -----------------------------------------------------------------------------
+output_columns:
+
+  - name: source_file
+    dtype: string
+    nullable: false
+    derived_from: input filename (basename)
+    sort_key: 1
+
+  - name: sheet_date
+    dtype: date           # ISO 8601 yyyy-mm-dd
+    nullable: false
+    derived_from: cell E4 of input (regex above)
+    sort_key: 2
+
+  - name: row_excel
+    dtype: int32
+    nullable: false
+    derived_from: original Excel row number (for traceability)
+
+  - name: barcode
+    raw_source: Barcodes
+    dtype: string
+    nullable: true
+
+  - name: m_s_no
+    raw_source: M.S.No
+    dtype: Int64           # nullable integer
+    nullable: true
+    sort_key: 3
+
+  - name: s_no
+    raw_source: S.No
+    dtype: Int64
+    nullable: true
+
+  - name: gso_code
+    raw_source: GSO code
+    dtype: string
+    nullable: true
+    pattern: '^[A-Z]-\d+(/\d+)?$'
+    special_values:
+      ISO:
+        action: set_null
+        flag: gso_code_was_iso_placeholder    # raised in data_quality_flags
+        reason: "User confirmed Q6: 'ISO' was used for samples with no GSO code; semantically wrong, treat as missing."
+
+  - name: sample_name
+    raw_source: Sample Name
+    dtype: string
+    nullable: true
+
+  - name: restaurant_name
+    raw_source: Restaurant name
+    dtype: string
+    nullable: true
+
+  - name: test
+    raw_source: Test
+    dtype: categorical
+    nullable: false
+    canonical_values:
+      - السالمونيلا                 # Salmonella
+      - ايشيريشيا كولاي              # E. coli
+      - استافيلوكوكس اورياس           # Staphylococcus aureus
+      - انتيروباكتريسي                # Enterobacteriaceae
+      - العدد الكلي للبكتيريا           # Total bacterial count
+      - كوليفورم                    # Coliform
+      - باصلص سيرز                  # Bacillus cereus
+      - الخمائر والاعفان              # Yeasts and moulds
+      - سيدومومناس                  # Pseudomonas (residual ambiguity — see ambiguous_cases)
+    mapping:
+      كولي فورم: كوليفورم
+      باصلص سيرس: باصلص سيرز
+      الخماير والاعفان: الخمائر والاعفان
+      خمائر: الخمائر والاعفان         # confirmed Q4: merge into combined yeast+mould category
+      اعفان: الخمائر والاعفان         # confirmed Q4: merge into combined yeast+mould category
+
+  - name: limit_raw
+    raw_source: GSO 1016 Limits
+    dtype: string
+    nullable: true
+    note: "Mixed-type column — keep verbatim text. Examples: 100, '<100/25cm2', 'غير موجودة'."
+
+  - name: limit_numeric
+    derived: true
+    dtype: float64
+    nullable: true
+    description: "Best-effort numeric parse of limit_raw; null when text-only."
+
+  - name: result_raw
+    raw_source: Results
+    dtype: string
+    nullable: true
+
+  - name: result_numeric
+    derived: true
+    dtype: float64
+    nullable: true
+
+  - name: validity
+    raw_source: Validity
+    dtype: boolean
+    nullable: true
+    mapping:
+      صالح: true
+      غير صالح: false
+
+  - name: final_report_raw
+    raw_source: Final Report
+    dtype: string
+    nullable: true
+
+  - name: final_report_code
+    derived: true
+    dtype: string
+    nullable: true
+    description: "Compact code derived from final_report_raw via the code_map below."
+
+  - name: conc_10_1
+    raw_source: "10 1"
+    dtype: string
+    nullable: true
+    description: "Concentration / dilution (10^1) — kept verbatim per user Q1."
+
+  - name: conc_10_2
+    raw_source: "10 2"
+    dtype: string
+    nullable: true
+
+  - name: conc_10_3
+    raw_source: "10 3"
+    dtype: string
+    nullable: true
+
+  - name: data_quality_flags
+    derived: true
+    dtype: string
+    nullable: true
+    description: "Pipe-separated list of flags raised during cleaning for this row."
+
+# -----------------------------------------------------------------------------
+# 8. FINAL REPORT CODE MAP
+# 10 unique phrases were observed in 010124.xlsx. Mapping by first matching
+# substring. Other files may introduce new phrases — those will be assigned
+# code UNKNOWN and flagged.
+# -----------------------------------------------------------------------------
+final_report_code_map:
+  VALID:
+    match_type: contains
+    needles: ["العينه صالحه بناءا على الحدود"]
+  INVALID_TOTAL_BACTERIA:
+    match_type: contains_all
+    needles: ["العينه غير", "صالحه", "العدد الكلي للبكتيريا"]
+    not_contains: ["انتيروباكتيرييسي", "الخمائر"]
+  INVALID_SALMONELLA:
+    match_type: contains_all
+    needles: ["العينه غير", "صالحه", "السالمونيلا"]
+    not_contains: ["انتيروباكتيرييسي"]
+  INVALID_ENTEROBACTERIACEAE_SALMONELLA:
+    match_type: contains_all
+    needles: ["انتيروباكتيرييسي", "السالمونيلا"]
+  INVALID_MULTIPLE_TBC_ENTERO_YEAST:
+    match_type: contains_all
+    needles: ["العدد الكلي للبكتيريا", "انتيروباكتيرييسي", "الخمائر"]
+  INVALID_YEAST_MOULD:
+    match_type: contains_all
+    needles: ["العينه غير", "الخمائر"]
+    not_contains: ["انتيروباكتيرييسي", "العدد الكلي"]
+  INVALID_ENTEROBACTERIACEAE:
+    match_type: contains_all
+    needles: ["العينه غير", "انتيروباكتيرييسي"]
+    not_contains: ["السالمونيلا", "العدد الكلي", "الخمائر"]
+  INVALID_E_COLI:
+    match_type: contains_all
+    needles: ["العينه غير", "الايشيريشيا كولاي"]
+  INVALID_WATER_COLIFORM:
+    match_type: contains_all
+    needles: ["تحليل عينة المياه", "الكوليفورم"]
+  UNKNOWN:
+    match_type: fallback
+    flag: final_report_unmapped
+
+# -----------------------------------------------------------------------------
+# 9. CLEANING RECIPE (ordered, deterministic)
+# Each step is idempotent. clean_file(path) executes them in this order.
+# -----------------------------------------------------------------------------
+cleaning_recipe:
+
+  - id: 01_load_workbook
+    op: openpyxl.load_workbook
+    params: { data_only: true, read_only: false }
+
+  - id: 02_extract_date
+    op: extract_date
+    config: $.date_extraction
+
+  - id: 03_unmerge_and_fill
+    op: unmerge_and_fill_from_top_left
+    note: "Materialise sample-level merged values into every covered cell."
+
+  - id: 04_to_dataframe
+    op: build_dataframe
+    header_row_excel: 6
+    use_cols_excel: [E, F, G, H, I, J, K, L, M, N, O, P, Q, R]
+
+  - id: 05_drop_empty_rows
+    op: dropna
+    how: all_in_subset
+    subset: [M.S.No, S.No, GSO code, Sample Name, Test, Results]
+
+  - id: 06_normalise_text
+    op: normalise_strings
+    steps:
+      - unicode_normalise: NFKC
+      - strip_outer_whitespace: true
+      - collapse_internal_whitespace: true
+      - remove_zero_width_chars: true
+      - remove_rtl_marks: true
+      - keep_arabic_diacritics: true        # do NOT strip — meaningful
+      - keep_letter_form_distinctions: true  # do NOT fold ا/أ/إ/آ — only used for COMPARISON, never for write-back
+
+  - id: 07_apply_value_mappings
+    op: map_values
+    targets:
+      Test: $.output_columns[name=test].mapping
+      Validity: $.output_columns[name=validity].mapping
+
+  - id: 08_handle_gso_iso
+    op: special_value
+    column: GSO code
+    rule: $.output_columns[name=gso_code].special_values.ISO
+
+  - id: 09_flag_msno_typo
+    op: flag_value
+    column: M.S.No
+    predicate: "value == 4223"
+    flag: msno_value_4223_suspect_typo
+    note: "Q5 — flag, do not auto-correct."
+
+  - id: 10_flag_final_report_truncation
+    op: flag_value
+    column: Final Report
+    predicate: "value.lstrip().startswith('م تحليل')"
+    flag: final_report_truncation
+    fix: prepend_taa
+    new_value_rule: "'ت' + value.lstrip()"
+
+  - id: 11_collapse_double_space_in_final_report
+    op: collapse_internal_whitespace
+    column: Final Report
+    note: "Removes the recurring 'غير  صالحه' double-space."
+
+  - id: 12_derive_final_report_code
+    op: code_map
+    column: Final Report
+    map: $.final_report_code_map
+    output: final_report_code
+
+  - id: 13_parse_numeric
+    op: parse_numeric_best_effort
+    columns:
+      - { source: GSO 1016 Limits, output: limit_numeric }
+      - { source: Results,         output: result_numeric }
+    rules:
+      - strip_comparison_prefixes: ['<', '>', '≤', '≥']    # captured into a side flag
+      - arabic_digits_to_ascii: true
+      - thousands_separator: [',', '٬']
+      - decimal_separator: ['.', '٫']
+      - on_text_only: null
+
+  - id: 14_flag_sno_gaps
+    op: flag_sequence_gaps
+    column: S.No
+    flag: s_no_sequence_gap
+    note: "Q8 — gaps in 1..max(S.No) flagged at file-summary level (not per-row)."
+    output_destination: diff_report.gaps_in_s_no
+
+  - id: 15_rename_to_canonical
+    op: rename
+    map:
+      Barcodes: barcode
+      M.S.No: m_s_no
+      S.No: s_no
+      GSO code: gso_code
+      Sample Name: sample_name
+      Restaurant name: restaurant_name
+      "10 1": conc_10_1
+      "10 2": conc_10_2
+      "10 3": conc_10_3
+      Test: test
+      GSO 1016 Limits: limit_raw
+      Results: result_raw
+      Validity: validity
+      Final Report: final_report_raw
+
+  - id: 16_attach_metadata
+    op: add_columns
+    values:
+      source_file: "{input_filename}"
+      sheet_date: "{extracted_date}"
+
+  - id: 17_validate_schema
+    op: validate
+    fail_on:
+      - test_value_not_in_canonical
+      - validity_value_not_in_mapping
+      - sheet_date_missing
+      - source_file_missing
+    warn_on:
+      - msno_value_4223_suspect_typo
+      - gso_code_was_iso_placeholder
+      - final_report_truncation
+      - final_report_unmapped
+      - s_no_sequence_gap
+      - gso_code_pattern_violation
+      - limit_numeric_unparseable
+      - result_numeric_unparseable
+
+  - id: 18_sort_deterministic
+    op: sort_values
+    by: [sheet_date, m_s_no, s_no, test]
+    na_position: last
+
+  - id: 19_reset_index
+    op: reset_index
+
+# -----------------------------------------------------------------------------
+# 10. DROP vs FLAG policy
+# -----------------------------------------------------------------------------
+drop_policy:
+  drop_row_if:
+    - "all of {m_s_no, s_no, gso_code, sample_name, test, result_raw} are null"
+  reason_field: drop_reason
+
+flag_policy:
+  preserve_row: true
+  flag_field: data_quality_flags
+  format: "pipe_separated"
+
+# -----------------------------------------------------------------------------
+# 11. AMBIGUOUS CASES STILL NEEDING USER CONFIRMATION
+# These do not block Phase 3; the cleaner will flag-but-not-fail.
+# -----------------------------------------------------------------------------
+ambiguous_cases:
+
+  - id: pseudomonas_canonical_spelling
+    column: test
+    issue: "The legend block in 010124.xlsx lists 7 canonical Arabic test names but does NOT include Pseudomonas. The data spells it 'سيدومومناس' (×2). Could be a non-standard transliteration."
+    current_decision: "Keep 'سيدومومناس' as canonical; flag 'pseudomonas_spelling_unverified' on each row."
+    needs_from_user: "Preferred Arabic spelling for Pseudomonas, e.g. سودومونس / بسيدومونس / سيدومومناس?"
+
+  - id: dilution_columns_meaning
+    columns: [conc_10_1, conc_10_2, conc_10_3]
+    issue: "User confirmed Q1 these are concentration columns, not necessary, kept verbatim. Two cells (الربع300<, الخامس 248) appear to encode quartile/order info in mixed Arabic+number form."
+    current_decision: "Keep as-is (string); flag 'dilution_value_nonstandard' on those two cells."
+    needs_from_user: "If you ever want these parsed semantically, send a key for what 'الربع', 'الخامس' encode."
+
+  - id: missing_columns_in_other_files
+    issue: "Barcodes & Restaurant name are 100% empty in 010124.xlsx. Schema retains them per Q3."
+    current_decision: "Schema includes them; cleaner will populate from files that have them."
+    needs_from_user: "If a future file uses different column names for these (e.g. 'باركود', 'اسم المطعم'), tell me and I'll add aliases."
+
+# -----------------------------------------------------------------------------
+# 12. OUTPUT
+# -----------------------------------------------------------------------------
+output:
+  format: parquet
+  compression: zstd
+  partitioning: none           # single file per input xlsx in Phase 3
+  filename_template: "{stem}.parquet"
+  diff_report:
+    format: markdown
+    filename_template: "{stem}_diff.md"
+    contents:
+      - rows_in_count
+      - rows_out_count
+      - rows_dropped + reasons
+      - cells_changed_per_column
+      - value_remappings_applied
+      - flags_raised_summary
+      - sequence_gaps
+      - schema_violations

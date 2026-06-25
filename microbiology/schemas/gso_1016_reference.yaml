@@ -1,0 +1,4315 @@
+schema_name: gso_1016_reference
+schema_version: 1
+source: Classification.html (GSO 1016 standards table)
+categories:
+- letter: A
+  name_en: Dairy Products
+  section_number: 1
+  codes:
+  - A-1
+  - A-2
+  - A-3
+  - A-4
+  - A-5
+  - A-6
+  - A-7
+  - A-8
+  - A-9
+  - A-10
+  - A-11
+  - A-12
+  - A-13
+  - A-14
+  - A-15
+  - A-16
+  - A-17
+  - A-18
+- letter: B
+  name_en: Infants, Children and Certain Categories of Dietetic Foods
+  section_number: 2
+  codes:
+  - B-1
+  - B-2
+  - B-3
+  - B-4
+  - B-5
+  - B-6
+  - B-7
+  - B-8
+  - B-9
+- letter: C
+  name_en: Meat, Poultry and its Products
+  section_number: 3
+  codes:
+  - C-1
+  - C-2
+  - C-3
+  - C-4
+  - C-5
+  - C-6
+  - C-7
+  - C-8
+  - C-9
+  - C-10
+  - C-11
+  - C-12
+- letter: D
+  name_en: Fish and Shellfish their Products
+  section_number: 4
+  codes:
+  - D-1
+  - D-2
+  - D-3
+  - D-4
+  - D-5
+  - D-6
+  - D-7
+  - D-8
+- letter: E
+  name_en: Egg and Egg Products
+  section_number: 5
+  codes:
+  - E-1
+  - E-2
+  - E-3
+  - E-4
+  - E-5
+  - E-6
+- letter: F
+  name_en: Fats and Oils
+  section_number: 6
+  codes:
+  - F-1
+  - F-2
+  - F-3
+  - F-4
+- letter: G
+  name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  section_number: 7
+  codes:
+  - G-1
+  - G-2
+  - G-3
+  - G-4
+  - G-5
+  - G-6
+  - G-7
+  - G-8
+- letter: I
+  name_en: Cereals; Legumes and their Products
+  section_number: 9
+  codes:
+  - I-1
+  - I-2
+  - I-3
+  - I-4
+  - I-5
+  - I-6
+  - I-7
+  - I-8
+  - I-9
+  - I-10
+  - I-11
+  - I-12
+  - I-13
+- letter: J
+  name_en: Fruit and Vegetables
+  section_number: 10
+  codes:
+  - J-1
+  - J-2
+  - J-3
+  - J-4
+  - J-5
+  - J-6
+  - J-7
+  - J-8
+  - J-9
+- letter: K
+  name_en: Jelly, Jam and Marmalade
+  section_number: 11
+  codes:
+  - K-1
+  - K-2
+  - K-3
+- letter: L
+  name_en: Chocolate, Sweets and their Ingredients
+  section_number: 12
+  codes:
+  - L-1
+  - L-2
+  - L-3
+  - L-4
+  - L-5
+  - L-6
+  - L-7
+  - L-8
+  - L-9
+  - L-10
+  - L-11
+- letter: N
+  name_en: Drinking Water
+  section_number: 14
+  codes:
+  - N-1
+  - N-2
+  - N-3
+  - N-4
+- letter: O
+  name_en: Beverages
+  section_number: 15
+  codes:
+  - O-1
+  - O-2
+  - O-3
+  - O-4
+  - O-5
+  - O-6
+  - O-7
+  - O-8
+  - O-9
+- letter: P
+  name_en: Ready to Eat Foods
+  section_number: 16
+  codes:
+  - P-1
+  - P-2
+  - P-3
+  - P-4
+  - P-5
+  - P-6/1
+  - P-6/2
+  - P-6/3
+  - P-6/4
+  - P-8
+- letter: Q
+  name_en: Miscellaneous Foods
+  section_number: 17
+  codes:
+  - Q-1
+  - Q-2
+  - Q-3
+  - Q-4
+  - Q-5
+  - Q-6
+codes:
+- code: A-1
+  code_short: MILK
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Pasteurized milk (with or without added flavour)
+  name_en_long: Pasteurized Milk (With or Without Added Flavour)
+  name_ar: الحليب المبستر (مع أو بدون نكهة)
+  sub_products_ar: حليب مع او بدون النكهات (جميعها)
+  in_scope: true
+  lims_progress: true
+  notes: '* In case of added flavour'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: '5'
+    limit_numeric: 5.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: A-2
+  code_short: UHT
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: UHT milk- (with or without added flavour)
+  name_en_long: UHT Milk (With or Without Added Flavour)
+  name_ar: حليب معقم (مع أو بدون نكهة)
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: 'Incubation at 37 C/15 days or 55 C/7days: * In case of added flavour'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: A-3
+  code_short: FM
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Fermented milk products (with or without added flavour), e.g. yoghurt, laban, labena
+  name_en_long: (Fermented Milk Products (With or Without Added Flavour
+  name_ar: منتجات الحليب المتخمرة (مع أو بدون نكهة)
+  sub_products_ar: سلطة زبادي - لبنة - لبن - زبادي
+  in_scope: true
+  lims_progress: true
+  notes: '* In case of added flavour'
+  required_tests:
+  - test: انتيروباكتريسي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: A-4
+  code_short: COND
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Condensed and sweeten condensed milk
+  name_en_long: Condensed and Sweeten Condensed Milk
+  name_ar: الحليب المكثف والحليب المكثف المحلى
+  sub_products_ar: حليب مكثف - حليب مركز - صوص حليب مركز
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+- code: A-5
+  code_short: EV
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Evaporated milk
+  name_en_long: Evaporated Milk
+  name_ar: حليب مبخر
+  sub_products_ar: حليب مبخر
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: A-6
+  code_short: PC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Pasteurized cream (with or without added flavour)
+  name_en_long: Pasteurized Cream (With or Without Added Flavour)
+  name_ar: قشطة مبسترة (مع أو بدون نكهة)
+  sub_products_ar: قشطة - قشدة - قشطة قيمر - قشطة فراولة
+  in_scope: true
+  lims_progress: true
+  notes: '* In case of added flavour'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '20'
+    limit_numeric: 20.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الخمائر و الاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: A-7
+  code_short: WC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Whipped cream
+  name_en_long: Whipped Cream
+  name_ar: كريمة مخفوقة
+  sub_products_ar: كريمة خفق
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '500000'
+    limit_numeric: 500000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '20'
+    limit_numeric: 20.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-8
+  code_short: FC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Fermented cream
+  name_en_long: Fermented Cream
+  name_ar: كريمة متخمرة
+  sub_products_ar: ساور كريم - كريم شيز
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتريسي
+    limit_raw: '20'
+    limit_numeric: 20.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: A-9
+  code_short: STC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Sterilized cream
+  name_en_long: Sterilized Cream
+  name_ar: قشطة معقمة
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied
+    limit_raw: Requirements for canned products (Item 8) shall be applied
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: A-10
+  code_short: PM
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Powdered milk (full, skimmed, semi- skimmed), whey (dried or powdered condensed)
+  name_en_long: Powder Milk - Whey (Dried or Powdered Condensed)
+  name_ar: حليب البودرة - الشرش (المجفف أو البودرة)
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '300000'
+    limit_numeric: 300000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-11
+  code_short: PWC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Powdered whipped cream (with or without added flavour
+  name_en_long: (Powder Whipped Cream (With or Without Added Flavour
+  name_ar: مسحوق الكريمة المخفوقة (مع أو بدون نكهة)
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الخمائر و الاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-12
+  code_short: SC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Soft cheese (made from pasteurized milk)
+  name_en_long: Soft Cheese
+  name_ar: جبن طري / جبن سائل
+  sub_products_ar: جبن سائل/ سايل - شبيه جبن سائل
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتريسي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-13
+  code_short: HC
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Hard and semi–hard cheese
+  name_en_long: Hard and Semi Hard Cheese
+  name_ar: الأجبان الجامدة وشبه جامدة
+  sub_products_ar: جبن شرائح - جبن شيدر - موزيرلا - بارميزان - فيتا - مش - قريش - قشثوان - صوص جبن - حلوم - سلطة جبنة بالنعناع
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتريسي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-14
+  code_short: PCH
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Processed cheese packed in non-metal containers
+  name_en_long: Processed Cheese Packed in Non-Metal Containers
+  name_ar: الجبن المصنع والمعبأ في عبوات غير معدنية
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-15
+  code_short: CA
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Caseinate
+  name_en_long: Caseinate
+  name_ar: كازينات
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '200000'
+    limit_numeric: 200000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشياكولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-16
+  code_short: ICE
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Edible ices (Ice cream (with nut*)– ice milk –water ice)
+  name_en_long: Ice Cream
+  name_ar: ايسكريم
+  sub_products_ar: المثلجات / ايسكريم جميع الأنواع
+  in_scope: true
+  lims_progress: true
+  notes: '* In case of ice cream containing nuts.'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشياكولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: اعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: true
+- code: A-17
+  code_short: D-ICE
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Dehydrated ice cream mixes
+  name_en_long: Dried Ice Cream Mixtures
+  name_ar: خليط الآيس كريم المجفف
+  sub_products_ar: خليط ايسكريم مجفف
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '200000'
+    limit_numeric: 200000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: A-18
+  code_short: MSH
+  category_letter: A
+  category_section_number: 1
+  category_name_en: Dairy Products
+  name_en: Milkshakes
+  name_en_long: null
+  name_ar: ميلك شيك (Milk Shakes)
+  sub_products_ar: ميلك شيك فانيلا
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: كوليفورم
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: B-1
+  code_short: BI
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Biscuits (plain, dried)
+  name_en_long: Biscuits
+  name_ar: البسكويت
+  sub_products_ar: بسكوت
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: B-2
+  code_short: SBI
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Shelf–stable dried biscuits coated or filled with chocolate or others
+  name_en_long: (Shelf -Stable Dried bisciuts)
+  name_ar: البسكويت من الانواع الجافة التي لها فترة حفظ طويلة
+  sub_products_ar: بسكوت بالشوكولاته
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Enterobacteriaeace
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Staphylococcus aureus
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: B-3
+  code_short: DIP
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Dried and instant products requiring reconstitution
+  name_en_long: Dried and Instant Products Requiring Reconstitution
+  name_ar: المنتجات المجففة و الفورية التي تتطلب إعادة تحضير
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: '** Optional *** In case of the product contains milk and/or rice **** In case of the products contains meat'
+  required_tests:
+  - test: Total Count Bacteria
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: Enterobacteriaeace
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: – Cronobacter sakazakii (infant food 6 months and younger)
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Staphylococcus aureus
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: – Bacillus cereus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+  - test: Clostridium perfringens
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: true
+  - test: – Escherichia coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: B-4
+  code_short: CBF
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Cereal based foods for infant, Mushroom
+  name_en_long: Cereal Based Foods for Infant
+  name_ar: الأطعمة المصنوعة من الحبوب للرضع
+  sub_products_ar: '-'
+  in_scope: true
+  lims_progress: true
+  notes: '** Optional'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: true
+  - test: Staphylococcus aureus
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: B-5
+  code_short: PIF
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Powdered infant formula, including those with lactic acid- producing cultures
+  name_en_long: Powder Infant Formula
+  name_ar: مسحوق حليب الأطفال
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Enterobacteriaeace
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: – Bacillus cereus
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: – Listeria monocytogenes
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Clostridium perfringens
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: – Cronobacter sakazakii (infant food 6 months and younger)
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Staphylococcus aureus
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: B-6
+  code_short: DPRH
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Dried products requiring heating to boiling before consumption
+  name_en_long: Dried Products Requiring Heating to Boiling Before Consumption
+  name_ar: المنتجات المجففة التي تتطلب التسخين حتى الغليان قبل الاستهلاك
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: '*** In case of the product contains milk and/or rice'
+  required_tests:
+  - test: Total Count Bacteria
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: Enterobacteriaeace
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Escherichia coli
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Bacillus cereus
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+  - test: – Cronobacter sakazakii (infant food 6 months and younger)
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: B-7
+  code_short: TPP
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Thermally processed products in sealed containers
+  name_en_long: Thermally Processed Products in Sealed Containers
+  name_ar: منتجات معالجة حراريًا في عبوات محكمة الإغلاق
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: '**** In case of the products contains meat'
+  required_tests:
+  - test: Clostridium perfringens
+    limit_raw: '0'
+    limit_numeric: 0.0
+    zero_tolerance: false
+    optional: true
+  - test: Shall meet the microbiological requirements for canned foods sspecified in this standard
+    limit_raw: Shall meet the microbiological requirements for canned foods sspecified in this standard
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Shall meet the microbiological requirements for canned foods sspecified in this standard
+    limit_raw: Shall meet the microbiological requirements for canned foods sspecified in this standard
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: B-8
+  code_short: DFIC
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Dietetic foods to be eaten by high risk category of consumers (according to the type of the product)
+  name_en_long: Dietetic Foods Intended for High-Risk Consume
+  name_ar: الحميات الغذائية المخصصة للفئات عالية الخطورة من المستهلكين
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: '**** In case of the products contains meat'
+  required_tests:
+  - test: Total Count Bacteria
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: Escherichia coli
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: Staphylococcus aureus
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Bacillus cereus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: Clostridium perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Campylobacter jejuni
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Listeria monocytogenes
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Escherichia coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: B-9
+  code_short: BBF
+  category_letter: B
+  category_section_number: 2
+  category_name_en: Infants, Children and Certain Categories of Dietetic Foods
+  name_en: Body building foods
+  name_en_long: Body Building Foods
+  name_ar: أطعمة بناء الأجسام
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Total Count Bacteria
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: Yeasts and moulds
+    limit_raw: '300'
+    limit_numeric: 300.0
+    zero_tolerance: false
+    optional: false
+  - test: Coliforms
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: Escherichia coli
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Salmonella
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Staphylococcus aureus
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-1
+  code_short: RM
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Raw meat (chilled/frozen); whole or half carcasses; pieces with or without bones
+  name_en_long: (Raw Meat (Cold or Chilled
+  name_ar: لحوم نيئة (مبردة أو مجمدة)
+  sub_products_ar: لحم فخذ/ظهر عجل - لحم عجل كتف
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-2
+  code_short: RP
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Fresh poultry (chilled/ frozen)
+  name_en_long: Raw Poultry (Chilled or Frozen)
+  name_ar: دواجن نيئة (مبردة او مجمدة)
+  sub_products_ar: دجاج (غير مقطع) ني مبرد/ مجمد
+  in_scope: true
+  lims_progress: true
+  notes: '** Sample is rejected if the sample unit is positive to Salmonella typhimurium and Salmonella enteritidis test. *** In case of chilled
+    minced meat and chilled poultry.'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '5000000'
+    limit_numeric: 5000000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+  - test: CAMPYLOPACTER
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: C-3
+  code_short: MMP
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Raw minced (meat and poultry);chilled/frozen
+  name_en_long: Raw Minced Meat and Poultry (Chilled or Frozen)
+  name_ar: اللحوم والدواجن المفرومة النيئة (مبردة أو مجمدة)
+  sub_products_ar: جميع انواع دجاج ني المقطع/ مفروم
+  in_scope: true
+  lims_progress: true
+  notes: '*** In case of chilled minced meat and chilled poultry. **** This criterion shall not apply to minced meat produced at retail level
+    when the shelf-life of the product is less than 24 hours. ***** Optional.'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '5000000'
+    limit_numeric: 5000000.0
+    zero_tolerance: false
+    optional: true
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: انتيروباكتريسي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+- code: C-4
+  code_short: RMM
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Raw minced/pieces meat (chilled/ frozen) with soy or marinated (e.g. kubba; meat balls, fresh sausage, meat burgers)
+  name_en_long: Raw Minced or Pieces Meat (Chilled or Frozen) With Soy or Marinated
+  name_ar: لحوم مقطعه أو مفرومه نيئة (مبردة أو مجمدة) مع صويا أو متبلة
+  sub_products_ar: كباب لحم ني / لحم مفروم / كبه
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-5
+  code_short: REW
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Raw edible offal (chilled/frozen) e.g. liver testes, kidney, gizzard
+  name_en_long: Raw Ediable Offal
+  name_ar: أجزاء قابلة للأكل من الذبيحة
+  sub_products_ar: كلية عجل بلدي - كبدة غنم مبرد - كبدة غنم
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-6
+  code_short: CSM
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Cured and/or smoked meat; mortadella; luncheon meat, basterma
+  name_en_long: Cured and / or Smoked Meat
+  name_ar: اللحوم المعالجة و / أو المدخنة
+  sub_products_ar: مرتديلا لحم - بيبروني قطع
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '5000000'
+    limit_numeric: 5000000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '5000'
+    limit_numeric: 5000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-7
+  code_short: CSP
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Cured and/or smoked poultry meat; mortadella, frankfurters, turkey, smoked turkey breast
+  name_en_long: Cured and / or Smoked Poultry
+  name_ar: الدواجن المعالجة و / أو المدخنة
+  sub_products_ar: مرتديلا دجاج - مرتديلا ديك رومي - مرتديلا دجاج بالزيتون - سلطة مرتديلا
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: CAMPYLOPACTER
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-8
+  code_short: CS
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Cooked sausages
+  name_en_long: Cooked Sausages
+  name_ar: السجق المطبوخ
+  sub_products_ar: لحم سجق
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: C-9
+  code_short: CPM
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Cooked poultry meat, frozen to be reheated before eating (e.g. prepared frozen meals; chicken burgers; chicken/ turkey rolls, chicken
+    nuggets, others breaded poultry products
+  name_en_long: Cooked Poultry Meat Frozen to be Reheated before Eating
+  name_ar: لحم الدواجن المطبوخ ، والمجمد ليتم تسخينه قبل الأكل
+  sub_products_ar: دجاج باربكيو - دجاج ليمون - دجاج بروستد - لحم البقر الازانيا (مطبوخ)
+  in_scope: false
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: لستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: CAMPYLOPACTER
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+- code: C-10
+  code_short: MPS
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Meat & poultry soup (concentrated, powder)
+  name_en_long: Meat & Poultry Soup (Concentrated or Powder)
+  name_ar: حساء اللحوم والدواجن (مركز أو بودرة)
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: '** In case of products containing rice or corn flour as ingredient.'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: true
+- code: C-11
+  code_short: DMP
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Dehydrated meat/poultry or their components; protein concentrates from meat/poultry
+  name_en_long: Dehydrated Meat or Poultry and Concentrates of Protein Derived from Meat or Poultry
+  name_ar: منتجات اللحوم أو الدواجن المجففة أو محتوياتهم من تركيز البروتين
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: لستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: C-12
+  code_short: VPMP
+  category_letter: C
+  category_section_number: 3
+  category_name_en: Meat, Poultry and its Products
+  name_en: Vacuum packed-semi- preserved but perishable meat and poultry products
+  name_en_long: Vacuum-Packed Semi-Preserved but Perishable Meat and Poultry Products
+  name_ar: منتجات اللحوم والدواجن نصف المحفوظة والقابلة للتلف والمعبأة بتفريغ الهواء
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلو كوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: CAMPYLOPACTER
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: D-1
+  code_short: FISH
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Raw fish and its products (chilled/frozen) e.g. fish blocks, comminuted, minced, and sliced
+  name_en_long: Raw Fish and Fish Products (Chilled or Frozen)
+  name_ar: الاسماك النيئة و منتجات الاسماك (مبردة أو مجمدة)
+  sub_products_ar: سمك ني
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.botulinum
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Aeromonas spp
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+- code: D-2
+  code_short: RC
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Raw (chilled/ frozen) crustaceans (e.g. shrimp, prawns, lobsters and crab)
+  name_en_long: (Raw Crustaceans (Chilled or Frozen
+  name_ar: قشريات نيئة (مبردة أو مجمدة)
+  sub_products_ar: شرمب ني - سلطعون ني - كابوريا ني
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: D-3
+  code_short: LM
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Live mollusks such as bivalve (oysters, clams, mussels, etc.), cephalopods (squids, cuttlefish, octopus, etc.), gastropods (snails,
+    etc.)
+  name_en_long: Live mollusks
+  name_ar: الرخويات الحية
+  sub_products_ar: محار - اخطبوط - حبار - الحلزون
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: ايشيريشيا كولاي
+    limit_raw: '700'
+    limit_numeric: 700.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+- code: D-4
+  code_short: BFCM
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Frozen/chilled breaded fish, crustaceans and mollusks products (e.g. fish sticks (fingers), fish protein, and fish cakes)
+  name_en_long: (Breaded Fish, Crustaceans and Mollusks Products (Frozen or Chilled
+  name_ar: منتجات الأسماك والقشريات والرخويات المغطاة بالبقسماط (المبردة أو المجمدة)
+  sub_products_ar: اصابع سمك - سمك مقلي
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: D-5
+  code_short: SF
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Smoked fish including herring, cooked prior to eating and eaten uncooked
+  name_en_long: Smoked Fish
+  name_ar: الأسماك المدخنة
+  sub_products_ar: 'سمك مطبوخ: مشوي، مدخن - تونا - رنجة'
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+- code: D-6
+  code_short: DSF
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Dried sea food, dehydrated fish and fish protein
+  name_en_long: Dried Seafood and Fish Protein
+  name_ar: أطعمة البحر المجففة وبروتين السمك
+  sub_products_ar: طحالب
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: D-7
+  code_short: SFF
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Salted and/or fermented fish
+  name_en_long: Salted and / or Fermented Fish
+  name_ar: الأسماك المملحة و / أو المخمرة
+  sub_products_ar: سمك مملح - فسيخ
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '400'
+    limit_numeric: 400.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: D-8
+  code_short: CCM
+  category_letter: D
+  category_section_number: 4
+  category_name_en: Fish and Shellfish their Products
+  name_en: Cooked (chilled/ frozen) crustaceans, molluscans
+  name_en_long: (Cooked Crustacean and Molluscans (Chilled or Frozen
+  name_ar: الرخويات والقشريات المطبوخة (مبردة أو مجمدة)
+  sub_products_ar: شرمب مقلي/مطبوخ ، حبار/اخطبوط مطبوخ - قباقب مطبوخة - سلطعون مطبوخ
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: V. parahaemolyticus
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: E-1
+  code_short: EGG
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Fresh whole eggs
+  name_en_long: Fresh Whole Eggs
+  name_ar: البيض الكامل الطازج
+  sub_products_ar: بيض مقلي - بيض مسلوق
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتيريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: CAMPYLOPACTER
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: E-2
+  code_short: LEG
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Liquid pasteurised egg (whole, yolk or white), chilled or frozen
+  name_en_long: Liquid Pasteurized Eggs Whole or Yolk or White (Chilled or Frozen)
+  name_ar: البيض السائل المبستر كامل أو صفار أو بياض (مبرد أو مجمد)
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Aerobic plate count
+    limit_raw: null
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Enterobacteriaceae
+    limit_raw: null
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: null
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: E-3
+  code_short: SEG
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Any egg product intended for special dietary purposes (infants, aged, relief foods, etc.)
+  name_en_long: All Egg Products Intended for Special Dietary Purposes
+  name_ar: جميع منتجات البيض المخصصة لأغراض غذائية خاصة
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: E-4
+  code_short: PPE
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Pudding with egg (powders)
+  name_en_long: Pudding Powder Containing Egg
+  name_ar: مسحوق بودينغ يحتوي على البيض
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: E-5
+  code_short: DEM
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Egg mix dehydrated
+  name_en_long: Dehydrated Egg Mix
+  name_ar: خليط البيض المجفف
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: E-6
+  code_short: DCM
+  category_letter: E
+  category_section_number: 5
+  category_name_en: Egg and Egg Products
+  name_en: Dried cake mixes with high egg content
+  name_en_long: Dried Cake Mixes with High Egg Content
+  name_ar: خليط الكيك المجففة ذات المحتوى العالي من البيض
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: F-1
+  code_short: BU
+  category_letter: F
+  category_section_number: 6
+  category_name_en: Fats and Oils
+  name_en: Butter (Salted and Unsalted)
+  name_en_long: Butter Salted and Unsalted
+  name_ar: الزبدة المالحة أو الغير مالحة
+  sub_products_ar: زبدة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Lipolytic bacteria
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: '20'
+    limit_numeric: 20.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: لستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: F-2
+  code_short: GHEE
+  category_letter: F
+  category_section_number: 6
+  category_name_en: Fats and Oils
+  name_en: Ghee (Butter oil) Fats from milk
+  name_en_long: Ghee (Butter Oil) and Fats from Milk
+  name_ar: السمن (زيت الزبدة) و الدهون المستخلصة من الحليب
+  sub_products_ar: دهن/سمن حيواني
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتيريسي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: F-3
+  code_short: MAR
+  category_letter: F
+  category_section_number: 6
+  category_name_en: Fats and Oils
+  name_en: Margarine
+  name_en_long: Margarine (Plant-Based Extract)
+  name_ar: مرجرين (مستخلص نباتي)
+  sub_products_ar: سمن نباتي
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: لستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: F-4
+  code_short: NBU
+  category_letter: F
+  category_section_number: 6
+  category_name_en: Fats and Oils
+  name_en: All kinds of Nut butters
+  name_en_long: All kinds of Nut Butters
+  name_ar: جميع أنواع زبدة المكسرات
+  sub_products_ar: مثل زبدة الفول السوداني - زبدة البيكان - زبدة الفستق
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الاعفان
+    limit_raw: '500'
+    limit_numeric: 500.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: G-1
+  code_short: CTO
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: All kinds of canned tomato products
+  name_en_long: All Kinds of Canned Tomato Products
+  name_ar: جميع أنواع منتجات الطماطم المعلبة
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_raw: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_raw: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_raw: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_raw: Requirements for canned products (Item 8) shall be applied (Canned food tests"code H in GSO1016").
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: G-2
+  code_short: TO
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: All kinds of tomato products
+  name_en_long: All Kinds of Tomato Products
+  name_ar: جميع أنواع منتجات الطماطم
+  sub_products_ar: كاتشب - محمرة - صلصة طماطم - صلصة بيتزا
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: اعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: G-3
+  code_short: SAU
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: Mayonnaise, mustard, salad sauce and other sauces
+  name_en_long: Sauces
+  name_ar: صوصات
+  sub_products_ar: صوص رانش - صوص ترافل - صوص ثوم
+  in_scope: true
+  lims_progress: true
+  notes: '* Impelemented test by our lab'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: true
+- code: G-4
+  code_short: VI
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: Vinegar
+  name_en_long: Vinegar
+  name_ar: الخل
+  sub_products_ar: الخل
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: G-5
+  code_short: DHS
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: Dried herbs and Spices, ready to eat herbs and spices
+  name_en_long: Dried Herbs and Spices Ready to Eat
+  name_ar: الأعشاب والتوابل الجافة الجاهزة للأكل
+  sub_products_ar: زعتر
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: Faecal Coliforms
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: اعفان
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: G-6
+  code_short: DH
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: Dried herbs (roselle, camomile, others)
+  name_en_long: Dried Herbs
+  name_ar: الأعشاب المجففة
+  sub_products_ar: كركدية - بابونج
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا الهوائية
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: العد الكلي للبكتيريا اللاهوائية
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+- code: G-7
+  code_short: TEA
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: All types of tea
+  name_en_long: All Types of Tea
+  name_ar: جميع أنواع الشاي
+  sub_products_ar: ايس تي
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: كوليفورم
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: G-8
+  code_short: COFF
+  category_letter: G
+  category_section_number: 7
+  category_name_en: Tomato Concentrates, Sauces, Vinegar, Spices and Herbs
+  name_en: Coffee and derivatives
+  name_en_long: Coffee and Derivatives
+  name_ar: القهوة ومشتقاتها
+  sub_products_ar: قهوة - كولد برو
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر و الأعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: I-1
+  code_short: CL
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Cereal grains
+  name_en_long: Cereal and Legume
+  name_ar: الحبوب و البقوليات
+  sub_products_ar: مثل العدس - الحمص
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: اعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-2
+  code_short: CF
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Cereals, cereal flours and by-products such as bran
+  name_en_long: Cereals Flours and by Products such as Bran
+  name_ar: دقيق الحبوب والمنتجات الثانوية مثل النخالة
+  sub_products_ar: دقيق
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: اعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-3
+  code_short: SF
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Soya flours, concentrates and isolates
+  name_en_long: Soya Flours
+  name_ar: دقيق فول الصويا
+  sub_products_ar: دقيق الصويا
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: اعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-4
+  code_short: STARCH
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Starch and starch containing products (e.g. custard powder)
+  name_en_long: Starch and Starch Containing Products
+  name_ar: النشا والمنتجات التي تحتوي على النشا
+  sub_products_ar: نشا
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: true
+- code: I-5
+  code_short: UPN
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Pasta / Macaroni & Noodles (uncooked, wet & dry) with or without filling
+  name_en_long: Uncooked Pasta and Noodles (With or Without Filling)
+  name_ar: المكرونة و النودلز الغير مطبوخة (مع أو بدون حشوة)
+  sub_products_ar: مكرونة نيء - باستا
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: الخمائر و الأعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: باسيليس سيريس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Sulphite-reducin Clostridia
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: true
+- code: I-6
+  code_short: PMFD
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Pizza, meat pies, frozen dough with or without filling
+  name_en_long: (Pizza, Meat Pies and Frozen Dough (With or Without Filling
+  name_ar: البيتزا، فطائر اللحم، والعجين المجمد (مع أو بدون حشوة)
+  sub_products_ar: بيتزا مجمدة - عجينة مجمدة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-7
+  code_short: BR
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Bread
+  name_en_long: Bread
+  name_ar: الخبـز
+  sub_products_ar: خبز - صامولي
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: انتيروباكتيريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+- code: I-8
+  code_short: SBR
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Special breads (sweetened) with egg, or milk
+  name_en_long: Special Breads
+  name_ar: خبز خاص
+  sub_products_ar: خبز بالبيض ، خبز حليب ، خبز بالبطاطس
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروباكتيريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '2000'
+    limit_numeric: 2000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-9
+  code_short: CB
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Cakes and bakery products (ready to eat)
+  name_en_long: Cakes and Bakery Products Ready to Eat
+  name_ar: الكعك ومنتجات المخابز الجاهزة للأكل
+  sub_products_ar: كيك - سان سابيستيان - كوكيز - كروسان - جكيع المخبوزات الجاهزة
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيلس سيرس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: لستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: I-10
+  code_short: PFC
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Puffed, flaked cereal Products
+  name_en_long: Puffed Flaked and Cereal Products
+  name_ar: منتجات الحبوب المنفوخة و الرقائق
+  sub_products_ar: كورن فلكس - فشار
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيلس سيرس
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: اعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-11
+  code_short: SRC
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Entrees (soup) containing rice or corn flour as main ingredient (frozen or dried)
+  name_en_long: Soup Entrees Containing Rice or Corn Flour as Main Ingredient (Frozen or Dried)
+  name_ar: الشوربة التي تحتوي على الأرز أو دقيق الذرة كمكوّن رئيسي (مجمدة أو مجففة)
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: باسيلس سيرس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-12
+  code_short: CDB
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Cakes, desserts and bakery products (frozen or dehydrated)
+  name_en_long: Cakes, Desserts and Bakery Products (Frozen or Dehydrated)
+  name_ar: الكيك، الحلويات، ومنتجات المخابز (مجمدة أو مجففة).
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: I-13
+  code_short: MA
+  category_letter: I
+  category_section_number: 9
+  category_name_en: Cereals; Legumes and their Products
+  name_en: Malt, Malt derivatives
+  name_en_long: Malt Malt Derivatives
+  name_ar: الشعير مشتقات الشعير
+  sub_products_ar: شعير
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر و الأعفان
+    limit_raw: '5000'
+    limit_numeric: 5000.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: J-1
+  code_short: FFV
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Fresh fruits and vegetables (precut and crudités) to be consumed raw
+  name_en_long: Fresh Fruits and Vegetables
+  name_ar: فواكه و خضروات طازجة
+  sub_products_ar: زهرة - برتقال -مانجو - ليمون
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: ايشيريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: الليستيريا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: J-2
+  code_short: DVE
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Dried vegetables
+  name_en_long: Dried Vegetables
+  name_ar: خضروات مجففة
+  sub_products_ar: طماطم مجفف - زبيب
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: ايشيريشيا كولاي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+- code: J-3
+  code_short: DFR
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Dried fruits; dates (including date paste), figs, apricot, grape (raisons), etc
+  name_en_long: Dried Fruits
+  name_ar: فواكه مجففة
+  sub_products_ar: تين مجفف - مشمش مجفف
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: خمائر
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: اعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: J-4
+  code_short: FVF
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Frozen vegetables and frozen fruits, pH equal or higher than 4.5
+  name_en_long: Frozen Vegetables and Fruits
+  name_ar: خضروات و فواكه مجمدة
+  sub_products_ar: خضروات وفواكة مجمدة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: ايشيريشيا كولاي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+- code: J-5
+  code_short: FVFP
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Frozen frozen than 4.5 vegetables fruits, pH and less
+  name_en_long: Frozen Vegetables and Fruits With pH Less Than 4.5
+  name_ar: خضروات وفواكه مجمدة لها رقم هيدروجيني اقل من 4.5
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: pH measured at the time of sampling
+    limit_raw: pH values shall be less than 4.5 in all tested samples
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: pH measured at the time of sampling
+    limit_raw: pH values shall be less than 4.5 in all tested samples
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: pH measured at the time of sampling
+    limit_raw: pH values shall be less than 4.5 in all tested samples
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: pH measured at the time of sampling
+    limit_raw: pH values shall be less than 4.5 in all tested samples
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+- code: J-6
+  code_short: VSP
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Vegetable soup (powder)
+  name_en_long: Vegetable Soup Powder
+  name_ar: مسحوق شوربة الخضار
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: J-7
+  code_short: PVF
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Pickled/Fermented vegetable/Fruits (e.g. sauerkraut, pickles, table olive, etc.)
+  name_en_long: Pickled Vegetables or Fruits
+  name_ar: الخضروات أو الفواكه المخللة
+  sub_products_ar: مخلل خيار - مخلل لفت
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: خمائر
+    limit_raw: '2'
+    limit_numeric: 2.0
+    zero_tolerance: false
+    optional: false
+  - test: اعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: J-8
+  code_short: FPO
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Fried potatoes (e.g. chips, fingers, etc.)
+  name_en_long: Fried Potatoes
+  name_ar: بطاطس مقلية
+  sub_products_ar: بطاطس مقلي
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: باسلس سيرس
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: J-9
+  code_short: CT
+  category_letter: J
+  category_section_number: 10
+  category_name_en: Fruit and Vegetables
+  name_en: Concentrated tamarind
+  name_en_long: Concentrated Tamarind
+  name_ar: التمر الهندي المركز
+  sub_products_ar: تمر هندي
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: اعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: K-1
+  code_short: JELLY
+  category_letter: K
+  category_section_number: 11
+  category_name_en: Jelly, Jam and Marmalade
+  name_en: Jam, jelly and marmalade
+  name_en_long: Jam, Jelly and Marmalade
+  name_ar: المربى, الجيلي و المرمالاد
+  sub_products_ar: مربى توت
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+- code: K-2
+  code_short: JEP
+  category_letter: K
+  category_section_number: 11
+  category_name_en: Jelly, Jam and Marmalade
+  name_en: Jelly powder
+  name_en_long: Jelly Powder
+  name_ar: مسحوق الجيلي
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: K-3
+  code_short: FSS
+  category_letter: K
+  category_section_number: 11
+  category_name_en: Jelly, Jam and Marmalade
+  name_en: Fruit whole/pieces in sugar syrup (canned)
+  name_en_long: (Whole or Pieces Fruits in Sugar Syrup (Canned
+  name_ar: فواكه كاملة أو قطع في شراب سكري (معلبة)
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: L-1
+  code_short: CHO
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Chocolate (plain or sweetened- with milk, or filled or covered with nuts), toffee, nougat, fudge etc.
+  name_en_long: Chocolate
+  name_ar: الشوكولاته
+  sub_products_ar: شوكولاتة (جميع انواعها صلبة/سائلة) - نوتيلا - صوص وايت موكا - صوص شوكلاتة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-2
+  code_short: DD
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Dehydrated desserts, (bonbons, caramels and other similar products)
+  name_en_long: Dehydrated Desserts
+  name_ar: حلويات مجففة
+  sub_products_ar: حلاوة جافة - حلوى كراميل
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+- code: L-3
+  code_short: HSC
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Hard & soft candy
+  name_en_long: Hard and Soft Candy
+  name_ar: الحلوى الصلبة و الطرية
+  sub_products_ar: حلويات - حلاوة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '5000'
+    limit_numeric: 5000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-4
+  code_short: CO
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Cocoa
+  name_en_long: Cocoa
+  name_ar: الكاكاو
+  sub_products_ar: بودرة الكاكاو - كاكاو
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-5
+  code_short: COC
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Coconut (grated/desiccated)
+  name_en_long: Coconut (Grated or Desiccated)
+  name_ar: جوز الهند (المبشور أو المجفف)
+  sub_products_ar: جوز الهند مبشور/ مقطع
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-6
+  code_short: NUT
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Nuts
+  name_en_long: Nuts
+  name_ar: المكسرات
+  sub_products_ar: مكسرات
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الاعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+- code: L-7
+  code_short: CHG
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Chewing gum
+  name_en_long: Chewing Gum
+  name_ar: العلك اللبان
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-8
+  code_short: HO
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Honey
+  name_en_long: Honey
+  name_ar: العسل
+  sub_products_ar: عسل
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: Sulphite-reducing anaerobes
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: C.botulinum
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: L-9
+  code_short: AS
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Arabic sweets
+  name_en_long: Arabic Sweets
+  name_ar: الحلويات العربية
+  sub_products_ar: حلويات عربية - بيتوفور - ام علي - معمول
+  in_scope: true
+  lims_progress: true
+  notes: '* Optional'
+  required_tests:
+  - test: كوليفورم
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: L.monocytogenes
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: L-10
+  code_short: MDS
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Molasses, debs (date syrup), hard brown suger
+  name_en_long: All Types of Molasses and Hard Brown Sugar
+  name_ar: جميع أنواع الدبس و السكر البني الصلب
+  sub_products_ar: دبس رمان - دبس التمر - شبية العسل -
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: L-11
+  code_short: CCS
+  category_letter: L
+  category_section_number: 12
+  category_name_en: Chocolate, Sweets and their Ingredients
+  name_en: Concentrated cane syrup
+  name_en_long: Concentrated Cane Syrup
+  name_ar: شراب القصب المركز
+  sub_products_ar: شراب القصب المركز
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: N-1
+  code_short: BOT
+  category_letter: N
+  category_section_number: 14
+  category_name_en: Drinking Water
+  name_en: 'Bottled drinking water: a) Non-carbonated (including flavoured)'
+  name_en_long: Bottled Water
+  name_ar: المياه المعبأة
+  sub_products_ar: مياه شرب معبأة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: كوليفورم
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: P.aeruginosa
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: N-2
+  code_short: CWA
+  category_letter: N
+  category_section_number: 14
+  category_name_en: Drinking Water
+  name_en: Carbonated waters
+  name_en_long: Carbonated Water
+  name_ar: المياه المكربنة
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: N-3
+  code_short: UBOT
+  category_letter: N
+  category_section_number: 14
+  category_name_en: Drinking Water
+  name_en: Water for human consumption; at source, bottling operation
+  name_en_long: Unbottled Water
+  name_ar: المياه الغير المعبأة
+  sub_products_ar: مياه غسيل
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: كوليفورم
+    limit_raw: 10/100 ml
+    limit_numeric: null
+    zero_tolerance: false
+    optional: false
+  - test: Fecel streptococci
+    limit_raw: Absent in 100 ml of sample
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: Sulphite-reducing-clostridia
+    limit_raw: Absent in 100 ml of sample
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: N-4
+  code_short: MWA
+  category_letter: N
+  category_section_number: 14
+  category_name_en: Drinking Water
+  name_en: Natural mineral water
+  name_en_long: Natural Mineral Water
+  name_ar: مياه معدنية طبيعية
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: O-1
+  code_short: CBE
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Carbonated beverages (non-alcoholic)
+  name_en_long: Carbonated Beverages
+  name_ar: المشروبات الغازية
+  sub_products_ar: بيبسي - كولا
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '300'
+    limit_numeric: 300.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+- code: O-2
+  code_short: FUJ
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Un-pasteurized juices (fresh)
+  name_en_long: Fresh Unpasteurized Juices
+  name_ar: العصائر الطازجة الغير المبسترة
+  sub_products_ar: عصير برتقال - عصير تفاح
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الخمائر والاعفان
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: O-3
+  code_short: PFJD
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Pasteurized fruit juice and drink (including concentrated)
+  name_en_long: Pasteurized Fruit Juice and Drink
+  name_ar: عصائر الفواكه والمشروبات المبسترة
+  sub_products_ar: نكتار فراولة - عصير (معلب مبستر)
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: O-4
+  code_short: FL
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Flavoured drink & its concentrates
+  name_en_long: Flavored Drink and its Concentrates
+  name_ar: شراب بنكهة و مركزاتها
+  sub_products_ar: نكهة توت اسود
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: O-5
+  code_short: DPD
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Drink powder (dry)
+  name_en_long: Drink Powder Dry
+  name_ar: مساحيق الشرب الجافة
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: O-6
+  code_short: LIR
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Liquorice root extract; concentrates or drink
+  name_en_long: (Liquorice Root Extract (Concentrates or Drink
+  name_ar: مستخلص جذر عرق السوس (مركز أو مشروب)
+  sub_products_ar: شراب عرق سوس
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: O-7
+  code_short: PSD
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Pasteurized soya drink
+  name_en_long: Pasteurized Soya Drink
+  name_ar: مشروب الصويا المبستر
+  sub_products_ar: منتجات حليب الصويا
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: O-8
+  code_short: SSD
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Sterilized soya drink
+  name_en_long: Sterilized Soya Drink
+  name_ar: مشروب الصويا المعقم
+  sub_products_ar: '-'
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: O-9
+  code_short: LCB
+  category_letter: O
+  category_section_number: 15
+  category_name_en: Beverages
+  name_en: Low calories beverages
+  name_en_long: Low Calories Beverages
+  name_ar: مشروبات منخفضة السعرات الحرارية
+  sub_products_ar: بيبسي دايت/ زيرو
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر والاعفان
+    limit_raw: '2'
+    limit_numeric: 2.0
+    zero_tolerance: false
+    optional: false
+  - test: كوليفورم (100ml)
+    limit_raw: '1'
+    limit_numeric: 1.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: P-1
+  code_short: SWS
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Sandwiches and filled rolls with salad
+  name_en_long: Sandwiches and Filled Rolls With Salad
+  name_ar: ساندويتش يحتوي على سلطة
+  sub_products_ar: ساندويتش تيركي (يحتوي على خس وخضروات)
+  in_scope: true
+  lims_progress: true
+  notes: '*This limit applies to shelf-stable foods (kept at room temperature or deep freezer). If it is refrigerated or meant for children the
+    approach should be "not detected in 25 g".'
+  required_tests:
+  - test: ايشيريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: باسيلس سيرس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: L.monocytogenes
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: true
+- code: P-2
+  code_short: SNS
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Sandwiches and filled rolls without salad
+  name_en_long: Sandwiches and Filled Rolls Without Salad
+  name_ar: ساندويتش لا يحتوي على سلطة
+  sub_products_ar: ساندويتش جبن
+  in_scope: false
+  lims_progress: true
+  notes: '*Optional **Salmonella is tested only when the sample is found to have any count of Enterobacteriaceae'
+  required_tests:
+  - test: باسيلس سيرس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: true
+- code: P-3
+  code_short: COL
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Coleslaw (cabbage)
+  name_en_long: Coleslaw (Cabbage)
+  name_ar: الكولسلو (الملفوف)
+  sub_products_ar: كولسلو
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: E.coli O157
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: L.monocytogenes
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: P-4
+  code_short: RM
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Sandwiches and filled rolls with cheese- Ready to eat meals (pasta/pizza, others)
+  name_en_long: Ready-to-Eat Meals
+  name_ar: أغذية جاهزة للأكل
+  sub_products_ar: سليق - برجر - باستا - طعام جاهز للأكل
+  in_scope: true
+  lims_progress: true
+  notes: '**Salmonella is tested only when the sample is found to have any count of Enterobacteriaceae'
+  required_tests:
+  - test: انتيروبكتريسي
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيلس سيريس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: السالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: P-5
+  code_short: RI
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Rice
+  name_en_long: Rice
+  name_ar: أرز
+  sub_products_ar: جميع انواع الرز المطبوخ
+  in_scope: true
+  lims_progress: true
+  notes: '**In case if the rice contains meat or poultry.'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: باسيلس سيرس
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: P-6/1
+  code_short: FAB
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: (1) Bhaji, Falafel
+  name_en_long: Falafel and Bhaji
+  name_ar: فلافل و بهاجي
+  sub_products_ar: فلافل
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000'
+    limit_numeric: 10000.0
+    zero_tolerance: false
+    optional: false
+- code: P-6/2
+  code_short: SSMD
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: (2) Soup(all kinds)Samosa, Mashed potato, Desserts (tarts, flans, and sweet pies)
+  name_en_long: All Kinds Soup, Samosa, Mashed Potato and Desserts
+  name_ar: جميع أنواع الشوربة، السمبوسة، البطاطس المهروسة والحلويات
+  sub_products_ar: شوربة - سمبوسة - بطاطس مهروسة - تارت - كريمة كراميل - فطيرة حالية
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100000'
+    limit_numeric: 100000.0
+    zero_tolerance: false
+    optional: false
+- code: P-6/3
+  code_short: ST
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: (3) Spring rolls- Trifle
+  name_en_long: Spring Rolls - Trifle
+  name_ar: سبرنغ رول - حلى الترايفل
+  sub_products_ar: سبرينق رول
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000000'
+    limit_numeric: 1000000.0
+    zero_tolerance: false
+    optional: false
+- code: P-6/4
+  code_short: DIP
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: (4) Homous, Tzatziki, and other dips
+  name_en_long: Dipping Appetizers
+  name_ar: مقبلات للتغميس
+  sub_products_ar: حمص - متبل - بابا غنوج - ورق عنب
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '10000000'
+    limit_numeric: 10000000.0
+    zero_tolerance: false
+    optional: false
+- code: P-8
+  code_short: null
+  category_letter: P
+  category_section_number: 16
+  category_name_en: Ready to Eat Foods
+  name_en: Jelly
+  name_en_long: null
+  name_ar: الجيلي Jelly
+  sub_products_ar: جيلي - جلي فراولة
+  in_scope: false
+  lims_progress: false
+  notes: '*Optional'
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: انتيروبكتريسي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: Sulphite-reducing anaerobes
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: C.perfringens
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: true
+- code: Q-1
+  code_short: NTO
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Tofu (not UHT)
+  name_en_long: Not UHT Tofu
+  name_ar: توفو غير معقم
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: Q-2
+  code_short: SSP
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Sesame seed products (Tahini, Halwa)
+  name_en_long: Sesame Seed Products
+  name_ar: منتجات السمسم
+  sub_products_ar: حلوى - طحينية - طحينة
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: الاعفان
+    limit_raw: '1000'
+    limit_numeric: 1000.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشيريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: سالمونيلا
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: استافيلوكوكس اورياس
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+- code: Q-3
+  code_short: CSG
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Cultured Seeds and Grains (bean sprouts, alfalfa, etc)
+  name_en_long: Cultured Seeds and Grains
+  name_ar: البذور والحبوب المستنبتة
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: Q-4
+  code_short: EEW
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Edible essential water (rose & flower water, others)
+  name_en_long: Edible Essential Water
+  name_ar: مياه عطرية صالحة للأكل
+  sub_products_ar: مويه ورد - مويه زهره
+  in_scope: true
+  lims_progress: true
+  notes: null
+  required_tests:
+  - test: العد الكلي للبكتيريا
+    limit_raw: '100'
+    limit_numeric: 100.0
+    zero_tolerance: false
+    optional: false
+  - test: الخمائر
+    limit_raw: '20'
+    limit_numeric: 20.0
+    zero_tolerance: false
+    optional: false
+  - test: Candida
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: كوليفورم
+    limit_raw: '10'
+    limit_numeric: 10.0
+    zero_tolerance: false
+    optional: false
+  - test: ايشريشيا كولاي
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: P. aeruginosa
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+  - test: باسيلس سيريس
+    limit_raw: غير موجودة
+    limit_numeric: 0.0
+    zero_tolerance: true
+    optional: false
+- code: Q-5
+  code_short: NP
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Nutritious powder
+  name_en_long: Nutritious Powder
+  name_ar: مسحوق غذائي
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []
+- code: Q-6
+  code_short: CCP
+  category_letter: Q
+  category_section_number: 17
+  category_name_en: Miscellaneous Foods
+  name_en: Cream caramel powder
+  name_en_long: Cream Caramel Powder
+  name_ar: مسحوق كريم الكراميل
+  sub_products_ar: null
+  in_scope: false
+  lims_progress: true
+  notes: null
+  required_tests: []

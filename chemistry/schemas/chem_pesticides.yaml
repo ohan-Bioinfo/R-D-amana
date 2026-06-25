@@ -1,0 +1,47 @@
+# Pesticides 2025 — long format. One row per (sample, detected pesticide).
+# Continuation rows have blank sample_id/sample_name — cleaner forward-fills.
+section: pesticides
+applies_to:
+  2024: "pesticide section.xlsx"
+  2025: "Copy of pesticide section 2025.xlsx"
+
+skip_sheets:
+  - invalid samples
+  - stat
+  - restricted pesticides
+  - prohibited pesticides
+  - banned and restricted
+  - sheet
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  receiving_date:    ["Receiving Date"]
+  sampling_date:     ["Sampling Date"]
+  testing_date:      ["Testing date"]
+  sample_code:       ["Sample Code"]
+  sample_notes:      ["Sample Notes"]
+  testing_notes:     ["Testing Notes"]
+  sample_name:       ["Sample Name", "Sample name"]
+  sample_category:   ["Sample Category"]
+  sample_id:         ["Sample ID"]
+  facility_name:     ["Facility Name"]
+  district_name:     ["District Name"]
+  street_name:       ["Street Name"]
+  municipality:      ["Municipality name"]
+  license_number:    ["رقم الرخصة"]
+  analysis_section:  ["Analysis section"]
+  validity_raw:      ["Valid/ Invalid", "Valid/Invalid",
+                      "Matched/ not matched", "Matched/not matched",
+                      "Compliant / Non-compliant"]
+  pesticide_name:    ["Detected Pesticide Name", "Pesticide name"]
+  concentration_ppm: ["Concentration (ppm)"]
+  limit_ppm:         ["Limit (ppm)"]
+  specification:     ["Specification"]
+  qc_pesticide:      ["QC for detected pesticide"]
+  analyzer:          ["Analyzer Instrument"]
+  num_pesticides:    ["No. of tests", "Number Of Pesticides"]
+  # Banned/restricted classification (2025-only). Values: محظور (banned) or
+  # مقيد (restricted). Some sheets prefix with the pesticide name.
+  banned_restricted: ["المبيدات المحظورة والمقيدة"]
+  pesticide_notes:   ["ملاحظات"]

@@ -1,0 +1,81 @@
+# Water analysis 2025 — many physicochemical params per sample (no inline
+# limits; GSO 1016 reference applies at enrichment time).
+section: water_analysis
+applies_to:
+  2024: "Water analysis section.xlsx"
+  2025: "Copy of Water analysis section 2025.xlsx"
+
+skip_sheets:
+  - invalid samples
+  - copy of            # 2024 has 'Copy of Water analysis section' master sheet
+  - final              # 2025 Final XYZ summary tabs
+  - draft
+require_monthly_sheet: true
+header_row_max: 4
+
+columns:
+  receiving_date:   ["Receiving Date"]
+  sampling_date:    ["Sampling Date"]
+  testing_notes:    ["Testing Notes"]
+  sample_notes:     ["Sample Notes"]
+  sample_name:      ["Sample Name", "Sample name"]
+  sample_category:  ["Sample Category"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  district_name:    ["District Name"]
+  street_name:      ["Street Name"]
+  municipality:     ["Municipality name"]
+  license_number:   ["رقم الرخصة"]
+  analysis_section: ["Analysis section"]
+  validity_raw:     ["Valid/ Invalid", "Valid/Invalid", "Valid /Invalid",
+                     "Matched/not matched", "Matched/ not matched",
+                     "Compliant / Non-compliant"]
+  invalid_test:     ["Invalid test", "Non-Compliant Test"]
+  num_tests:        ["no. of tests"]
+  qc_invalid:       ["QC for invalid test"]
+  qc_result:        ["Result QC for invalid test"]
+  # Physicochemical parameters.
+  temperature:      ["Temperature C"]
+  ph:               ["pH"]
+  ec:               ["Electrical conductivity"]
+  tds:              ["Total dissolved salt TDS"]
+  do:               ["Dissolved Oxygen"]
+  turbidity:        ["Turbidity"]
+  free_chlorine:    ["Free chlorine"]
+  total_chlorine:   ["total chlorine"]
+  total_hardness:   ["total hardness"]
+  total_alkalinity: ["total alkalinity"]
+  carbonate:        ["Carbonate"]
+  fluoride:         ["floride", "fluoride"]
+  chloride:         ["chloride"]
+  nitrite:          ["nitrite"]
+  bromide:          ["bromide"]
+  nitrate:          ["nitrate"]
+  phosphate:        ["phosphate"]
+  sulphate:         ["sulphate"]
+  sodium:           ["sodium"]
+  ammonium:         ["ammonium"]
+  potassium:        ["potassium"]
+  magnesium:        ["magnesium"]
+  calcium:          ["calicum", "calcium"]
+  total_carbon:     ["total carbon"]
+  toc:              ["toc"]
+  ic:               ["ic"]
+
+# No inline limit columns in source — limits live in the GSO 1016 reference.
+tests:
+  - { name: "Temperature",          result: temperature,      limit: null, unit: "°C" }
+  - { name: "pH",                   result: ph,               limit: null, unit: "" }
+  - { name: "Electrical conductivity", result: ec,            limit: null, unit: "µS/cm" }
+  - { name: "TDS",                  result: tds,              limit: null, unit: "mg/L" }
+  - { name: "Dissolved Oxygen",     result: do,               limit: null, unit: "%" }
+  - { name: "Turbidity",            result: turbidity,        limit: null, unit: "NTU" }
+  - { name: "Free chlorine",        result: free_chlorine,    limit: null, unit: "mg/L" }
+  - { name: "Total chlorine",       result: total_chlorine,   limit: null, unit: "mg/L" }
+  - { name: "Total hardness",       result: total_hardness,   limit: null, unit: "mg/L" }
+  - { name: "Total alkalinity",     result: total_alkalinity, limit: null, unit: "mg/L" }
+  - { name: "Fluoride",             result: fluoride,         limit: null, unit: "mg/L" }
+  - { name: "Chloride",             result: chloride,         limit: null, unit: "mg/L" }
+  - { name: "Nitrate",              result: nitrate,          limit: null, unit: "mg/L" }
+  - { name: "Nitrite",              result: nitrite,          limit: null, unit: "mg/L" }
+  - { name: "Sulphate",             result: sulphate,         limit: null, unit: "mg/L" }

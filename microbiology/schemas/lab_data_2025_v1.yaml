@@ -1,0 +1,414 @@
+# =============================================================================
+# Lab data normalisation schema — version 1, 2025 file shape
+# Designed against: 2025-original/Data 2025.xlsx
+# Output shape:    LONG (one row per sample) — different from 2024 schema since
+#                   this file already aggregates per sample (no per-test rows).
+# =============================================================================
+
+schema_version: 1
+schema_name: lab_data_2025_v1
+applies_to: 2025-original/Data 2025.xlsx
+
+# -----------------------------------------------------------------------------
+# 1. WORKBOOK STRUCTURE
+# -----------------------------------------------------------------------------
+workbook:
+  expected_sheet_name: Sheet2
+  header_row_excel: 1
+  data_starts_row_excel: 2
+  expected_cols: 8
+
+# -----------------------------------------------------------------------------
+# 2. RAW COLUMN MAP
+# Headers are bilingual: "<English>\n<Arabic>". Match by the English half.
+# -----------------------------------------------------------------------------
+raw_columns:
+  - { excel_col: A, header_en: "Sampling Date",   header_ar: "تاريخ سحب العينة",        canonical: sampling_date }
+  - { excel_col: B, header_en: "Sample Category", header_ar: "فئة العينة",              canonical: category_raw }
+  - { excel_col: C, header_en: "Sample Name",     header_ar: "اسم العينة",              canonical: sample_name_raw }
+  - { excel_col: D, header_en: "Sample ID",       header_ar: "رمز العينة",              canonical: sample_id_raw }
+  - { excel_col: E, header_en: "Facility Name",   header_ar: "اسم المنشأة",             canonical: facility_name_raw }
+  - { excel_col: F, header_en: "Municipality name", header_ar: "اسم البلدية",           canonical: municipality_raw }
+  - { excel_col: G, header_en: "Valid/ Invalid",  header_ar: "مطابقة/غير مطابقة",       canonical: validity_raw }
+  - { excel_col: H, header_en: "Invalid test",    header_ar: "الاختبار الغير مطابق",     canonical: invalid_tests_raw }
+
+# -----------------------------------------------------------------------------
+# 3. DATE EXTRACTION
+# Column has 7,343 real datetimes + 4,227 text strings + 1 NaN.
+# Text format observed: dd/mm/yyyy (single- or double-digit day/month).
+# -----------------------------------------------------------------------------
+date_parsing:
+  text_regex: '^(\d{1,2})/(\d{1,2})/(\d{4})$'
+  text_capture_order: [day, month, year]
+  on_unparseable: flag_and_null     # raises flag `date_unparseable`
+  year_coercion:
+    nominal_year: 2025
+    rule: "if parsed year > nominal_year, replace with nominal_year and flag `date_year_coerced_to_2025`."
+    rationale: "User confirmed 2026/2027/2028 entries are typos for 2025 (3 rows in this file, all at the same facility on 2025-04-30)."
+
+# -----------------------------------------------------------------------------
+# 4. MUNICIPALITY SPLIT (per user Q2: option b)
+# Move sector + private-sample entries out of `municipality` into `municipality_type`.
+# -----------------------------------------------------------------------------
+municipality_typing:
+  rules:
+    - match_starts_with: "بلدية"
+      type: بلدية
+      name_strip_prefix: "بلدية "
+    - match_starts_with: "قطاع"
+      type: قطاع
+      name_strip_prefix: "قطاع "
+    - match_contains: "القطاع"
+      type: قطاع
+      keep_full: true
+    - match_contains: "Private Sample"
+      type: خاص
+      name: "عينة خاصة"        # filled (not null) so dashboards can group private samples
+    - match_equals: "عينة خاصة"
+      type: خاص
+      name: "عينة خاصة"
+    - match_equals: "-"
+      type: null
+      name: null
+      flag: municipality_was_dash_placeholder
+  default:
+    type: unknown
+    flag: municipality_unrecognised
+
+# -----------------------------------------------------------------------------
+# 4b. SECTOR TAXONOMY (added 2026-05-13)
+# Canonical Riyadh amanah structure: 5 sectors (قطاع), 16 sub-municipalities (بلدية).
+# Every type=بلدية row maps to exactly one sector via `sub_to_sector`.
+# Type=قطاع rows map to a sector via the raw sector label (`sector_raw_aliases`).
+# Type=خاص (private) → sector=null.
+# -----------------------------------------------------------------------------
+sector_taxonomy:
+  sectors:
+    - { name: "فرع أمانة في الشرق",          short: "الشرق",    sub_municipalities: ["الروضة", "الشرق"] }
+    - { name: "فرع أمانة في الشمال",         short: "الشمال",   sub_municipalities: ["الشمال"] }
+    - { name: "فرع أمانة في الغرب",          short: "الغرب",    sub_municipalities: ["العريجاء", "عرقة", "نمار"] }
+    - { name: "فرع أمانة في المنطقة الوسطى", short: "الوسطى",   sub_municipalities: ["الملز", "المعذر", "العليا", "الشميسي", "البطحاء"] }
+    - { name: "فرع أمانة في الجنوب",         short: "الجنوب",   sub_municipalities: ["العزيزية", "الحاير", "الشفا", "السلي", "النسيم"] }
+
+  # Raw labels seen in `municipality_raw` for قطاع-tagged rows.
+  # The cleaner uses these to resolve sector when no sub-municipality is set.
+  sector_raw_aliases:
+    "وسط الرياض": "فرع أمانة في المنطقة الوسطى"
+    "الشمال": "فرع أمانة في الشمال"
+    "القطاع وسط الرياض": "فرع أمانة في المنطقة الوسطى"
+    "قطاع الشمال": "فرع أمانة في الشمال"
+
+  on_unmapped_sub_municipality: flag_keep
+  on_unmapped_sector_raw: flag_keep
+
+# -----------------------------------------------------------------------------
+# 5. CATEGORY HANDLING (per user Q4)
+# Keep one canonical Arabic field; extract English when the "<AR> (<EN>)" or
+# "(<EN>) <AR>" parens-pattern matches. Don't force a split.
+# -----------------------------------------------------------------------------
+category_handling:
+  canonical_normalisation:
+    - unicode: NFKC
+    - remove_leading_pattern: '^[\s\n]+'    # the recurring '\n  ' prefix
+    - strip: true
+    - collapse_internal_whitespace: true
+    - remove_trailing_tab: true
+  canonical_merges:
+    description: "Pairs of category strings that share the same English label and are merged to one canonical AR form (most-frequent variant). Applied after extract_category. Each merge raises flag `category_merged_to_canonical`."
+    pairs:
+      'المياه الغير المعبأة (Unbottled water)': 'المياه الغير معبأة (Unbottled water)'
+      '"المياه الغير معبأة (Unbottled water)': 'المياه الغير معبأة (Unbottled water)'
+      '(Cooked meat )لحوم مطبوخة': 'اللحوم المطبوخة (Cooked meat)'
+      '(الكولسلو (الملفوف (Coleslaw) (cabbage)': 'الملفوف (cabbage)'
+      'القشطة (cream)': '(cream) قشطة'
+      '(cream) كريمة': '(cream) قشطة'
+      '(Biscuits) بسكوت': 'البسكويت (Biscuits)'
+      '(yogurt) زبادي': 'اللبان (yogurt)'
+
+  english_extraction:
+    pattern_after: '^(.+?)\s*\(\s*([A-Za-z][A-Za-z0-9 &/,.\-'']*?)\s*\)\s*$'   # <AR> ( <EN> )
+    pattern_before: '^\(\s*([A-Za-z][A-Za-z0-9 &/,.\-'']*?)\s*\)\s*(.+?)$'     # ( <EN> ) <AR>
+    bilingual_fallback:
+      description: "If neither parens pattern matches and the string contains both Arabic and a Latin run ≥ 3 chars, extract the longest Latin run as the English label. Handles slash-separated, comma-separated, and plain-space bilingual forms (e.g. 'الزيتون /Olive', 'Whipped Cream كريمة مخفوقة')."
+      latin_run_regex: '[A-Za-z][A-Za-z0-9 &,.\-'']{2,}'
+      arabic_present_regex: '[؀-ۿ]'
+    on_no_match: leave_english_null
+
+# -----------------------------------------------------------------------------
+# 6. SAMPLE-ID NORMALISATION
+# Pattern observed: <prefix>-<digits>-<R<digits>> where prefix is mixed case.
+# Lowercase prefix and 'R' for de-duplication. Three known case-only collisions.
+# -----------------------------------------------------------------------------
+sample_id_handling:
+  pattern: '^([A-Za-z]+)-(\d+)-([Rr])(\d+)$'
+  normalise:
+    - lowercase_prefix: true
+    - lowercase_R_segment: true
+  duplicate_handling: resolve_per_cluster
+  duplicate_resolution:
+    true_duplicate:
+      condition: "all key fields match across rows in cluster"
+      key_fields: [sample_name_raw, sampling_date, category_canonical, facility_name_raw, municipality, validity_raw, invalid_tests_raw]
+      action: drop_later_rows
+      flag: sample_id_duplicate_dropped
+    id_collision:
+      condition: "any key field differs (different physical samples sharing an ID)"
+      action: suffix_with_letters    # row1 → -a, row2 → -b, …
+      flag: sample_id_collision
+      rationale: "Merging different samples would corrupt the data; suffixing keeps both rows but disambiguates joins."
+
+# -----------------------------------------------------------------------------
+# 7. VALIDITY MAPPING
+# 2025 vocabulary differs from 2024 (مطابقة/غير مطابقة vs صالح/غير صالح).
+# -----------------------------------------------------------------------------
+validity_mapping:
+  مطابقة: true
+  "غير مطابقة": false
+  on_unknown: fail_loudly
+
+# -----------------------------------------------------------------------------
+# 8. INVALID TEST PARSING
+# Field is either 'لا يوجد' (no failures, sentinel) or one+ test names
+# separated by ' | '. Each individual test name is then canonicalised.
+# -----------------------------------------------------------------------------
+invalid_tests_handling:
+  no_failure_sentinel: "لا يوجد"
+  separator: " | "
+  canonical_test_names:
+    - العد الكلي للبكتيريا
+    - استافيلوكوكس اورياس
+    - انتيروباكتريسي
+    - الخمائر والاعفان
+    - السالمونيلا
+    - ايشيريشيا كولاي
+    - كوليفورم
+    - باصلص سيرز         # 2024 spelling for Bacillus cereus
+    - باسيلس سيريس        # 2025 spelling for Bacillus cereus (more phonetic)
+    - سيدومومناس         # 2024 spelling for Pseudomonas
+    - سيدوموناس          # 2025 spelling for Pseudomonas
+  test_name_aliases:
+    العدد الكلي للبكتيريا: العد الكلي للبكتيريا   # cross-year alias (2024 used double د)
+    خمائر: الخمائر والاعفان                       # confirmed in 2024 schema
+    اعفان: الخمائر والاعفان
+    كولي فورم: كوليفورم
+    باصلص سيرس: باصلص سيرز
+    الخماير والاعفان: الخمائر والاعفان
+
+  on_unknown_test: flag_keep_raw          # add `invalid_test_unmapped` flag
+
+# -----------------------------------------------------------------------------
+# 9. CANONICAL OUTPUT SCHEMA (long format, one row per sample)
+# -----------------------------------------------------------------------------
+output_columns:
+  - { name: source_file,            dtype: string,  nullable: false }
+  - { name: row_excel,              dtype: int32,   nullable: false }
+  - { name: sampling_date,          dtype: date,    nullable: true  }
+  - { name: year_month,             dtype: string,  nullable: true,  description: "YYYY-MM (sortable for time-series charts)." }
+  - { name: iso_year_week,          dtype: string,  nullable: true,  description: "ISO year + week, e.g. 2025-W14." }
+  - { name: quarter,                dtype: Int8,    nullable: true,  description: "1..4 (calendar quarter)." }
+  - { name: day_of_week,            dtype: Int8,    nullable: true,  description: "0=Mon .. 6=Sun." }
+  - { name: sample_id,              dtype: string,  nullable: false, normalised_lowercased: true }
+  - { name: sample_id_raw,          dtype: string,  nullable: false }
+  - { name: sample_name,            dtype: string,  nullable: true  }
+  - { name: category_canonical,     dtype: string,  nullable: true  }
+  - { name: category_en,            dtype: string,  nullable: true  }
+  - { name: category_raw,           dtype: string,  nullable: true  }
+  - { name: facility_name,          dtype: string,  nullable: true  }
+  - { name: facility_chain,         dtype: string,  nullable: true,  description: "Chain prefix (everything before the first dash-with-whitespace separator). Equals facility_name when no separator." }
+  - { name: facility_branch,        dtype: string,  nullable: true,  description: "Branch suffix after the first chain/branch separator. Null for single-segment names." }
+  - { name: facility_name_raw,      dtype: string,  nullable: true  }
+  - { name: sample_type,            dtype: string,  nullable: false, description: "Decision-making bucket per sample_type_buckets. Always set; defaults to 'other'." }
+  - { name: has_pathogen_failure,   dtype: boolean, nullable: false, description: "True if any failed test is in test_classification.pathogen." }
+  - { name: failed_pathogens,       dtype: list_string, nullable: true, description: "Subset of invalid_tests classified as pathogen." }
+  - { name: failed_indicators,      dtype: list_string, nullable: true, description: "Subset of invalid_tests classified as indicator." }
+  - { name: severity_tier,          dtype: string,  nullable: false, enum: [none, indicator_only, pathogen, multi_pathogen], description: "Per severity_rules." }
+  - { name: chain_invalid_count_90d, dtype: int32,  nullable: false, description: "Count of invalid samples at the same facility_chain in the trailing 90 days (inclusive of this row)." }
+  - { name: is_repeat_offender_90d, dtype: boolean, nullable: false, description: "chain_invalid_count_90d ≥ repeat_offender_rules.invalid_threshold." }
+  - { name: municipality,           dtype: string,  nullable: true  }
+  - { name: municipality_type,      dtype: string,  nullable: true,  enum: [بلدية, قطاع, خاص, unknown] }
+  - { name: municipality_raw,       dtype: string,  nullable: true  }
+  - { name: is_valid,               dtype: boolean, nullable: false, description: "Verbatim from the source validity column (مطابقة/غير مطابقة → bool)." }
+  - { name: is_failure,             dtype: boolean, nullable: false, description: "Decision-maker composite: true if (is_valid==false) OR (n_failed_tests>0). Use this for failure-rate calculations to avoid drift caused by the 9 source-data inconsistencies where is_valid and invalid_tests disagree." }
+  - { name: invalid_tests_raw,      dtype: string,  nullable: true  }
+  - { name: invalid_tests,          dtype: list_string, nullable: true,  description: "Canonical test names; empty list if no failure." }
+  - { name: n_failed_tests,         dtype: int32,   nullable: false, description: "0 for valid samples; otherwise count of canonical failed tests." }
+  - { name: data_quality_flags,     dtype: string,  nullable: true,  format: pipe_separated }
+
+# -----------------------------------------------------------------------------
+# 10. CLEANING RECIPE (ordered, deterministic, idempotent)
+# -----------------------------------------------------------------------------
+cleaning_recipe:
+  - { id: 01, op: read_excel,                  params: { sheet: Sheet2, header: 0, dtype: object } }
+  - { id: 02, op: assert_header_match,         tolerance: collapse_whitespace }
+  - { id: 03, op: drop_fully_empty_rows }
+  - { id: 04, op: parse_dates,                 column: sampling_date, rules: $.date_parsing }
+  - { id: 05, op: normalise_text,              columns: [category_raw, sample_name_raw, facility_name_raw, municipality_raw, validity_raw, invalid_tests_raw], rules: $.category_handling.canonical_normalisation }
+  - { id: 06, op: split_municipality,          input: municipality_raw, outputs: [municipality, municipality_type], rules: $.municipality_typing }
+  - { id: 07, op: extract_category,            input: category_raw, outputs: [category_canonical, category_en], rules: $.category_handling }
+  - { id: 08, op: normalise_sample_id,         input: sample_id_raw, output: sample_id, rules: $.sample_id_handling }
+  - { id: 09, op: flag_sample_id_duplicates,   column: sample_id, flag: $.sample_id_handling.duplicate_flag }
+  - { id: 10, op: map_validity,                input: validity_raw, output: is_valid, mapping: $.validity_mapping }
+  - { id: 11, op: parse_invalid_tests,         input: invalid_tests_raw, output: invalid_tests, rules: $.invalid_tests_handling }
+  - { id: 12, op: derive_n_failed_tests,       input: invalid_tests, output: n_failed_tests }
+  - { id: 13, op: validate,                    fail_on: [validity_unknown, header_mismatch, sheet_missing] }
+  - { id: 14, op: sort,                        by: [sampling_date, sample_id], na_position: last }
+  - { id: 15, op: reset_index }
+
+# -----------------------------------------------------------------------------
+# 11. AMBIGUOUS CASES (recorded; cleaner flags but doesn't fail)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Sample-type rollup (decision-making bucket).
+# Each row is matched against keywords (in category_canonical + category_en,
+# casefolded). First bucket whose keyword set hits wins. 'other' is the fallback.
+# To add a new category in the future, append a keyword here — no code change.
+# -----------------------------------------------------------------------------
+sample_type_buckets:
+  # Order matters — most-specific first. Keyword match is casefold substring
+  # against (category_canonical | category_en). First hit wins; default 'other'.
+  - id: swab
+    keywords: [swab, swabs, مسحة, مسحات, المسحات]
+  - id: water
+    keywords: [water, مياه, الماء, مياة]
+  - id: dairy
+    keywords: [milk, cheese, yogurt, cream, لبن, لبنة, اللبان, حليب, جبن, جبنة, قشطة,
+               كريمة, زبادي, fermented, eggs, egg, بيض, البيض, ايس كريم, ice cream, آيس]
+  - id: raw_meat
+    keywords: [raw meat, raw, نيئة, نيء, ذبيحة, offal, لحوم نيئة, raw ediable, لحم نيء]
+  - id: cooked_meat_poultry
+    keywords: [cooked meat, cooked chicken, cooked, مطبوخة, مطبوخ, دجاج, fish, سمك, اسماك,
+               الاسماك, smoked, مشوي, مشوية, مدخنة, تيس, ذبيحة, kabsa, كبسة,
+               mortadella, مرتديلا, salami, سلامي, sausage, نقانق, tuna, تونة, sardine, سردين,
+               poultry, دواجن, liver, كبدة, الكبدة, hot dog, هوت دوج, pastrami, بسطرمة]
+  - id: produce
+    keywords: [salad, سلطة, السلطة, vegetable, خضار, خضروات, الخضار, fruit, fruits, فاكهة, الفواكه,
+               tomato, طماطم, الطماطم, cucumber, خيار, الخيار, olive, زيتون, الزيتون,
+               cabbage, ملفوف, الملفوف, lettuce, خس, الخس, potato, بطاطس, البطاطس,
+               dates, تمر, التمر, البطيخ, watermelon, mushroom, مشروم, المشروم,
+               زنجبيل, ginger, leaf, leaves, ورق عنب, grape leaves, eggplant, باذنجان, الباذنجان,
+               onion, onions, بصل, البصل, jalapeno, هلابينو, pomegranate, رمان, الرمان,
+               lemon, lemons, ليمون, الليمون, parsley, بقدونس, البقدونس, pepper, peppers,
+               فلفل, الفلفل, herb, herbs, اعشاب, الأعشاب, corn, ذرة, الذرة, garlic, ثوم, الثوم,
+               radish, radishes, الفجل, zucchini, كوسة, الكوسة, carrot, جزر, الجزر, fig, figs, تين, التين,
+               orange, oranges, برتقال, البرتقال, apple, apples, تفاح, التفاح, banana, موز, الموز,
+               coleslaw, كولسلو, الكولسلو,
+               melon, melons, شمام, الشمام, beet, beets, شمندر, mango, مانجو, المانجو,
+               nut, nuts, مكسرات, المكسرات, grain, grains, cereal, cereals, الحبوب, حبوب, malt, الشعير,
+               rocket, arugula, جرجير, الجرجير, kiwi, كيوي, الكيوي, bean, beans, فاصوليا, الفاصوليا,
+               lentil, lentils, عدس, العدس, thyme, زعتر, الزعتر, spinach, سبانخ, السبانخ,
+               coriander, كزبرة, الكزبرة, bulgur, برغل, البرغل, mint, نعناع, النعناع,
+               cilantro, dill, شبت, oats, شوفان, freekeh, فريكة, chickpea, chickpeas, نخود, النخود,
+               flaked, puffed, سمسم, sesame, dill, روحان]
+  - id: sauce_condiment
+    keywords: [sauce, صوص, صلصة, صلصه, salsa, syrup, نكهة, نكهات, mayonnaise, مايونيز,
+               ketchup, كاتشب, hot sauce, شطة, الشطة, pickle, مخلل, المخلل, molasses, دبس,
+               tahini, طحينة, jam, jelly, marmalade, مربى, debs, lugaimat, لقيمات, mustard, خردل, vinegar, خل]
+  - id: sweets_bakery
+    keywords: [sweet, sweetness, الحلا, الحلويات, sweets, dessert, desserts, حلوى, الحلوى,
+               cake, كيك, biscuit, biscuits, البسكويت, بسكوت, chocolate, شوكولاته, الشوكولاته,
+               samposa, سمبوسة, falafel, فلافل, bread, خبز, الخبز, الكعك, baker, bakery, baked,
+               مخبز, مخبوزات, المخبوزات, bhaji, بهاجي, basbousa, بسبوسة, cookies, كوكيز,
+               brownie, كوب كيك, cup cake, pie, pies, فطيرة, فطائر, croissant, كروسان,
+               donut, donuts, دونات, honey, عسل, العسل, dough, عجين, العجين, cream cake, تورته,
+               muffin, مافن, pastry, معجنات, kunafa, كنافة, halawa, halva, طحينية, الجريش,
+               maamoul, معمول, mamoul, qatayef, قطايف, baklava, بقلاوة]
+  - id: beverage
+    keywords: [juice, juices, عصير, عصائر, العصائر, drink, drinks, مشروب, مشروبات,
+               coffee, قهوة, القهوة, tea, شاي, الشاي, latte, espresso, كولد برو, كركدية,
+               smoothie, سموثي, milkshake, ميلك شيك, soda, مشروبات غازية]
+  - id: prepared_meal
+    keywords: [rice, ارز, الارز, رز, soup, soups, شوربة, الشوربة, شوفان, samosa, سمبوسك,
+               sandwich, ساندويتش, ساندوتش, ساندو, hummus, homous, حمص, الحمص, foul, فول,
+               mashed, ready to eat, اطعمة جاهزة, الاطعمة الجاهزة, hareesa, هريسة, sushi, سوشي,
+               kebab, كباب, مندي, mozzarella, موزاريلا, kibbeh, كبه, الكبة,
+               appetizer, appetizers, مقبلات, المقبلات, kashana, كشنة, dolma, محشي, المحشي,
+               pasta, مكرونة, pizza, بيتزا, البيتزا, burger, برجر, شاورما, shawarma, kabsa, مكرونات,
+               نودلز, noodles, biryani, برياني, مأكولات, prepared, جاهز]
+  - id: animal_feed
+    keywords: [اعلاف, feed, fodder]
+
+facility_split:
+  description: "Split facility_name into chain + branch on the first hyphen / en-dash / em-dash that has whitespace on at least one side. If no separator, chain = full name, branch = null. Preserves intra-name dashes (e.g. '7-Eleven' would stay whole)."
+  separator_regex: '\s+[-–—]\s*|\s*[-–—]\s+'
+
+# -----------------------------------------------------------------------------
+# Time-dimension derivations (deterministic from sampling_date)
+# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+# Test classification — which failed-test names indicate a pathogen vs an
+# indicator/hygiene marker. Used to compute severity_tier and pathogen flags.
+# To add a new test, append it to the right list. Unknown tests are flagged.
+# -----------------------------------------------------------------------------
+test_classification:
+  pathogen:
+    - السالمونيلا              # Salmonella
+    - ايشيريشيا كولاي           # E. coli (generic)
+    - ايشيريشيا كولاي O157      # E. coli O157 (added from 2024 data)
+    - استافيلوكوكس اورياس       # Staphylococcus aureus
+    - باصلص سيرز                # Bacillus cereus (2024 spelling)
+    - باسيلس سيريس              # Bacillus cereus (2025 spelling)
+    - الليستيريا                # Listeria (added from 2024)
+    - كلوستريديوم بيرفرنجنز     # Clostridium perfringens (added from 2024)
+    - كلوستريديوم بوتولينوم     # Clostridium botulinum (added from 2024)
+    - كامبيلوباكتر              # Campylobacter (added from 2024)
+    - فيبريو                    # Vibrio (added from 2024)
+    - Aeromonas                 # Aeromonas (added from 2024); GSO 1016 treats as a pathogen
+    - سيدوموناس                 # Pseudomonas — reclassified to pathogen per user direction
+    - سيدومومناس                # Pseudomonas (2024 spelling variant — same classification)
+                                #   2026-06-18: Pseudomonas is a pathogen in drinking water
+                                #   contexts and the user requested treating it as such here.
+  indicator:
+    - العد الكلي للبكتيريا       # Total bacterial count
+    - العدد الكلي للبكتيريا      # 2024 spelling alias
+    - كوليفورم                  # Coliform
+    - انتيروباكتريسي            # Enterobacteriaceae
+    - الخمائر والاعفان          # Yeasts & moulds
+
+# -----------------------------------------------------------------------------
+# Severity tiers derived from invalid_tests + test_classification above.
+# -----------------------------------------------------------------------------
+severity_rules:
+  tiers:
+    - { id: none,            condition: "n_failed_tests == 0" }
+    - { id: indicator_only,  condition: "≥1 failure, all indicator" }
+    - { id: pathogen,        condition: "exactly 1 pathogen failure" }
+    - { id: multi_pathogen,  condition: "≥2 distinct pathogen failures" }
+
+# -----------------------------------------------------------------------------
+# Repeat-offender rolling window (chain-level).
+# For each row: count invalid samples at the same facility_chain in the
+# trailing window ending on this sample's date (inclusive). Flag if ≥ threshold.
+# -----------------------------------------------------------------------------
+repeat_offender_rules:
+  group_by: facility_chain
+  window_days: 90
+  invalid_threshold: 2
+  inclusive_of_current_row: true
+  invalid_signal: is_failure   # uses the composite (is_valid==false OR n_failed_tests>0)
+
+time_dimensions:
+  year_month: "sampling_date.strftime('%Y-%m')"
+  iso_year_week: "sampling_date.strftime('%G-W%V')"
+  quarter: "sampling_date.dt.quarter (1..4)"
+  day_of_week: "sampling_date.dt.dayofweek (Mon=0..Sun=6)"
+
+ambiguous_cases:
+  - id: cross_year_total_bacteria_spelling
+    description: "2024 used 'العدد الكلي للبكتيريا' (double د); 2025 uses 'العد الكلي للبكتيريا' (single د). Defaulting to 2025 spelling as canonical for the larger dataset; alias added in test_name_aliases."
+
+  - id: sample_id_duplicates
+    description: "15 IDs appear twice; 3 differ by case only. Default: flag-keep-both pending user investigation."
+
+  - id: facility_name_normalisation
+    description: "12 near-duplicate facility groups (whitespace + ة/ه variants). Cleaner applies whitespace collapse + leading newline strip but does NOT fold ة/ه — those are real letter distinctions in formal Arabic. Surveys downstream should casefold for grouping."
+
+# -----------------------------------------------------------------------------
+# 12. OUTPUT
+# -----------------------------------------------------------------------------
+output:
+  parquet:
+    path: cleaned/data2025.parquet
+    compression: zstd
+  diff_report:
+    path: reports/data2025_diff.md
+    format: markdown
