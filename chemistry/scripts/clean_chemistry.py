@@ -15,6 +15,7 @@ Output:
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from collections import Counter
 from datetime import date
@@ -30,6 +31,55 @@ from _common import (
     normalise_text, parse_nd_to_float, parse_limit_to_float, parse_date,
     normalise_sample_id, write_parquet,
 )
+import categories  # canonical sample-category classification (2026-07-01 spec)
+
+
+def water_redcell_failed_map(src_path: Path) -> dict[str, str]:
+    """M1 (water 2024): the failing parameter of each invalid water sample is
+    marked only as a red cell-fill (FFFF0000) in the monthly sheets. Return
+    {sample_id_lower: "param1|param2|..."} recovered from those red cells."""
+    import openpyxl
+    META = {"no.", "receiving date", "sampling date", "sample name", "sample id",
+            "facility name", "municipality name", "municipality name ", "district name",
+            "street name", "sample notes", "testing notes", "license number", "رقم الرخصة",
+            "analysis section", "valid/ invalid", "valid/invalid", "valid /invalid",
+            "matched/not matched", "matched/ not matched", "compliant / non-compliant",
+            "invalid test", "non-compliant test", "no. of tests", "no of tests",
+            "qc for invalid test", "result qc for invalid test", ""}
+    out: dict[str, list[str]] = {}
+    try:
+        wb = openpyxl.load_workbook(src_path)
+    except Exception:
+        return {}
+    for ws in wb.worksheets:
+        name = ws.title.lower()
+        if name.startswith("copy of") or name.startswith("invalid samples"):
+            continue
+        header_row = None; headers: dict[int, str] = {}
+        for r in range(1, min(6, ws.max_row) + 1):
+            vals = {c.column: (str(c.value).split("\n")[0].strip() if c.value else "") for c in ws[r]}
+            if any(v.lower() == "sample id" for v in vals.values()):
+                header_row = r; headers = vals; break
+        if header_row is None:
+            continue
+        sid_col = next((col for col, h in headers.items() if h.lower() == "sample id"), None)
+        if sid_col is None:
+            continue
+        for row in ws.iter_rows(min_row=header_row + 1):
+            sid_cell = ws.cell(row=row[0].row, column=sid_col)
+            sid = str(sid_cell.value).strip().lower() if sid_cell.value else None
+            if not sid:
+                continue
+            for c in row:
+                fl = c.fill
+                fg = getattr(fl.fgColor, "rgb", None) if (fl and fl.patternType == "solid") else None
+                if fg == "FFFF0000":
+                    h = headers.get(c.column, "")
+                    if h and h.lower() not in META:
+                        out.setdefault(sid, [])
+                        if h not in out[sid]:
+                            out[sid].append(h)
+    return {k: "|".join(v) for k, v in out.items() if v}
 
 VALIDITY_TRUE_TOKENS  = ("مطابق", "matched", "valid", "vaild", "صالح", "compliant")
 VALIDITY_FALSE_TOKENS = ("غير مطابق", "غيرمطابق", "not matched", "invalid", "invaild",
@@ -125,6 +175,14 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
     # so we can derive sheet_year_month from the row's date instead of the synthetic
     # (year, 1) bucket the iterator hands us.
     is_single_sheet = bool(schema.get("single_sheet", False))
+
+    # M1: water failed-tests have no numeric basis (limits live in GSO ref), so
+    # recover them from the source instead. 2024 → red cell-fills; 2025 → the
+    # lab-entered `invalid_test` column (surfaced per-row below).
+    water_redcells: dict[str, str] = {}
+    if section == "water_analysis" and int(year) == 2024:
+        water_redcells = water_redcell_failed_map(src_path)
+        print(f"  water red-cell failed-test map: {len(water_redcells)} samples")
 
     for sheet_name, ym, rows in iter_data_sheets(src_path, year, schema):
         audit["sheets_processed"] += 1
@@ -339,9 +397,27 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
                     rec["validity_status"] = "no_limit" if has_value_no_limit else "unknown"
                 rec["sample_code"]    = normalise_text(raw_row.get("sample_code"))
 
-            # Auto pass-through of remaining schema columns.
-            for k in passthrough_keys:
-                rec[k] = normalise_text(raw_row.get(k))
+            # Canonical sample-category + name grouping (2026-07-01 spec).
+            canon, cat_flag = categories.classify(
+                section, rec.get("sample_category"), rec.get("sample_name"))
+            rec["sample_category_canonical"] = canon
+            rec["category_flag"] = cat_flag
+            grp = categories.name_group(rec.get("sample_name"))
+            rec["sample_name_group"] = grp or rec.get("sample_name")
+
+            # M1: surface water failed-tests that have no numeric basis.
+            if section == "water_analysis" and not rec.get("failed_tests_derived"):
+                recovered = None
+                if int(year) == 2024:
+                    sid = rec.get("sample_id")
+                    recovered = water_redcells.get(sid.lower()) if sid else None
+                else:  # 2025 — lab-entered invalid_test column
+                    it = rec.get("invalid_test")
+                    if it and str(it).strip():
+                        recovered = "|".join(p.strip() for p in re.split(r"[,،]", str(it)) if p.strip())
+                if recovered:
+                    rec["failed_tests_derived"] = recovered
+                    rec["n_failed_tests_derived"] = len(recovered.split("|"))
 
             records.append(rec)
             audit["rows_out"] += 1
@@ -380,6 +456,7 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
     string_cols = [
         "source_file", "sheet_name", "sheet_year_month",
         "sample_id_raw", "sample_id", "sample_name", "sample_category",
+        "sample_category_canonical", "category_flag", "sample_name_group",
         "facility_name", "district_name", "street_name", "municipality",
         "license_number", "analysis_section", "validity_raw", "invalid_test",
         "sample_notes", "testing_notes", "failed_tests_derived",

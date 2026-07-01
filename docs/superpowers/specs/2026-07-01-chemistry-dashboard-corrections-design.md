@@ -155,6 +155,29 @@ cross-section mislabels (93 = coffee-in-aflatoxin), 18 review, ~2,500 UNCLASSIFI
 4. **2024 unclassified → section-aware best-effort** name rules; leftovers stay
    "miscellaneous".
 
+## 9b. Phase 1 outcome (2026-07-01)
+
+Shipped: `chemistry/scripts/categories.py` (canonical rules) + integration into
+`clean_chemistry.py` (adds `sample_category_canonical`, `category_flag`,
+`sample_name_group`; water M1 recovery). Regenerated all 12 chemistry parquets
++ synced to `clean/chemistry/` + xlsx. Row parity held (heavy_metals 2025 went
+917→924 because the committed parquet was stale vs the committed script, not from
+this change — verified by re-running the HEAD script).
+
+Results: coffee 181 rows → grains/legumes (0 real beverages left); **suspect flags
+down 107→12** (honey/hibiscus-in-aflatoxin, the real water-in-foodchem sample, 2
+pesticide name quirks — all genuinely-ambiguous, left for review); review 18
+(aflatoxin fruit/veg); 1 reclassified (meat→water, D2); merges applied exactly as
+previewed (مياه فلتر 461, شطة 132); water failed-tests recovered 41/46 (2024 red
+cells) + 54/64 (2025 `invalid_test`).
+
+**Deprecation:** `clean/scripts/apply_category_canonical.py` is now SUPERSEDED —
+the cleaner produces `sample_category_canonical` natively for all sections/years.
+Do NOT re-run it; it would overwrite with the old 2025-only inconsistent logic.
+
+The dashboard reads `chemistry/cleaned/` directly and already prefers
+`sample_category_canonical`, so Phase 2 picks up these fixes automatically.
+
 ## 10. Regeneration commands
 ```bash
 PY=microbiology/.venv/bin/python   # or food_analysis/Iter-2/.venv/bin/python
