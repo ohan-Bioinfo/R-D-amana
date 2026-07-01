@@ -178,6 +178,26 @@ Do NOT re-run it; it would overwrite with the old 2025-only inconsistent logic.
 The dashboard reads `chemistry/cleaned/` directly and already prefers
 `sample_category_canonical`, so Phase 2 picks up these fixes automatically.
 
+## 9c. Phase 1b — taxonomy refinements + sectors (2026-07-01)
+
+After reviewing the classification workbook (`chemistry/reports/
+classification_review_2026-07-01.{xlsx,md}`), Muhannad ruled:
+1. **Aflatoxin valid = grains/legumes, spices, sweets only** (removed RTE, meat,
+   beverage). The 184 "RTE" nut rows (لوز/فستق/كاجو) reclassified to grains/legumes.
+2. **فلفل → spices (البهارات والصوصات), ALL of them** — overrides any fruit/veg or
+   cereal label. 1,616 rows now spices. Also a «فلفل» name-group consolidates the
+   74 pepper-name variants in the subtypes chart (this was the wrong top-10 count).
+3. **Nuts fold into grains/legumes** per GSO 1016 (no separate nuts category).
+4. **Sectors enriched + normalized:** new `chemistry/scripts/sectors.py` maps
+   municipality → 5-sector amanah taxonomy (from the microbio schema), with
+   normalization (البلدية//typos/الشفاء→الشفا). Added `sector` + `sector_flag`
+   columns. Coverage: 12,332 rows mapped; 3,265 `no_municipality` (2024 source has
+   no municipality); 168 `private`; **21 `unmapped` (sample names leaked into the
+   municipality column — true junk)**. The dashboard's existing sector display now
+   has data to show.
+
+Aflatoxin suspect flags now 22 (13 RTE-not-nuts, 7 honey, 1 meat, 1 beverage).
+
 ## 10. Regeneration commands
 ```bash
 PY=microbiology/.venv/bin/python   # or food_analysis/Iter-2/.venv/bin/python

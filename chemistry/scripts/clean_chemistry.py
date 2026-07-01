@@ -32,6 +32,7 @@ from _common import (
     normalise_sample_id, write_parquet,
 )
 import categories  # canonical sample-category classification (2026-07-01 spec)
+import sectors      # municipality → amanah sector mapping (2026-07-01 spec)
 
 
 def water_redcell_failed_map(src_path: Path) -> dict[str, str]:
@@ -405,6 +406,11 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
             grp = categories.name_group(rec.get("sample_name"))
             rec["sample_name_group"] = grp or rec.get("sample_name")
 
+            # Amanah sector from municipality (2026-07-01 spec).
+            sec_name, sec_flag = sectors.sector_for(rec.get("municipality"))
+            rec["sector"] = sec_name
+            rec["sector_flag"] = sec_flag
+
             # M1: surface water failed-tests that have no numeric basis.
             if section == "water_analysis" and not rec.get("failed_tests_derived"):
                 recovered = None
@@ -457,6 +463,7 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
         "source_file", "sheet_name", "sheet_year_month",
         "sample_id_raw", "sample_id", "sample_name", "sample_category",
         "sample_category_canonical", "category_flag", "sample_name_group",
+        "sector", "sector_flag",
         "facility_name", "district_name", "street_name", "municipality",
         "license_number", "analysis_section", "validity_raw", "invalid_test",
         "sample_notes", "testing_notes", "failed_tests_derived",

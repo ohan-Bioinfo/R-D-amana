@@ -86,9 +86,15 @@ NAME_KEYWORDS = [
     ("بيض", C_RTE),
 ]
 
+# Name tokens that force a spice category over a fruit/veg or misc label
+# (Muhannad 2026-07-01: فلفل / pepper is a spice, not a vegetable).
+SPICE_NAME_OVERRIDE = ("فلفل",)
+
 # per-section valid canonical categories (approved draft).
 SECTION_VALID = {
-    "aflatoxins":           {C_CEREAL, C_SPICE, C_RTE, C_SWEET},
+    # aflatoxins: no RTE / meat / beverage (Muhannad 2026-07-01). Nuts fold into
+    # grains/legumes per GSO 1016 (no separate nuts category).
+    "aflatoxins":           {C_CEREAL, C_SPICE, C_SWEET},
     "food_chemistry":       {C_CEREAL, C_SPICE, C_RTE, C_FRVEG, C_SWEET, C_BEV,
                              C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_HONEY, C_MISC},
     "heavy_metals":         {C_CEREAL, C_SPICE, C_RTE, C_FRVEG, C_SWEET, C_BEV,
@@ -147,6 +153,13 @@ def classify(section: str, raw_category, sample_name):
     if base is None:
         return SECTION_DEFAULT.get(section, C_MISC), "defaulted"
 
+    # Spice override: فلفل (pepper) is a spice, not a vegetable/cereal/misc,
+    # whatever the lab labelled it — ALL of them (Muhannad 2026-07-01).
+    if base not in (W_TAP, W_FILTER, W_DRINK):
+        s = _norm(sample_name)
+        if any(tok in s for tok in SPICE_NAME_OVERRIDE):
+            base = C_SPICE
+
     # Water subtype refinement (D4): a name that says فلتر / معبأ wins over a
     # generic "Tap water" raw label, so filter/bottled water gets its own slice.
     if base in (W_TAP, W_FILTER, W_DRINK):
@@ -176,4 +189,6 @@ def name_group(sample_name) -> str | None:
         return W_FILTER
     if _SHATTA.search(s):
         return "شطة"
+    if "فلفل" in s:                 # consolidate 74 pepper variants (Muhannad 2026-07-01)
+        return "فلفل"
     return None

@@ -17,6 +17,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 import sys; sys.path.insert(0, str(Path(__file__).parent))
 import categories as C
+import sectors as SEC
 # NOTE: do NOT import build_dashboard — its module-level import breaks the
 # openpyxl xlsx writer. The GSO list below mirrors its CHEM_TO_GSO values.
 
@@ -113,9 +114,8 @@ def main():
                 muni[m] = muni.get(m, 0) + 1
     map_rows = []
     for m, n in sorted(muni.items(), key=lambda x: -x[1]):
-        sub = strip_baladiya(m)
-        sec = sub_to_sector.get(sub) or st.get("sector_raw_aliases", {}).get(sub)
-        map_rows.append((m, sub, sec or "★ UNMAPPED", n))
+        sec, flag = SEC.sector_for(m)
+        map_rows.append((m, strip_baladiya(m), sec or f"★ {flag}", n))
     map_df = pd.DataFrame(map_rows, columns=["municipality (raw)", "stripped", "sector", "rows"])
 
     # ---- sector taxonomy reference
@@ -146,7 +146,8 @@ def main():
         ws.freeze_panes = "A2"
     wb.save(OUT_XLSX)
 
-    unmapped = map_df[map_df["sector"] == "★ UNMAPPED"]
+    unmapped = map_df[map_df["sector"] == "★ unmapped"]      # true junk only
+    private = map_df[map_df["sector"] == "★ private"]
     lines = ["# Chemistry classification review — 2026-07-01\n",
              f"Workbook `{OUT_XLSX.name}` (7 sheets) for your review/guidance.\n",
              "## GSO 1016 categories (official 15)\n"]
@@ -161,12 +162,14 @@ def main():
     lines.append("- Applied: فلتر → «مياه فلتر» ، شط[ةه] → «شطة»")
     lines.append("- **PROPOSED:** فلفل → «فلفل» (74 variants / 463 rows fragment the aflatoxin top-10)")
     lines.append("\n## Municipality → sector coverage (chemistry)\n")
-    lines.append(f"- {len(map_df)} distinct municipality values; **{len(unmapped)} UNMAPPED** "
-                 f"({unmapped['rows'].sum()} rows). See `municipality_to_sector` sheet.")
-    lines.append("- Chemistry parquets currently have NO `sector` column — that's why the dashboard's "
-                 "sector display is blank. Proposed: enrich chemistry with this map.")
+    lines.append(f"- {len(map_df)} distinct municipality values → mapped after normalization; "
+                 f"**{len(unmapped)} true-junk values ({unmapped['rows'].sum()} rows)** remain "
+                 f"(sample names leaked into the municipality column); "
+                 f"{len(private)} private-sample values ({private['rows'].sum()} rows) have no sector.")
+    lines.append("- Sector column NOW added to the chemistry parquets. Rows with no municipality "
+                 "at all (mostly 2024) get flag `no_municipality` and no sector.")
     if len(unmapped):
-        lines.append("\n### Unmapped municipalities (need your ruling)\n")
+        lines.append("\n### True-junk municipality values (sample names in wrong column)\n")
         for _, r in unmapped.head(25).iterrows():
             lines.append(f"  - {r['municipality (raw)']}  ({r['rows']} rows)")
     OUT_MD.write_text("\n".join(lines), encoding="utf-8")
