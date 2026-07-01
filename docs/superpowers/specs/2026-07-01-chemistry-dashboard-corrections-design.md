@@ -198,6 +198,23 @@ classification_review_2026-07-01.{xlsx,md}`), Muhannad ruled:
 
 Aflatoxin suspect flags now 22 (13 RTE-not-nuts, 7 honey, 1 meat, 1 beverage).
 
+## 9d. Phase 1c — retire Ready-to-Eat, honey→sweets (2026-07-01)
+
+Muhannad ruled (after reviewing RTE_contents): **RTE category → 0** everywhere,
+**nuts stay in grains/legumes** (kept the GSO ruling), **honey → sweets/chocolate**,
+other RTE items **reclassify by name**. Implemented in `categories.py`: removed the
+"ready to eat" keyword and C_RTE from all section valid-sets (so RTE rows fall to
+name-based classification), routed عسل/دبس → sweets, added name rules for ex-RTE
+items (خبز/توست/طحين/سميد→grains, بصل مجفف/حبة البركة→spices, بصل/فجل/فطر→veg,
+رقائق→sweets). Result: **RTE=0**, honey section 25→sweets, nuts consistently
+grains (لوز 492 / فستق 367 / كاجو 263), suspect flags 22→5.
+
+**Still pending (Phase 2, dashboard):** (a) rename all "failed"/"failure" →
+"non-compliant" in the UI; (b) the duplicate category labels
+(`Cereals; Legumes...` / `الحبوب والبقوليات"` / `Cereal and Legume products`) are
+already ONE canonical value in the data — they collapse once the dashboard is
+rebuilt against `sample_category_canonical`.
+
 ## 10. Regeneration commands
 ```bash
 PY=microbiology/.venv/bin/python   # or food_analysis/Iter-2/.venv/bin/python

@@ -41,7 +41,8 @@ CAT_KEYWORDS = [
     ("غير المعبأ", W_DRINK), ("متحرك", W_DRINK), ("drinking", W_DRINK),
     ("حبوب", C_CEREAL), ("بقول", C_CEREAL), ("cereal", C_CEREAL), ("legume", C_CEREAL),
     ("بهار", C_SPICE), ("صوص", C_SPICE), ("spice", C_SPICE), ("sauce", C_SPICE),
-    ("جاهز", C_RTE), ("ready to eat", C_RTE),
+    # NB: "ready to eat" intentionally NOT mapped — RTE is retired (Muhannad
+    # 2026-07-01: RTE→0). Such rows fall through to name-based classification.
     ("فواكه", C_FRVEG), ("خضار", C_FRVEG), ("fruit", C_FRVEG), ("vegetable", C_FRVEG),
     ("حلوي", C_SWEET), ("شوكولا", C_SWEET), ("شكولا", C_SWEET), ("sweet", C_SWEET), ("chocolate", C_SWEET),
     ("مشروب", C_BEV), ("beverage", C_BEV),
@@ -50,7 +51,8 @@ CAT_KEYWORDS = [
     ("ألبان", C_DAIRY), ("البان", C_DAIRY), ("حليب", C_DAIRY), ("dairy", C_DAIRY), ("milk", C_DAIRY),
     ("دهون", C_FAT), ("زيوت", C_FAT), ("oil", C_FAT), ("fat", C_FAT),
     ("اعلاف", C_FEED), ("أعلاف", C_FEED), ("fodder", C_FEED), ("feed", C_FEED),
-    ("عسل", C_HONEY), ("honey", C_HONEY),
+    # Honey → sweets/chocolate (Muhannad 2026-07-01).
+    ("عسل", C_SWEET), ("honey", C_SWEET), ("دبس", C_SWEET),
 ]
 
 # sample-name keyword -> canonical (used when the row has NO raw category, i.e.
@@ -60,6 +62,8 @@ NAME_KEYWORDS = [
     # water — note: NO bare "ماء" (false-matched ضرماء = wheat town)
     ("فلتر", W_FILTER),
     ("مياه", W_TAP), ("مياة", W_TAP), ("موية", W_TAP), ("مويه", W_TAP), ("حنفي", W_TAP), ("المياه", W_TAP),
+    # honey/molasses → sweets, FIRST among foods so "عسل حبة البركة" → sweets
+    ("عسل", C_SWEET), ("دبس", C_SWEET),
     # spices / sauces — before meat so chicken-spice → spices
     ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE), ("بهار", C_SPICE),
     ("فلفل", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE), ("قرفة", C_SPICE),
@@ -69,7 +73,14 @@ NAME_KEYWORDS = [
     ("ارز", C_CEREAL), ("أرز", C_CEREAL), ("قمح", C_CEREAL), ("عدس", C_CEREAL), ("حمص", C_CEREAL),
     ("فول", C_CEREAL), ("فاصولي", C_CEREAL), ("ذرة", C_CEREAL), ("شعير", C_CEREAL), ("لوز", C_CEREAL),
     ("فستق", C_CEREAL), ("كاجو", C_CEREAL), ("بندق", C_CEREAL), ("جوز", C_CEREAL), ("سمسم", C_CEREAL),
-    ("ترمس", C_CEREAL), ("جريش", C_CEREAL), ("بر ", C_CEREAL),
+    ("ترمس", C_CEREAL), ("جريش", C_CEREAL), ("بر ", C_CEREAL), ("مكسرات", C_CEREAL),
+    # grains: bread/flour/semolina (ex-RTE items)
+    ("خبز", C_CEREAL), ("توست", C_CEREAL), ("طحين", C_CEREAL), ("سميد", C_CEREAL),
+    # dried onion is a spice; fresh onion/radish/mushroom are vegetables
+    ("بصل مجفف", C_SPICE), ("حبة البركة", C_SPICE), ("حبةالبركة", C_SPICE),
+    ("بصل", C_FRVEG), ("فجل", C_FRVEG), ("فطر", C_FRVEG),
+    # snack chips → sweets; plain potato → vegetable (رقائق before بطاطس)
+    ("رقائق", C_SWEET), ("شيبس", C_SWEET), ("بطاطس", C_FRVEG),
     # fish — before meat (تونة etc.)
     ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH),
     # meat / poultry
@@ -79,11 +90,9 @@ NAME_KEYWORDS = [
     # beverages (coffee intentionally NOT here)
     ("عصير", C_BEV), ("شاي", C_BEV), ("كركدي", C_BEV), ("نسكافيه", C_BEV),
     # others
-    ("عسل", C_HONEY),
     ("زيت", C_FAT), ("سمن", C_FAT),
     ("مربى", C_SWEET), ("شوكولا", C_SWEET), ("حلاوة", C_SWEET), ("كاكاو", C_SWEET), ("بسكويت", C_SWEET),
     ("علف", C_FEED), ("اعلاف", C_FEED),
-    ("بيض", C_RTE),
 ]
 
 # Name tokens that force a spice category over a fruit/veg or misc label
@@ -94,15 +103,16 @@ SPICE_NAME_OVERRIDE = ("فلفل",)
 SECTION_VALID = {
     # aflatoxins: no RTE / meat / beverage (Muhannad 2026-07-01). Nuts fold into
     # grains/legumes per GSO 1016 (no separate nuts category).
+    # RTE retired everywhere (Muhannad 2026-07-01: RTE→0); honey→sweets.
     "aflatoxins":           {C_CEREAL, C_SPICE, C_SWEET},
-    "food_chemistry":       {C_CEREAL, C_SPICE, C_RTE, C_FRVEG, C_SWEET, C_BEV,
-                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_HONEY, C_MISC},
-    "heavy_metals":         {C_CEREAL, C_SPICE, C_RTE, C_FRVEG, C_SWEET, C_BEV,
-                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_HONEY, C_MISC,
+    "food_chemistry":       {C_CEREAL, C_SPICE, C_FRVEG, C_SWEET, C_BEV,
+                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_MISC},
+    "heavy_metals":         {C_CEREAL, C_SPICE, C_FRVEG, C_SWEET, C_BEV,
+                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_MISC,
                              W_TAP, W_FILTER, W_DRINK},
-    "honey":                {C_HONEY, C_RTE},
+    "honey":                {C_SWEET},
     "hormones_antibiotics": {C_MEAT, C_FISH, C_DAIRY},
-    "pesticides":           {C_FRVEG, C_CEREAL, C_SPICE, C_RTE, C_DAIRY, C_FAT},
+    "pesticides":           {C_FRVEG, C_CEREAL, C_SPICE, C_DAIRY, C_FAT, C_SWEET},
     "water_analysis":       {W_TAP, W_FILTER, W_DRINK},
 }
 SECTION_REVIEW = {"aflatoxins": {C_FRVEG}}   # allowed but flagged (dried ok, fresh not)
@@ -110,7 +120,7 @@ SECTION_REVIEW = {"aflatoxins": {C_FRVEG}}   # allowed but flagged (dried ok, fr
 # real default; mixed sections fall back to Miscellaneous.
 SECTION_DEFAULT = {
     "aflatoxins": C_CEREAL, "pesticides": C_FRVEG, "water_analysis": W_TAP,
-    "honey": C_HONEY, "hormones_antibiotics": C_MEAT,
+    "honey": C_SWEET, "hormones_antibiotics": C_MEAT,
     "food_chemistry": C_MISC, "heavy_metals": C_MISC,
 }
 
