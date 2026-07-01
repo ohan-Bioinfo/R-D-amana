@@ -137,6 +137,24 @@ Edits to `chemistry/scripts/build_dashboard.py`, then regenerate
 - Phase 2: open the regenerated HTML, exercise year/section filters, confirm KPIs,
   test-filter options, Top-10 lists, title, and removed subtitle all behave.
 
+## 9a. Phase 0 outcome + approved decisions (2026-07-01)
+
+Audit shipped: `chemistry/scripts/audit_categories.py` →
+`chemistry/reports/category_audit_2026-07-01.{xlsx,md}`. Findings: 107 genuine
+cross-section mislabels (93 = coffee-in-aflatoxin), 18 review, ~2,500 UNCLASSIFIED
+2024 rows (name-guess gap, not mislabels). Merges preview clean; water M1 recovers
+54/64 (2025 column) + 41/46 (2024 red cells).
+
+**Muhannad's approved rules for Phase 1:**
+1. **Coffee (قهوة) → الحبوب والبقوليات** (valid for aflatoxin) — resolves the 93.
+2. **Remaining mislabels → section-aware best-judgment:** water names → water,
+   chicken-spice (`بهارات دجاج`) → spices, wheat (`ضرماء` false match) → cereal;
+   flag only the truly ambiguous (honey-in-aflatoxin, fresh vs dried fruit).
+3. **Both name merges confirmed** exactly as previewed: filter-water (461 rows) →
+   «مياه فلتر», شطة (132 rows) → «شطة».
+4. **2024 unclassified → section-aware best-effort** name rules; leftovers stay
+   "miscellaneous".
+
 ## 10. Regeneration commands
 ```bash
 PY=microbiology/.venv/bin/python   # or food_analysis/Iter-2/.venv/bin/python
