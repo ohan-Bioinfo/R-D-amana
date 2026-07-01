@@ -122,6 +122,17 @@ def main():
     tax_rows = [(sec["name"], "، ".join(sec.get("sub_municipalities", []))) for sec in st["sectors"]]
     tax_df = pd.DataFrame(tax_rows, columns=["sector", "sub_municipalities"])
 
+    # ---- RTE contents (Muhannad wants RTE→0; needs to rule where each goes)
+    RTE = C.C_RTE
+    rte_rows = []
+    for f in glob.glob(str(ROOT / "cleaned" / "chem_*.parquet")):
+        df = pd.read_parquet(f); sec = Path(f).name[5:-8]
+        r = df[df["sample_category_canonical"] == RTE]
+        for nm, n in r["sample_name"].astype(str).value_counts().items():
+            rte_rows.append((sec, nm, n))
+    rte_df = pd.DataFrame(sorted(rte_rows, key=lambda x: -x[2]),
+                          columns=["section", "sample_name", "count"])
+
     # Write via openpyxl directly — pandas ExcelWriter is unreliable with the
     # installed pandas 3.0 / openpyxl 3.1.5 combo ("At least one sheet must be
     # visible"). Direct openpyxl is what export_to_xlsx.py uses successfully.
@@ -133,8 +144,8 @@ def main():
     sheets = [
         ("GSO_1016_categories", gso_df), ("canonical_to_GSO", canon_df),
         ("section_valid_cats", sec_df), ("name_keyword_rules", kw_df),
-        ("name_groups", ng_df), ("sector_taxonomy", tax_df),
-        ("municipality_to_sector", map_df),
+        ("name_groups", ng_df), ("RTE_contents", rte_df),
+        ("sector_taxonomy", tax_df), ("municipality_to_sector", map_df),
     ]
     for name, df in sheets:
         ws = wb.create_sheet(name[:31])
@@ -145,6 +156,14 @@ def main():
             ws.append(["" if pd.isna(v) else str(v) for v in row])
         ws.freeze_panes = "A2"
     wb.save(OUT_XLSX)
+
+    # CSV mirrors (Muhannad prefers CSV for review) — one per table, UTF-8-BOM
+    # so Excel renders Arabic correctly.
+    csv_dir = ROOT / "reports" / "classification_review_csv"
+    csv_dir.mkdir(parents=True, exist_ok=True)
+    for name, df in sheets:
+        df.to_csv(csv_dir / f"{name}.csv", index=False, encoding="utf-8-sig")
+    print(f"wrote {len(sheets)} CSVs → {csv_dir}")
 
     unmapped = map_df[map_df["sector"] == "★ unmapped"]      # true junk only
     private = map_df[map_df["sector"] == "★ private"]
