@@ -262,9 +262,10 @@ def classify(section, raw_category, sample_name, sample_id=None):
     """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
     canon, flag = _classify_core(section, raw_category, sample_name, sample_id)
     # Pesticide residue testing is done on fresh produce, so anything that reads
-    # as a spice in that section (كزبرة/زنجبيل …) is really fruit & veg — convert
-    # ALL pesticide spices to fruit & vegetables (Muhannad 2026-07-04).
-    if section == "pesticides" and canon == C_SPICE:
+    # as a spice or a cereal/legume in that section (كزبرة/زنجبيل, …) is really
+    # fruit & veg — convert ALL pesticide spices AND cereals/legumes to fruit &
+    # vegetables (Muhannad 2026-07-04).
+    if section == "pesticides" and canon in (C_SPICE, C_CEREAL):
         return C_FRVEG, flag
     return canon, flag
 
