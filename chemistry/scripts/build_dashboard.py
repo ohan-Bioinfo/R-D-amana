@@ -54,6 +54,7 @@ CHEM_TO_GSO = {
     "مياه الحنفية":                  "Drinking Water",
     "مياه فلتر":                     "Drinking Water",  # canonical W_FILTER — direct map (was name-fallback)
     "مياه شرب/معبأة":                "Drinking Water",  # canonical W_DRINK — direct map (was name-fallback)
+    "مياه صالحة للشرب":              "Drinking Water",  # merged potable water W_POTABLE (2026-07-04)
     "مياه شرب":                      "Drinking Water",
     "مياه غير صالحة للشرب":          "Non-potable Water",  # C_NONPOT — basin/standing/mobile (2026-07-04)
     "المربى والجلي":                 "Jelly, Jam and Marmalade",

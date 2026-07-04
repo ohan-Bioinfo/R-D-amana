@@ -61,6 +61,10 @@ NAME_OVERRIDE = [
 # water subtypes (all → GSO "Drinking Water" EXCEPT C_NONPOT)
 W_TAP = "مياه الحنفية"; W_FILTER = "مياه فلتر"; W_DRINK = "مياه شرب/معبأة"
 C_NONPOT = "مياه غير صالحة للشرب"   # → GSO "Non-potable Water" (2026-07-04)
+# Water collapses to exactly TWO classes (Muhannad 2026-07-04): potable (tap /
+# filter / bottled merged) and non-potable. The tap/filter/bottled constants are
+# still used internally by the subtype detector, then merged at the end.
+W_POTABLE = "مياه صالحة للشرب"      # → GSO "Drinking Water"
 
 # ---------------------------------------------------------------- prefix table
 # sample_id prefix → canonical category. Derived from Muhannad's prefix tab plus
@@ -273,12 +277,12 @@ def classify(section, raw_category, sample_name, sample_id=None):
     # vegetables (Muhannad 2026-07-04).
     if section == "pesticides" and canon in (C_SPICE, C_CEREAL):
         return C_FRVEG, flag
-    # ubot = UN-bottled water, so it cannot be مياه شرب/معبأة (bottled). Any
-    # ubot sample that resolved to bottled/drinking (generic or unfilled names)
-    # is tap water → مياه الحنفية (Muhannad 2026-07-04). Filter and non-potable
-    # subtypes are left untouched.
-    if canon == W_DRINK and _prefix(sample_id) == "ubot":
-        return W_TAP, flag
+    # Water = exactly two classes: merge tap / filter / bottled into one potable
+    # «مياه صالحة للشرب»; non-potable «مياه غير صالحة للشرب» stays separate. This
+    # runs last so it also collapses water values coming from the per-sample_id
+    # corrections (Muhannad 2026-07-04).
+    if canon in (W_TAP, W_FILTER, W_DRINK):
+        return W_POTABLE, flag
     return canon, flag
 
 
