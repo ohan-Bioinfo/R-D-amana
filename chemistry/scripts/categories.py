@@ -260,6 +260,16 @@ def _cat_from_raw(raw) -> str | None:
 
 def classify(section, raw_category, sample_name, sample_id=None):
     """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
+    canon, flag = _classify_core(section, raw_category, sample_name, sample_id)
+    # Pesticide residue testing is done on fresh produce, so anything that reads
+    # as a spice in that section (كزبرة/زنجبيل …) is really fruit & veg — convert
+    # ALL pesticide spices to fruit & vegetables (Muhannad 2026-07-04).
+    if section == "pesticides" and canon == C_SPICE:
+        return C_FRVEG, flag
+    return canon, flag
+
+
+def _classify_core(section, raw_category, sample_name, sample_id=None):
     n = _norm(sample_name)
 
     # -1. Precise per-sample_id correction from Muhannad's «التصنيف الصحيح»
