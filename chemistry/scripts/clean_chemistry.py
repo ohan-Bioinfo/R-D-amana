@@ -400,7 +400,8 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
 
             # Canonical sample-category + name grouping (2026-07-01 spec).
             canon, cat_flag = categories.classify(
-                section, rec.get("sample_category"), rec.get("sample_name"))
+                section, rec.get("sample_category"), rec.get("sample_name"),
+                rec.get("sample_id"))
             rec["sample_category_canonical"] = canon
             rec["category_flag"] = cat_flag
             grp = categories.name_group(rec.get("sample_name"))

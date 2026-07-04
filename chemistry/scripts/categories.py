@@ -1,48 +1,140 @@
 #!/usr/bin/env python3
 """Canonical sample-category classification for the chemistry pipeline.
 
-Single source of truth for turning the lab's messy `sample_category` labels
-(and, for 2024 rows that have none, the `sample_name`) into a clean canonical
-category, with per-section validation and section-aware best-judgment.
+Single source of truth for turning a sample into a clean canonical category.
 
-Approved rules (2026-07-01 spec, Phase 0 sign-off):
-  1. Coffee (قهوة) → الحبوب والبقوليات (valid for aflatoxin; coffee is an
-     aflatoxin-tested commodity). Only affects 2024 rows (2025 has raw labels).
-  2. Section-aware best-judgment: a category that is invalid for the section is
-     overridden by a section-valid category derived from the name when possible
-     (e.g. `مياه غسيل ادوات` mislabeled Meat → water). Spice keywords are checked
-     before meat so `بهارات دجاج` (chicken *spices*) → spices, not meat. Bare
-     `ماء` is NOT a water keyword (it false-matched `ضرماء` = a wheat town).
-  3. Name grouping (D4/D5): `فلتر` names → «مياه فلتر»; شطة variants → «شطة»
-     (the coffee `قهوة خولاني وشط` is excluded — needs شط + ة/ه).
-  4. 2024 leftovers → section-aware default (best-effort), else «أغذية متنوعة».
+Classification order (2026-07-04 — Muhannad's validated re-classification):
+  1. sample_id PREFIX → product → category (PRIMARY key). The lab encodes the
+     product in the sample_id prefix (e.g. `al-0100` = لوز/almond, `uu-pe-0510`
+     = فلفل/pepper, `zab-…` = زبيب/raisin). This is the most reliable signal and
+     overrides mislabeled raw categories (e.g. a meat sample tagged "Tap water").
+     Prefix→product decode table: reports/…-Corrected.xlsx tab
+     "related-missing-code prefix for".
+  2. Water sub-classification by name/raw (tap / filter / bottled / NON-POTABLE).
+  3. Sample-name keyword → category (for `1-####` IDs that carry no product
+     prefix but name the product).
+  4. Raw sample_category keyword.
+  5. Default → «أغذية متنوعة» (Miscellaneous), flagged `defaulted`.
+
+Muhannad's 2026-07-04 rulings (reverse the earlier 2026-07-01 taxonomy):
+  * Nuts (لوز/فستق/كاجو/بندق/جوز/ترمس/مكسرات) → sweets/chocolate (were grains).
+  * فلفل (pepper) → fruit & vegetables (was spices).
+  * بصل مجفف (dried onion) → fruit & vegetables (was spices).
+  * زبيب (raisin), سلطة (salad), رقائق/شيبس (chips) → fruit & vegetables.
+  * سمسم (sesame) → miscellaneous (was grains).
+  * هريس/جريش (harees) → cereals; مربى → jelly/jam; حليب… → dairy.
+  * NEW category: non-potable water «مياه غير صالحة للشرب» for حوض/راكد/متحرك.
+  * Per-section valid-category gating RETIRED — category comes purely from the
+    product (prefix/name); no more section-based `suspect` overrides.
 
 Public API:
-  classify(section, raw_category, sample_name) -> (canonical, flag)
-      flag ∈ {None, 'review', 'reclassified', 'suspect', 'defaulted'}
-  name_group(sample_name) -> str | None      # display-name group, or None
+  classify(section, raw_category, sample_name, sample_id) -> (canonical, flag)
+      flag ∈ {None, 'defaulted'}
+  name_group(sample_name) -> str | None
 """
 from __future__ import annotations
 import re
 
 # ------------------------------------------------------------ canonical vocab
-C_CEREAL = "الحبوب والبقوليات"; C_SPICE = "البهارات والصوصات"; C_RTE = "الأطعمة الجاهزة للأكل"
+C_CEREAL = "الحبوب والبقوليات"; C_SPICE = "البهارات والصوصات"
 C_FRVEG = "الفواكه والخضار"; C_SWEET = "الحلويات والشوكولاتة"; C_BEV = "المشروبات"
 C_MEAT = "اللحوم والدواجن"; C_FISH = "الأسماك والمأكولات البحرية"; C_DAIRY = "الحليب ومنتجات الألبان"
-C_FAT = "الدهون والزيوت"; C_FEED = "الأعلاف"; C_HONEY = "عسل"
-W_TAP = "مياه الحنفية"; W_FILTER = "مياه فلتر"; W_DRINK = "مياه شرب/معبأة"
+C_FAT = "الدهون والزيوت"; C_FEED = "الأعلاف"
+C_JAM = "المربى والجلي"          # → GSO "Jelly, Jam and Marmalade"
 C_MISC = "أغذية متنوعة"
+# water subtypes (all → GSO "Drinking Water" EXCEPT C_NONPOT)
+W_TAP = "مياه الحنفية"; W_FILTER = "مياه فلتر"; W_DRINK = "مياه شرب/معبأة"
+C_NONPOT = "مياه غير صالحة للشرب"   # → GSO "Non-potable Water" (2026-07-04)
 
-# raw category text (bilingual) -> canonical. First substring hit wins.
+# ---------------------------------------------------------------- prefix table
+# sample_id prefix → canonical category. Derived from Muhannad's prefix tab plus
+# the 3,093 validated sheet-8 corrections (majority vote; only prefixes with
+# solid support or an explicit product decode are listed). Ambiguous prefixes
+# (e.g. `pe` = peanut AND pepper) are deliberately omitted so the NAME rules
+# below disambiguate them.
+PREFIX_TO_CANONICAL = {
+    # fruit & vegetables
+    "uu-pe": C_FRVEG, "zab": C_FRVEG, "sal": C_FRVEG, "oou-on": C_FRVEG,
+    "uu-le": C_FRVEG, "uu-pr": C_FRVEG, "uo-ap": C_FRVEG, "oo-oss-po": C_FRVEG,
+    "oau-fi": C_FRVEG, "oau-da": C_FRVEG, "uoss-be": C_FRVEG, "fr": C_FRVEG,
+    "mango": C_FRVEG, "veg": C_FRVEG, "co": C_FRVEG,
+    # sweets / chocolate  (nuts live here now)
+    "al": C_SWEET, "pis": C_SWEET, "lup": C_SWEET, "walnuts": C_SWEET, "cho": C_SWEET,
+    # dairy
+    "milk": C_DAIRY,
+    # miscellaneous  (sesame)
+    "ses": C_MISC, "se": C_MISC,
+    # spices / sauces
+    "cer": C_SPICE, "car": C_SPICE, "spic": C_SPICE, "sau": C_SPICE,
+    "salt": C_SPICE, "hs": C_SPICE,
+    # cereals / legumes
+    "puree": C_CEREAL, "coff": C_CEREAL, "len": C_CEREAL, "lens": C_CEREAL,
+    "bea": C_CEREAL, "ma": C_CEREAL, "bu": C_CEREAL, "cor": C_CEREAL,
+    # fish
+    "sh": C_FISH, "fish": C_FISH,
+    # meat
+    "raw": C_MEAT,
+    # jelly / jam
+    "sweet": C_JAM,
+}
+# prefixes that denote water — routed to the water sub-classifier (name decides
+# tap / filter / bottled / non-potable).
+WATER_PREFIXES = {"bot", "ubot", "wat", "water"}
+
+_PREFIX_RE = re.compile(r"^([a-z]+(?:-[a-z]+)*)-\d")
+
+# --------------------------------------------------------------- name keywords
+# sample-name keyword → canonical (used for rows with no product prefix — mostly
+# the aflatoxin `1-####` IDs, and 2024 rows with no raw category). ORDER MATTERS.
+NAME_KEYWORDS = [
+    # honey / molasses / jam → sweets & jam
+    ("مربى", C_JAM),
+    ("عسل", C_SWEET), ("دبس", C_SWEET),
+    # nuts → sweets (REVERSED 2026-07-04)
+    ("لوز", C_SWEET), ("فستق", C_SWEET), ("كاجو", C_SWEET), ("بندق", C_SWEET),
+    ("جوز", C_SWEET), ("مكسرات", C_SWEET), ("ترمس", C_SWEET), ("فول سوداني", C_SWEET),
+    # sesame → miscellaneous (REVERSED). Tahini stays a sauce/spice.
+    ("طحينة", C_SPICE), ("طحينه", C_SPICE), ("سمسم", C_MISC),
+    # pepper → fruit & veg (REVERSED). Before spices so فلفل never reads as spice.
+    ("فلفل", C_FRVEG),
+    # dried onion → fruit & veg (REVERSED). Before spices.
+    ("بصل مجفف", C_FRVEG),
+    # raisin / dried fruit, salad, chips, fresh veg → fruit & veg
+    ("زبيب", C_FRVEG), ("سلطة", C_FRVEG), ("رقائق", C_FRVEG), ("شيبس", C_FRVEG),
+    ("بطاطس", C_FRVEG), ("بصل", C_FRVEG), ("فجل", C_FRVEG), ("فطر", C_FRVEG),
+    # spices / sauces
+    ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE),
+    ("بهار", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE),
+    ("قرفة", C_SPICE), ("كمون", C_SPICE), ("كزبرة", C_SPICE), ("حبة البركة", C_SPICE),
+    ("حبةالبركة", C_SPICE),
+    # cereals / legumes / grains — coffee lives here (aflatoxin commodity)
+    ("قهوة", C_CEREAL), ("قهوه", C_CEREAL),
+    ("هريس", C_CEREAL), ("جريش", C_CEREAL), ("جريس", C_CEREAL),
+    ("ارز", C_CEREAL), ("أرز", C_CEREAL), ("قمح", C_CEREAL), ("عدس", C_CEREAL),
+    ("حمص", C_CEREAL), ("فول", C_CEREAL), ("فاصولي", C_CEREAL), ("ذرة", C_CEREAL),
+    ("شعير", C_CEREAL), ("خبز", C_CEREAL), ("توست", C_CEREAL), ("طحين", C_CEREAL),
+    ("سميد", C_CEREAL),
+    # fish — before meat
+    ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH),
+    ("سلمون", C_FISH), ("بلطي", C_FISH),
+    # meat / poultry
+    ("لحم", C_MEAT), ("دجاج", C_MEAT), ("فروج", C_MEAT), ("شاورما", C_MEAT), ("كباب", C_MEAT),
+    # dairy
+    ("حليب", C_DAIRY), ("لبن", C_DAIRY), ("جبن", C_DAIRY), ("زبادي", C_DAIRY), ("قشطة", C_DAIRY),
+    # beverages
+    ("عصير", C_BEV), ("شاي", C_BEV), ("كركدي", C_BEV), ("نسكافيه", C_BEV),
+    # fats
+    ("زيت", C_FAT), ("سمن", C_FAT),
+    # sweets (bakery/confectionery)
+    ("شوكولا", C_SWEET), ("حلاوة", C_SWEET), ("كاكاو", C_SWEET), ("بسكويت", C_SWEET),
+    # feed
+    ("علف", C_FEED), ("اعلاف", C_FEED),
+]
+
+# raw category text (bilingual) → canonical. Last-resort fallback.
 CAT_KEYWORDS = [
-    ("فلتر", W_FILTER),
-    ("حنفي", W_TAP), ("tap water", W_TAP),
-    ("معبأ", W_DRINK), ("شرب", W_DRINK), ("bottled", W_DRINK), ("unbottled", W_DRINK),
-    ("غير المعبأ", W_DRINK), ("متحرك", W_DRINK), ("drinking", W_DRINK),
     ("حبوب", C_CEREAL), ("بقول", C_CEREAL), ("cereal", C_CEREAL), ("legume", C_CEREAL),
     ("بهار", C_SPICE), ("صوص", C_SPICE), ("spice", C_SPICE), ("sauce", C_SPICE),
-    # NB: "ready to eat" intentionally NOT mapped — RTE is retired (Muhannad
-    # 2026-07-01: RTE→0). Such rows fall through to name-based classification.
     ("فواكه", C_FRVEG), ("خضار", C_FRVEG), ("fruit", C_FRVEG), ("vegetable", C_FRVEG),
     ("حلوي", C_SWEET), ("شوكولا", C_SWEET), ("شكولا", C_SWEET), ("sweet", C_SWEET), ("chocolate", C_SWEET),
     ("مشروب", C_BEV), ("beverage", C_BEV),
@@ -51,94 +143,42 @@ CAT_KEYWORDS = [
     ("ألبان", C_DAIRY), ("البان", C_DAIRY), ("حليب", C_DAIRY), ("dairy", C_DAIRY), ("milk", C_DAIRY),
     ("دهون", C_FAT), ("زيوت", C_FAT), ("oil", C_FAT), ("fat", C_FAT),
     ("اعلاف", C_FEED), ("أعلاف", C_FEED), ("fodder", C_FEED), ("feed", C_FEED),
-    # Honey → sweets/chocolate (Muhannad 2026-07-01).
+    ("مربى", C_JAM), ("jam", C_JAM), ("jelly", C_JAM),
     ("عسل", C_SWEET), ("honey", C_SWEET), ("دبس", C_SWEET),
 ]
 
-# sample-name keyword -> canonical (used when the row has NO raw category, i.e.
-# all of 2024). ORDER MATTERS: water & spices are listed before meat so that
-# `بهارات دجاج` resolves to spices and `قهوة` (coffee) resolves to grains.
-NAME_KEYWORDS = [
-    # water — note: NO bare "ماء" (false-matched ضرماء = wheat town)
-    ("فلتر", W_FILTER),
-    ("مياه", W_TAP), ("مياة", W_TAP), ("موية", W_TAP), ("مويه", W_TAP), ("حنفي", W_TAP), ("المياه", W_TAP),
-    # honey/molasses → sweets, FIRST among foods so "عسل حبة البركة" → sweets
-    ("عسل", C_SWEET), ("دبس", C_SWEET),
-    # spices / sauces — before meat so chicken-spice → spices
-    ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE), ("بهار", C_SPICE),
-    ("فلفل", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE), ("قرفة", C_SPICE),
-    ("كمون", C_SPICE), ("كزبرة", C_SPICE),
-    # cereals / legumes / nuts — coffee (قهوة) lives here per approval #1
-    ("قهوة", C_CEREAL), ("قهوه", C_CEREAL),
-    ("ارز", C_CEREAL), ("أرز", C_CEREAL), ("قمح", C_CEREAL), ("عدس", C_CEREAL), ("حمص", C_CEREAL),
-    ("فول", C_CEREAL), ("فاصولي", C_CEREAL), ("ذرة", C_CEREAL), ("شعير", C_CEREAL), ("لوز", C_CEREAL),
-    ("فستق", C_CEREAL), ("كاجو", C_CEREAL), ("بندق", C_CEREAL), ("جوز", C_CEREAL), ("سمسم", C_CEREAL),
-    ("ترمس", C_CEREAL), ("جريش", C_CEREAL), ("بر ", C_CEREAL), ("مكسرات", C_CEREAL),
-    # grains: bread/flour/semolina (ex-RTE items)
-    ("خبز", C_CEREAL), ("توست", C_CEREAL), ("طحين", C_CEREAL), ("سميد", C_CEREAL),
-    # dried onion is a spice; fresh onion/radish/mushroom are vegetables
-    ("بصل مجفف", C_SPICE), ("حبة البركة", C_SPICE), ("حبةالبركة", C_SPICE),
-    ("بصل", C_FRVEG), ("فجل", C_FRVEG), ("فطر", C_FRVEG),
-    # snack chips → sweets; plain potato → vegetable (رقائق before بطاطس)
-    ("رقائق", C_SWEET), ("شيبس", C_SWEET), ("بطاطس", C_FRVEG),
-    # fish — before meat (تونة etc.)
-    ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH),
-    # meat / poultry
-    ("لحم", C_MEAT), ("دجاج", C_MEAT), ("فروج", C_MEAT), ("شاورما", C_MEAT), ("كباب", C_MEAT),
-    # dairy
-    ("حليب", C_DAIRY), ("لبن", C_DAIRY), ("جبن", C_DAIRY), ("زبادي", C_DAIRY), ("قشطة", C_DAIRY),
-    # beverages (coffee intentionally NOT here)
-    ("عصير", C_BEV), ("شاي", C_BEV), ("كركدي", C_BEV), ("نسكافيه", C_BEV),
-    # others
-    ("زيت", C_FAT), ("سمن", C_FAT),
-    ("مربى", C_SWEET), ("شوكولا", C_SWEET), ("حلاوة", C_SWEET), ("كاكاو", C_SWEET), ("بسكويت", C_SWEET),
-    ("علف", C_FEED), ("اعلاف", C_FEED),
-]
+# water detection + subtype
+_WATER_HINTS = ("مياه", "مياة", "موية", "مويه", "حنفي", "فلتر", "معبأ",
+                "tap water", "drinking water", "bottled water")
+_NONPOTABLE = ("حوض", "راكد", "متحرك")   # basin / standing / mobile → non-potable
 
-# Name tokens that force a spice category over a fruit/veg or misc label
-# (Muhannad 2026-07-01: فلفل / pepper is a spice, not a vegetable).
-SPICE_NAME_OVERRIDE = ("فلفل",)
-
-# per-section valid canonical categories (approved draft).
-SECTION_VALID = {
-    # aflatoxins: no RTE / meat / beverage (Muhannad 2026-07-01). Nuts fold into
-    # grains/legumes per GSO 1016 (no separate nuts category).
-    # RTE retired everywhere (Muhannad 2026-07-01: RTE→0); honey→sweets.
-    "aflatoxins":           {C_CEREAL, C_SPICE, C_SWEET},
-    "food_chemistry":       {C_CEREAL, C_SPICE, C_FRVEG, C_SWEET, C_BEV,
-                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_MISC},
-    "heavy_metals":         {C_CEREAL, C_SPICE, C_FRVEG, C_SWEET, C_BEV,
-                             C_MEAT, C_FISH, C_DAIRY, C_FAT, C_FEED, C_MISC,
-                             W_TAP, W_FILTER, W_DRINK},
-    "honey":                {C_SWEET},
-    "hormones_antibiotics": {C_MEAT, C_FISH, C_DAIRY},
-    "pesticides":           {C_FRVEG, C_CEREAL, C_SPICE, C_DAIRY, C_FAT, C_SWEET},
-    "water_analysis":       {W_TAP, W_FILTER, W_DRINK},
-}
-SECTION_REVIEW = {"aflatoxins": {C_FRVEG}}   # allowed but flagged (dried ok, fresh not)
-# 2024 leftover default (best-effort). Only sections with a dominant type get a
-# real default; mixed sections fall back to Miscellaneous.
-SECTION_DEFAULT = {
-    "aflatoxins": C_CEREAL, "pesticides": C_FRVEG, "water_analysis": W_TAP,
-    "honey": C_SWEET, "hormones_antibiotics": C_MEAT,
-    "food_chemistry": C_MISC, "heavy_metals": C_MISC,
-}
-
-_SHATTA = re.compile(r"شط[ةه]")   # شطة/شطه/الشطة; excludes وشط (coffee)
+_SHATTA = re.compile(r"شط[ةه]")
 
 
 def _norm(s) -> str:
     return "" if s is None else str(s).strip().strip('"').strip().lower()
 
 
-def _cat_from_raw(raw) -> str | None:
-    s = _norm(raw)
-    if not s or s in ("<na>", "nan", "none"):
-        return None
-    for kw, canon in CAT_KEYWORDS:
-        if kw.lower() in s:
-            return canon
-    return None
+def _prefix(sample_id) -> str | None:
+    s = _norm(sample_id)
+    m = _PREFIX_RE.match(s)
+    return m.group(1) if m else None
+
+
+def _looks_like_water(*texts) -> bool:
+    blob = " ".join(_norm(t) for t in texts)
+    return any(h.lower() in blob for h in _WATER_HINTS)
+
+
+def _water_subtype(raw, name) -> str:
+    blob = _norm(name) + " " + _norm(raw)
+    if any(k in blob for k in _NONPOTABLE):
+        return C_NONPOT
+    if "فلتر" in blob:
+        return W_FILTER
+    if any(k in blob for k in ("معبأ", "bottled", "drinking", "شرب")):
+        return W_DRINK
+    return W_TAP
 
 
 def _cat_from_name(name) -> str | None:
@@ -151,42 +191,40 @@ def _cat_from_name(name) -> str | None:
     return None
 
 
-def classify(section: str, raw_category, sample_name):
-    """Return (canonical_category, flag)."""
-    valid = SECTION_VALID.get(section, set())
-    review = SECTION_REVIEW.get(section, set())
+def _cat_from_raw(raw) -> str | None:
+    s = _norm(raw)
+    if not s or s in ("<na>", "nan", "none"):
+        return None
+    for kw, canon in CAT_KEYWORDS:
+        if kw.lower() in s:
+            return canon
+    return None
 
-    base = _cat_from_raw(raw_category)
-    if base is None:
-        base = _cat_from_name(sample_name)
 
-    if base is None:
-        return SECTION_DEFAULT.get(section, C_MISC), "defaulted"
+def classify(section, raw_category, sample_name, sample_id=None):
+    """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
+    pfx = _prefix(sample_id)
 
-    # Spice override: فلفل (pepper) is a spice, not a vegetable/cereal/misc,
-    # whatever the lab labelled it — ALL of them (Muhannad 2026-07-01).
-    if base not in (W_TAP, W_FILTER, W_DRINK):
-        s = _norm(sample_name)
-        if any(tok in s for tok in SPICE_NAME_OVERRIDE):
-            base = C_SPICE
+    # 1. Explicit product prefix (overrides mislabeled raw categories).
+    if pfx in PREFIX_TO_CANONICAL:
+        return PREFIX_TO_CANONICAL[pfx], None
 
-    # Water subtype refinement (D4): a name that says فلتر / معبأ wins over a
-    # generic "Tap water" raw label, so filter/bottled water gets its own slice.
-    if base in (W_TAP, W_FILTER, W_DRINK):
-        nh = _cat_from_name(sample_name)
-        if nh in (W_FILTER, W_DRINK) and nh != base:
-            base = nh
+    # 2. Water — by prefix or by text. Sub-classify tap/filter/bottled/non-potable.
+    if pfx in WATER_PREFIXES or _looks_like_water(raw_category, sample_name):
+        return _water_subtype(raw_category, sample_name), None
 
-    if base in valid:
+    # 3. Sample-name product keyword (nuts/pepper/… reversals applied).
+    base = _cat_from_name(sample_name)
+    if base:
         return base, None
-    if base in review:
-        return base, "review"
 
-    # invalid for this section — try a section-valid name hint (best-judgment)
-    hint = _cat_from_name(sample_name)
-    if hint in valid:
-        return hint, "reclassified"
-    return base, "suspect"      # kept, but flagged for review
+    # 4. Raw sample_category keyword.
+    base = _cat_from_raw(raw_category)
+    if base:
+        return base, None
+
+    # 5. Default.
+    return C_MISC, "defaulted"
 
 
 def name_group(sample_name) -> str | None:
@@ -199,6 +237,6 @@ def name_group(sample_name) -> str | None:
         return W_FILTER
     if _SHATTA.search(s):
         return "شطة"
-    if "فلفل" in s:                 # consolidate 74 pepper variants (Muhannad 2026-07-01)
+    if "فلفل" in s:
         return "فلفل"
     return None

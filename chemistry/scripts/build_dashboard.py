@@ -8,7 +8,7 @@ and emits a slim per-row payload. The UI provides:
   - 6 KPI cards
   - Monthly stacked bar (valid/invalid/unknown)
   - Validity donut
-  - Top failed tests bar
+  - Top non-compliant tests bar
   - Top repeat-offender facilities table
   - Sample-category pass/fail breakdown table
   - Drilldown table of invalid / matching samples (first 200)
@@ -42,7 +42,8 @@ CHEM_TO_GSO = {
     "الحلويات والشوكولاتة":          "Chocolate, Sweets and their Ingredients",
     "الحلويات والشكولاته":           "Chocolate, Sweets and their Ingredients",  # actual chem spelling
     "منتجات الألبان":                "Dairy Products",
-    "الحليب ومنتجات الالبان":        "Dairy Products",  # actual chem spelling
+    "الحليب ومنتجات الالبان":        "Dairy Products",  # actual chem spelling (no hamza)
+    "الحليب ومنتجات الألبان":        "Dairy Products",  # canonical form from categories.py (C_DAIRY)
     "المشروبات":                     "Beverages",
     "الأسماك والمأكولات البحرية":     "Fish and Shellfish their Products",
     "البيض ومنتجاته":                "Egg and Egg Products",
@@ -50,11 +51,17 @@ CHEM_TO_GSO = {
     "الدهون والزيوت":                "Fats and Oils",  # word-order variant
     "المياه المعبأة":                "Drinking Water",
     "مياه الحنفية":                  "Drinking Water",
+    "مياه فلتر":                     "Drinking Water",  # canonical W_FILTER — direct map (was name-fallback)
+    "مياه شرب/معبأة":                "Drinking Water",  # canonical W_DRINK — direct map (was name-fallback)
     "مياه شرب":                      "Drinking Water",
+    "مياه غير صالحة للشرب":          "Non-potable Water",  # C_NONPOT — basin/standing/mobile (2026-07-04)
     "المربى والجلي":                 "Jelly, Jam and Marmalade",
     "أغذية أطفال":                   "Infants, Children and Certain Categories of Dietetic Foods",
     "اعلاف":                         "Animal Feed",
-    "عينات خاصه":                    "Miscellaneous Foods",
+    "الأعلاف":                       "Animal Feed",   # canonical form from categories.py (C_FEED)
+    # "عينات خاصه" mapping deleted 2026-07-04 (Muhannad's GSO_bridge annotation);
+    # private-sample rows now classify by their product name instead.
+    "أغذية متنوعة":                  "Miscellaneous Foods",  # canonical C_MISC — must NOT fall through to a name-guessed GSO
 }
 # Fallback name → GSO mapping (added 2026-06-25 because 2024 chemistry xlsx
 # have no Sample Category column — without this every 2024 row would collapse
@@ -102,6 +109,24 @@ def _to_gso(cat: str | None, sample_name: str | None = None) -> str:
     by_name = _gso_from_name(sample_name)
     if by_name: return by_name
     return "Miscellaneous Foods"
+
+# The cleaner stores `sector` as the Arabic amanah-branch name, but the
+# dashboard's sector chips, map pins, and legends are all English. Map to
+# English at payload-build time so the filter chips actually match the data
+# (fix 2026-07-01 — previously the English chips matched nothing). Unknown /
+# None values pass through untouched.
+SECTOR_AR_TO_EN = {
+    "فرع أمانة في الشرق":            "East",
+    "فرع أمانة في الشمال":           "North",
+    "فرع أمانة في الغرب":            "West",
+    "فرع أمانة في المنطقة الوسطى":   "Central",
+    "فرع أمانة في الجنوب":           "South",
+}
+
+def _sector_en(sector):
+    if sector is None:
+        return None
+    return SECTOR_AR_TO_EN.get(str(sector).strip(), sector)
 
 SECTIONS = [
     ("aflatoxins",           "Aflatoxins",            "Aflatoxins B1+B2+G1+G2 summed to Total (ppb); only Total has a regulatory limit (per lab practice 2026-06-25)"),
@@ -181,7 +206,7 @@ def build_payload() -> dict:
                 # restored 2026-06-25). Rows without a sector (junk values,
                 # private-sample placeholders, sections without municipality
                 # column like pesticides 2024) get None — no raw fallback.
-                (_val(getattr(r, "sector", None))
+                (_sector_en(_val(getattr(r, "sector", None)))
                   if "sector" in df.columns else None),
                 _val(getattr(r, "district_name", None)),
                 (1 if r.is_valid is True else (0 if r.is_valid is False else None))
@@ -299,7 +324,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>أمانة منطقة الرياض · R&amp;D Chemistry Decision Dashboard</title>
+<title>مختبرات أمانة الرياض</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
@@ -556,7 +581,7 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   <div class="masthead-inner">
     <div class="logo"></div>
     <div class="titleblock">
-      <h2 class="title-ar">أمانة منطقة الرياض · مختبر صحة الغذاء والمياه</h2>
+      <h2 class="title-ar">مختبرات أمانة الرياض</h2>
       <div class="title-en">Riyadh Municipality · Research &amp; Development</div>
       <div class="subtitle-block">Chemistry Decision Dashboard</div>
     </div>
@@ -569,7 +594,6 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 
 <div class="page-body">
 <h1>Riyadh Municipality Lab</h1>
-<div class="subtitle" id="subtitle">Loading data…</div>
 
 <div class="error-banner" id="error-banner"></div>
 
@@ -621,8 +645,8 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   <div class="card full"><h2>GSO 1016 category — volume &amp; non-compliance</h2><div class="chart" id="chart-gso" style="min-height:340px"></div></div>
   <div class="card full"><h2>Top 10 most-contaminated subtypes <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— grouped by sample_name with parent GSO category. Minimum 20 samples per row.</span></h2><div id="chart-top-subtypes" style="overflow:auto"></div></div>
   <div class="card full"><h2>Riyadh map <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— awaiting per-sample geographic coordinates</span></h2><div id="chart-map" class="chart" style="min-height:480px"></div></div>
-  <div class="card full"><h2>Top failed tests</h2><div class="chart" id="chart-fail"></div></div>
-  <div class="card"><h2>Top repeat-offender facilities</h2><div id="tbl-facilities" style="overflow:auto;max-height:380px"></div></div>
+  <div class="card full"><h2>Top non-compliant tests</h2><div class="chart" id="chart-fail"></div></div>
+  <div class="card"><h2>Top 10 repeat-offender facilities</h2><div id="tbl-facilities" style="overflow:auto;max-height:380px"></div></div>
   <div class="card"><h2>Sample-category breakdown</h2><div id="tbl-categories" style="overflow:auto;max-height:380px"></div></div>
   <div class="card full">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -659,7 +683,7 @@ try {
   // resulting "merged" row aggregates validity (invalid wins > valid > unknown)
   // and collects the list of sections that tested the sample.
   const ALL_LABEL = "All sections";
-  const ALL_DESC  = "Total physical samples across every section. One sample tested in N panels = ONE row; verdict is aggregated (non-compliant if any panel failed).";
+  const ALL_DESC  = "Total physical samples across every section. One sample tested in N panels = ONE row; verdict is aggregated (non-compliant if any panel is non-compliant).";
 
   let _combinedCache = null;
   function getCombinedRows() {
@@ -787,8 +811,10 @@ try {
   function renderGlobalBanner() {
     let totalSamples = 0, totalValid = 0, totalInvalid = 0, totalUnknown = 0;
     const facSet = new Set(), munSet = new Set();
-    getCombinedRows().forEach(r => {
-      if (currentYear !== "all" && r[COLS.year] !== parseInt(currentYear, 10)) return;
+    // Recompute from the active filtered set so every KPI card reacts to the
+    // section / year / compliance / sector / GSO / search filters (U6,
+    // 2026-07-01). filteredRows() already applies all active filters.
+    filteredRows().forEach(r => {
       totalSamples++;
       if (r[COLS.is_valid] === 1) totalValid++;
       else if (r[COLS.is_valid] === 0) totalInvalid++;
@@ -833,7 +859,7 @@ try {
         <div class="gb-sub">${pct(totalValid, totalSamples)}% pass all panels</div></div>
       <div class="gb-item"><div class="gb-label">Non-compliant samples</div>
         <div class="gb-value" style="color:var(--crit)">${totalInvalid.toLocaleString()}</div>
-        <div class="gb-sub">${failPct}% failed at least 1 panel</div></div>
+        <div class="gb-sub">${failPct}% non-compliant in ≥1 panel</div></div>
       <div class="gb-item"><div class="gb-label">Without specifications</div>
         <div class="gb-value" style="color:var(--warn)">${totalUnknown.toLocaleString()}</div>
         ${unknownSub}</div>
@@ -845,9 +871,23 @@ try {
     // Separate test-level summary strip — distinct from the sample-level
     // banner above. Tests = individual test results across all samples
     // (e.g. one sample tested for 30 pesticides = 30 tests).
+    // The test counts are precomputed per YEAR across ALL sections only, so
+    // this strip is meaningful only for the all-sections view with no
+    // section/compliance/sector/GSO/search narrowing. Hide it otherwise so it
+    // never shows numbers that contradict the active filters (U6, 2026-07-01).
+    const testBanner = document.getElementById('test-banner');
+    const testBannerValid = isAllSections()
+      && activeCompliance.size === 0 && activeSectors.size === 0
+      && activeGso.size === 0 && !searchTerm;
+    if (!testBannerValid) {
+      testBanner.style.display = 'none';
+      testBanner.innerHTML = '';
+      return;
+    }
+    testBanner.style.display = '';
     const tFailPct = totalTests > 0 ? (100 * ncTests / totalTests).toFixed(2) : '0';
     const tCompPct = totalTests > 0 ? (100 * cTests / totalTests).toFixed(2) : '0';
-    document.getElementById('test-banner').innerHTML = `
+    testBanner.innerHTML = `
       <div class="gb-item"><div class="gb-label">${yrLabel} · total chemistry tests</div>
         <div class="gb-value" style="color:var(--accent)">${totalTests.toLocaleString()}</div>
         <div class="gb-sub">distinct test results across all samples</div></div>
@@ -944,13 +984,28 @@ try {
       wrap.appendChild(c);
     });
   }
+  // Rows for the active section (combined when "All") narrowed by the active
+  // YEAR only. Used to populate option lists (e.g. GSO chips) so they reflect
+  // the current section/year instead of the whole dataset (U5, 2026-07-01).
+  // Deliberately NOT narrowed by the chip filters themselves, so an option
+  // doesn't vanish the moment it's toggled on.
+  function chipScopeRows() {
+    let rows = isAllSections() ? getCombinedRows() : DATA.sections[currentSection].rows;
+    if (currentYear !== 'all') {
+      const y = parseInt(currentYear, 10);
+      rows = rows.filter(r => r[COLS.year] === y);
+    }
+    return rows;
+  }
+
   function renderGsoChips() {
     const wrap = document.getElementById('gso-chips');
     if (!wrap) return;
     wrap.innerHTML = '';
-    // Build list once from the combined data, sorted by sample volume.
+    // Rebuild from the currently-scoped rows (section + year), sorted by volume,
+    // so the option list tracks the active section/year (U5).
     const counts = new Map();
-    getCombinedRows().forEach(r => {
+    chipScopeRows().forEach(r => {
       const g = r[COLS.gso_category];
       if (g) counts.set(g, (counts.get(g) || 0) + 1);
     });
@@ -1130,7 +1185,7 @@ try {
     const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25);
     if (!entries.length) {
       Plotly.purge('chart-fail');
-      document.getElementById('chart-fail').innerHTML = '<p class="muted">No failed-test data for this filter.</p>';
+      document.getElementById('chart-fail').innerHTML = '<p class="muted">No non-compliant-test data for this filter.</p>';
       return;
     }
     // Gradient: top failures darker red, rest amber → orange so the eye lands
@@ -1151,14 +1206,14 @@ try {
       text: entries.map(e => `${e[1]}  ·  ${(e[1]*100/grandTotal).toFixed(1)}%`),
       textposition: 'outside',
       textfont: {size: 11, color: '#1c2742'},
-      hovertemplate: '<b>%{y}</b><br>Failed: %{x:,}<br>%{customdata:.1f}% of failures<extra></extra>',
+      hovertemplate: '<b>%{y}</b><br>Non-compliant: %{x:,}<br>%{customdata:.1f}% of non-compliant tests<extra></extra>',
       customdata: entries.map(e => e[1]*100/grandTotal),
       cliponaxis: false,
     }], {paper_bgcolor:'transparent', plot_bgcolor:'transparent',
         font:{color:'#1c2742', family:'Inter, system-ui, sans-serif'},
         margin:{t:10, r:80, b:35, l:280},
         height: Math.max(240, entries.length * 26 + 70),
-        xaxis: {gridcolor:'#e5e7eb', title: {text:'Failure count', font:{size:12}}, range:[0, top*1.18]},
+        xaxis: {gridcolor:'#e5e7eb', title: {text:'Non-compliance count', font:{size:12}}, range:[0, top*1.18]},
         yaxis: {automargin: true, autorange: 'reversed', tickfont:{size:12}},
         bargap: 0.25,
        }, {responsive:true, displayModeBar:false});
@@ -1328,7 +1383,7 @@ try {
     });
     const arr = Object.entries(fac).filter(([_, v]) => v.invalid >= 1)
       .sort((a,b) => b[1].invalid - a[1].invalid || (b[1].invalid/b[1].total) - (a[1].invalid/a[1].total))
-      .slice(0, 20);
+      .slice(0, 10);
     if (!arr.length) {
       document.getElementById('tbl-facilities').innerHTML = '<p class="muted">No facility-level invalid samples.</p>';
       return;
@@ -1340,7 +1395,7 @@ try {
         <td><span class="badge ${cls}">${v.invalid}</span></td><td>${p}%</td></tr>`;
     }).join('');
     document.getElementById('tbl-facilities').innerHTML = `<table>
-      <thead><tr><th>Facility</th><th>Total</th><th>Non-compliant</th><th>Fail %</th></tr></thead>
+      <thead><tr><th>Facility</th><th>Total</th><th>Non-compliant</th><th>Non-compliance %</th></tr></thead>
       <tbody>${tr}</tbody></table>`;
   }
 
@@ -1515,7 +1570,7 @@ try {
         <td>${p}%</td></tr>`;
     }).join('');
     document.getElementById('tbl-categories').innerHTML = `<table>
-      <thead><tr><th>Category</th><th>Total</th><th>Compliant</th><th>Non-compliant</th><th>Fail %</th></tr></thead>
+      <thead><tr><th>Category</th><th>Total</th><th>Compliant</th><th>Non-compliant</th><th>Non-compliance %</th></tr></thead>
       <tbody>${tr}</tbody></table>`;
   }
 
@@ -1590,12 +1645,7 @@ try {
     try {
       const desc = isAllSections() ? ALL_DESC : DATA.sections[currentSection].desc;
       document.getElementById('section-desc').textContent = desc;
-      // Subtitle = deduped sample count (one row per unique physical sample),
-      // not the per-section row count. Avoids the 15k-vs-12k confusion the
-      // old wording created.
-      const totalUnique = combinedTotal();
-      document.getElementById('subtitle').textContent =
-        `${totalUnique.toLocaleString()} total samples · years ${DATA.all_years.join(' + ')}`;
+      // Muted subtitle line under the masthead removed 2026-07-01 (U3).
       const fRows = filteredRows();
       document.getElementById('filter-status').textContent =
         searchTerm ? `→ ${fRows.length.toLocaleString()} match` : '';
@@ -1685,7 +1735,6 @@ try {
   renderAll();
 } catch (err) {
   console.error('Dashboard init failed:', err);
-  document.getElementById('subtitle').textContent = 'Failed to load: ' + err.message;
   const eb = document.getElementById('error-banner');
   eb.style.display = 'block';
   eb.textContent = 'Init error: ' + err.message;
