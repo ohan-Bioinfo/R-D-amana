@@ -62,7 +62,8 @@ CHEM_TO_GSO = {
     "الأعلاف":                       "Animal Feed",   # canonical form from categories.py (C_FEED)
     # "عينات خاصه" mapping deleted 2026-07-04 (Muhannad's GSO_bridge annotation);
     # private-sample rows now classify by their product name instead.
-    "أغذية متنوعة":                  "Miscellaneous Foods",  # canonical C_MISC — must NOT fall through to a name-guessed GSO
+    "أغذية متنوعة":                  "Miscellaneous Foods",  # canonical C_MISC (sesame only) — must NOT fall through to a name-guessed GSO
+    "أخرى":                          "Others",  # canonical C_OTHER — unclassified / junk leftovers (2026-07-04)
 }
 # Fallback name → GSO mapping (added 2026-06-25 because 2024 chemistry xlsx
 # have no Sample Category column — without this every 2024 row would collapse

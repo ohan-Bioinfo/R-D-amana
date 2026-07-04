@@ -42,7 +42,8 @@ C_MEAT = "اللحوم والدواجن"; C_FISH = "الأسماك والمأك�
 C_FAT = "الدهون والزيوت"; C_FEED = "الأعلاف"
 C_JAM = "المربى والجلي"          # → GSO "Jelly, Jam and Marmalade"
 C_RTE = "الأطعمة الجاهزة للأكل"   # → GSO "Ready to Eat Foods" (re-added 2026-07-04 for كشنة)
-C_MISC = "أغذية متنوعة"
+C_MISC = "أغذية متنوعة"          # RESERVED for sesame only (Muhannad 2026-07-04)
+C_OTHER = "أخرى"                 # → GSO "Others" — unclassified / junk leftovers
 
 # Explicit product-name overrides that WIN over the sample_id prefix — for
 # products whose lab prefix is wrong/shared (Muhannad 2026-07-04). Black seed
@@ -295,9 +296,10 @@ def classify(section, raw_category, sample_name, sample_id=None):
     if base:
         return base, None
 
-    # 5. Default — Miscellaneous is reserved for sesame; pesticide leftovers are
-    #    fresh produce (Muhannad 2026-07-04).
-    return SECTION_DEFAULT.get(section, C_MISC), "defaulted"
+    # 5. Default — Miscellaneous is reserved for sesame (ses/سمسم); pesticide
+    #    leftovers are fresh produce; everything else unclassified → «أخرى»
+    #    (Others), not Miscellaneous (Muhannad 2026-07-04).
+    return SECTION_DEFAULT.get(section, C_OTHER), "defaulted"
 
 
 def name_group(sample_name) -> str | None:
