@@ -215,9 +215,82 @@ grains (لوز 492 / فستق 367 / كاجو 263), suspect flags 22→5.
 already ONE canonical value in the data — they collapse once the dashboard is
 rebuilt against `sample_category_canonical`.
 
+## 9e. Phase 3 — validated re-classification + dashboard reactivity (2026-07-04)
+
+Muhannad validated the Phase 1/2 output in
+`chemistry/reports/category_location_validation_2026-07-01-Corrected.xlsx`
+(sheet 8 «التصنيف الصحيح» — 3,093 row edits — plus a sample_id-prefix decode tab)
+and issued a series of rulings that **revise several 2026-07-01 decisions**.
+
+**Classification engine (`categories.py`) — now layered; precedence top→down:**
+1. **Per-sample_id corrections** — `chemistry/scripts/category_corrections.csv`
+   (2,401 rows lifted verbatim from the «التصنيف الصحيح» column). Authoritative;
+   loaded at import, applied first. **This CSV is now a pipeline INPUT** — the
+   cleaner depends on it; regenerate categories after editing it.
+2. **Name overrides** (win over prefix) — حبة البركة/الحبة السوداء→spices,
+   كشنة→ready-to-eat, زيت زيتون→fats. Bread items skip, so «خبز بالحبة السوداء»
+   stays a cereal.
+3. **sample_id PREFIX → product** (`PREFIX_TO_CANONICAL`) — the lab encodes the
+   product in the id prefix (al=almond, uu-pe=pepper, zab=raisin, ses=sesame,
+   milk=dairy, raw=meat, bot/ubot=water …); overrides mislabeled raw categories.
+4. Water sub-classifier → 5. name keywords → 6. raw keyword → 7. default («أخرى»,
+   except the pesticide section which defaults to fruit & veg).
+
+**Taxonomy rulings (these REVERSE the 2026-07-01 taxonomy):**
+- Nuts (لوز/فستق/كاجو/بندق/جوز/ترمس/مكسرات) → **sweets** (were grains/legumes).
+- فلفل, بصل مجفف, زبيب, سلطة, رقائق/شيبس, خوخ → **fruit & veg** (فلفل was a spice).
+- سمسم → **Miscellaneous**; مربى → jelly/jam; حليب/لبن/جبن → dairy; هريس/جريش → cereals.
+- **Miscellaneous = sesame ONLY**; every other unclassified row → new **«أخرى» (Others)**.
+- **Water = two classes**: potable «مياه صالحة للشرب» (tap + filter + bottled
+  merged) and non-potable «مياه غير صالحة للشرب» (حوض/راكد/متحرك). `ubot`
+  (un-bottled) never maps to bottled.
+- **Pesticide section** (fresh-produce panel): ALL spices **and** cereals/legumes
+  → fruit & veg; the single beverage sample is dropped. Olive oil (زيت زيتون) →
+  fats (fixed a bug where «تون»/tuna is a substring of «زيتون»/olive).
+- Per-section valid-category **gating retired** — `category_flag` is now only
+  `None` or `defaulted`; classification comes purely from the product.
+
+**Data drops:** food_chemistry 2024 sheet-months 2024-01/02/04 (sparse — 23 rows).
+Total chemistry **15,786 → 15,762**.
+
+**Dashboard (`build_dashboard.py`) — Phase 2 + reactivity:**
+- Title «مختبرات أمانة الرياض»; top-10 violating facilities; "failed" → "non-compliant".
+- **KPIs react to the section tab** — sample cards recompute from `filteredRows()`;
+  the compliant/non-compliant **test** split is precomputed per `(section, year)`.
+- **"None" location bucket** for rows with no amanah sector (no-municipality /
+  private / unmapped = 3,433); sector chips show per-scope counts; "Sectors
+  covered" excludes None.
+- **Riyadh map is data-driven** — one marker per sector, size = sample volume,
+  colour = % non-compliance, count on the label. Sector chips/chart/map all use
+  the English sector names (`_sector_en`).
+- Aflatoxin section blurb removed; GSO chips reactive; build stamp shows date + time.
+
+**Current taxonomy (audited 2026-07-04, 15,762 rows):**
+
+| Canonical | GSO 1016 | Rows |
+|---|---|---|
+| الفواكه والخضار | Fruit and Vegetables | 7,248 |
+| الحبوب والبقوليات | Cereals; Legumes | 3,300 |
+| الحلويات والشوكولاتة | Chocolate, Sweets | 1,557 |
+| البهارات والصوصات | Spices / Sauces | 1,527 |
+| مياه صالحة للشرب | Drinking Water | 1,050 |
+| اللحوم والدواجن | Meat, Poultry | 427 |
+| أغذية متنوعة (sesame only) | Miscellaneous | 273 |
+| الأسماك والمأكولات البحرية | Fish | 167 |
+| الحليب ومنتجات الألبان | Dairy | 57 |
+| الأعلاف | Animal Feed | 55 |
+| المشروبات | Beverages | 40 |
+| مياه غير صالحة للشرب | Non-potable Water | 23 |
+| المربى والجلي | Jelly, Jam | 16 |
+| أخرى | Others | 15 |
+| الدهون والزيوت | Fats and Oils | 4 |
+| الأطعمة الجاهزة للأكل | Ready to Eat | 3 |
+
+Sectors: Central 4,504 · West 3,153 · North 1,833 · East 1,817 · South 1,022 · **None 3,433**.
+
 ## 10. Regeneration commands
 ```bash
-PY=microbiology/.venv/bin/python   # or food_analysis/Iter-2/.venv/bin/python
+PY=microbiology/.venv/bin/python
 $PY chemistry/scripts/clean_chemistry.py --section all
 cp chemistry/cleaned/*.parquet clean/chemistry/
 $PY clean/scripts/export_to_xlsx.py
