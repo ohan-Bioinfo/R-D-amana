@@ -459,6 +459,15 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
             audit["rows_out"] = len(kept)
         records = kept
 
+    # Drop unwanted months — food_chemistry 2024 Jan/Feb/April are sparse and
+    # not wanted (Muhannad 2026-07-04).
+    if section == "food_chemistry" and int(year) == 2024:
+        _drop_months = {"2024-01", "2024-02", "2024-04"}
+        before = len(records)
+        records = [r for r in records if r.get("sheet_year_month") not in _drop_months]
+        if before - len(records):
+            audit["flags"]["food_chem_2024_months_dropped"] = before - len(records)
+
     out_path = CLEAN_DIR / f"chem_{section}_{year}.parquet"
     string_cols = [
         "source_file", "sheet_name", "sheet_year_month",

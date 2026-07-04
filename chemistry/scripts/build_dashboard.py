@@ -649,7 +649,7 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   <div class="card full"><h2>Sector breakdown</h2><div class="chart" id="chart-municipalities" style="min-height:300px"></div></div>
   <div class="card full"><h2>GSO 1016 category — volume &amp; non-compliance</h2><div class="chart" id="chart-gso" style="min-height:340px"></div></div>
   <div class="card full"><h2>Top 10 most-contaminated subtypes <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— grouped by sample_name with parent GSO category. Minimum 20 samples per row.</span></h2><div id="chart-top-subtypes" style="overflow:auto"></div></div>
-  <div class="card full"><h2>Riyadh map <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— awaiting per-sample geographic coordinates</span></h2><div id="chart-map" class="chart" style="min-height:480px"></div></div>
+  <div class="card full"><h2>Riyadh map <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— samples by sector (marker size = volume, colour = % non-compliance)</span></h2><div id="chart-map" class="chart" style="min-height:480px"></div></div>
   <div class="card full"><h2>Top non-compliant tests</h2><div class="chart" id="chart-fail"></div></div>
   <div class="card"><h2>Top 10 repeat-offender facilities</h2><div id="tbl-facilities" style="overflow:auto;max-height:380px"></div></div>
   <div class="card"><h2>Sample-category breakdown</h2><div id="tbl-categories" style="overflow:auto;max-height:380px"></div></div>
@@ -1359,7 +1359,9 @@ try {
       + '<tbody>' + tr + '</tbody></table>';
   }
 
-  // Riyadh map placeholder — 5 sector centroids, awaiting per-sample coords.
+  // Riyadh map — 5 sector centroids. Marker size = sample volume, colour = %
+  // non-compliance; labels + hover carry the numbers (2026-07-04). The "None"
+  // bucket has no geographic location so it is not plotted here.
   const SECTOR_PINS = {
     'Central': [24.6877, 46.7219],
     'East':    [24.7275, 46.7840],
@@ -1368,16 +1370,45 @@ try {
     'South':   [24.5470, 46.7800],
   };
   function renderMapPlaceholder() {
-    const lats = Object.values(SECTOR_PINS).map(p => p[0]);
-    const lons = Object.values(SECTOR_PINS).map(p => p[1]);
-    const names = Object.keys(SECTOR_PINS);
+    const rows = filteredRows();
+    const agg = {};
+    rows.forEach(r => {
+      const s = r[COLS.municipality];
+      if (!s || !(s in SECTOR_PINS)) return;   // skip None / non-geographic
+      if (!agg[s]) agg[s] = { total: 0, inv: 0 };
+      agg[s].total++;
+      if (r[COLS.is_valid] === 0) agg[s].inv++;
+    });
+    const present = Object.keys(SECTOR_PINS).filter(s => agg[s]);
+    const node = document.getElementById('chart-map');
+    if (!present.length) {
+      Plotly.purge('chart-map');
+      node.innerHTML = '<p class="muted" style="padding:30px">No sector-located samples in the current filter.</p>';
+      return;
+    }
+    const maxTotal = Math.max(...present.map(s => agg[s].total));
+    const totals = present.map(s => agg[s].total);
+    const invs   = present.map(s => agg[s].inv);
+    const rates  = present.map((s, i) => totals[i] ? 100 * invs[i] / totals[i] : 0);
+    // Marker area ∝ volume (sqrt scale), 22..64 px.
+    const sizes  = totals.map(t => 22 + 42 * Math.sqrt(t / maxTotal));
     Plotly.newPlot('chart-map', [{
-      type: 'scattermapbox', lat: lats, lon: lons,
+      type: 'scattermapbox',
+      lat: present.map(s => SECTOR_PINS[s][0]),
+      lon: present.map(s => SECTOR_PINS[s][1]),
       mode: 'markers+text',
-      marker: { size: 28, color: '#0e5c36', opacity: 0.55 },
-      text: names, textposition: 'bottom center',
-      textfont: { size: 14, color: '#1a1f2c', family: 'Tajawal, sans-serif' },
-      hovertemplate: '<b>%{text}</b><br>Awaiting per-sample coordinates<extra></extra>',
+      marker: {
+        size: sizes, sizemode: 'diameter',
+        color: rates, colorscale: [[0, '#0e5c36'], [0.5, '#c8a85a'], [1, '#a8331a']],
+        cmin: 0, cmax: Math.max(10, ...rates), opacity: 0.85,
+        showscale: true,
+        colorbar: { title: { text: '% non-comp', side: 'right' }, thickness: 12, len: 0.6, x: 1 },
+      },
+      text: present.map((s, i) => `${s}<br>${totals[i].toLocaleString()}`),
+      textposition: 'top center',
+      textfont: { size: 13, color: '#1a1f2c', family: 'Tajawal, sans-serif' },
+      customdata: present.map((s, i) => [totals[i], invs[i], rates[i]]),
+      hovertemplate: '<b>%{text}</b> samples<br>%{customdata[1]:,} non-compliant · %{customdata[2]:.1f}%<extra></extra>',
     }], {
       paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
       margin: { t: 0, r: 0, b: 0, l: 0 },
