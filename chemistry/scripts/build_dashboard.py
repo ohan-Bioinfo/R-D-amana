@@ -273,11 +273,16 @@ def _compute_test_counts() -> dict:
     # compliant tests (not 30/0). Previous logic over-counted non-compliant
     # tests by ~75× (58k vs AR's 763).
     split_by_year: dict[int, dict[str, int]] = {}
+    # Per-(section, year) breakdown so the dashboard's test KPIs react to the
+    # section tab, not just the year (2026-07-04).
+    by_section_year: dict[str, dict[int, int]] = {}
+    split_by_section_year: dict[str, dict[int, dict[str, int]]] = {}
     for p in sorted(CLEAN_DIR.glob("chem_*.parquet")):
-        m = re.search(r"_(\d{4})\.parquet$", p.name)
+        m = re.match(r"chem_(.+)_(\d{4})\.parquet$", p.name)
         if not m:
             continue
-        year = int(m.group(1))
+        section = m.group(1)
+        year = int(m.group(2))
         df = pd.read_parquet(p)
         if "pesticides" in p.name:
             # Long format: each row = one pesticide × one sample. is_valid
@@ -314,6 +319,11 @@ def _compute_test_counts() -> dict:
         slot = split_by_year.setdefault(year, {"compliant": 0, "non_compliant": 0})
         slot["compliant"]     += c
         slot["non_compliant"] += nc
+        by_section_year.setdefault(section, {})[year] = n
+        ssl = split_by_section_year.setdefault(section, {}).setdefault(
+            year, {"compliant": 0, "non_compliant": 0})
+        ssl["compliant"]     += c
+        ssl["non_compliant"] += nc
     grand = sum(by_year.values())
     g_compliant     = sum(v["compliant"]     for v in split_by_year.values())
     g_non_compliant = sum(v["non_compliant"] for v in split_by_year.values())
@@ -322,6 +332,8 @@ def _compute_test_counts() -> dict:
         "grand": grand,
         "compliance_split_by_year": split_by_year,
         "compliance_split": {"compliant": g_compliant, "non_compliant": g_non_compliant},
+        "by_section_year": by_section_year,
+        "compliance_split_by_section_year": split_by_section_year,
     }
 
 
@@ -751,13 +763,30 @@ try {
   function pct(num, den) { return den > 0 ? (num * 100 / den).toFixed(1) : '0.0'; }
   function lc(x) { return x == null ? '' : String(x).toLowerCase(); }
 
-  // Computed-from-data total tests, year-aware: respects the currently
-  // active year chip ('all' → grand total).
-  function totalTestsThisFilter() {
-    const tc = DATA.test_counts || {by_year:{}, grand:0};
-    if (currentYear === 'all') return tc.grand;
-    return tc.by_year[String(currentYear)] || 0;
+  // Computed-from-data test counts for the active SECTION + YEAR scope, split
+  // into compliant / non-compliant. Precomputed in Python per (section, year),
+  // so this reacts to the section tab and the year chip (2026-07-04). It does
+  // NOT reflect compliance/sector/GSO/search narrowing (not in the split).
+  function testCountsScope() {
+    const tc = DATA.test_counts || {};
+    let total = 0, compliant = 0, non_compliant = 0;
+    const addSplit = s => { if (s) { compliant += s.compliant || 0; non_compliant += s.non_compliant || 0; } };
+    if (isAllSections()) {
+      if (currentYear === 'all') {
+        total = tc.grand || 0; addSplit(tc.compliance_split);
+      } else {
+        total = (tc.by_year || {})[String(currentYear)] || 0;
+        addSplit((tc.compliance_split_by_year || {})[String(currentYear)]);
+      }
+    } else {
+      const bsy = (tc.by_section_year || {})[currentSection] || {};
+      const ssy = (tc.compliance_split_by_section_year || {})[currentSection] || {};
+      const years = currentYear === 'all' ? Object.keys(bsy) : [String(currentYear)];
+      years.forEach(y => { total += bsy[y] || 0; addSplit(ssy[y]); });
+    }
+    return { total, compliant, non_compliant };
   }
+  function totalTestsThisFilter() { return testCountsScope().total; }
 
   // Apply year + search filter to current section's rows. When the synthetic
   // "All sections" view is active, rows include a trailing _section element.
@@ -841,14 +870,11 @@ try {
     // Compute total tests (computed from data) and split by compliant /
     // non-compliant. The chemistry-test count was computed in Python at
     // build time and shipped in DATA.test_counts.compliance_split.
-    const tc = DATA.test_counts || {};
-    const splitForFilter = (() => {
-      if (currentYear === 'all') return tc.compliance_split || {compliant:0, non_compliant:0};
-      return (tc.compliance_split_by_year || {})[String(currentYear)] || {compliant:0, non_compliant:0};
-    })();
-    const totalTests = totalTestsThisFilter();
-    const cTests = splitForFilter.compliant;
-    const ncTests = splitForFilter.non_compliant;
+    // Test-level counts for the active section + year (reacts to the tab).
+    const _tsc = testCountsScope();
+    const totalTests = _tsc.total;
+    const cTests = _tsc.compliant;
+    const ncTests = _tsc.non_compliant;
     // "Without specifications" bucket (added 2026-06-25 per user direction):
     // these samples have no regulatory limit on file (validity_status='no_limit'
     // or 'unknown' or 'rejected'). They were previously dropped silently from
@@ -877,13 +903,12 @@ try {
     // Separate test-level summary strip — distinct from the sample-level
     // banner above. Tests = individual test results across all samples
     // (e.g. one sample tested for 30 pesticides = 30 tests).
-    // The test counts are precomputed per YEAR across ALL sections only, so
-    // this strip is meaningful only for the all-sections view with no
-    // section/compliance/sector/GSO/search narrowing. Hide it otherwise so it
-    // never shows numbers that contradict the active filters (U6, 2026-07-01).
+    // The test counts are precomputed per (section, year), so this strip reacts
+    // to the section tab and year chip. It cannot reflect compliance/sector/GSO/
+    // search narrowing (not in the precomputed split), so hide it only when one
+    // of those is active (2026-07-04).
     const testBanner = document.getElementById('test-banner');
-    const testBannerValid = isAllSections()
-      && activeCompliance.size === 0 && activeSectors.size === 0
+    const testBannerValid = activeCompliance.size === 0 && activeSectors.size === 0
       && activeGso.size === 0 && !searchTerm;
     if (!testBannerValid) {
       testBanner.style.display = 'none';
