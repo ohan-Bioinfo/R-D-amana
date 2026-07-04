@@ -1830,8 +1830,8 @@ def main():
     payload = build_payload()
     html = TEMPLATE.replace("__DATA_JSON__", json.dumps(payload, ensure_ascii=False))
     html = html.replace("__LOGO_DATA_URI__", _logo_data_uri())
-    # Stamp the build time into the masthead's meta strip
-    stamp = datetime.now().strftime("%d %b %Y")
+    # Stamp the build date + time into the masthead's meta strip
+    stamp = datetime.now().strftime("%d %b %Y · %H:%M")
     html = html.replace(
         '<span class="val" id="build-stamp">—</span>',
         f'<span class="val" id="build-stamp">{stamp}</span>'
