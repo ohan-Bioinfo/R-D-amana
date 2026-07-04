@@ -273,6 +273,12 @@ def classify(section, raw_category, sample_name, sample_id=None):
     # vegetables (Muhannad 2026-07-04).
     if section == "pesticides" and canon in (C_SPICE, C_CEREAL):
         return C_FRVEG, flag
+    # ubot = UN-bottled water, so it cannot be مياه شرب/معبأة (bottled). Any
+    # ubot sample that resolved to bottled/drinking (generic or unfilled names)
+    # is tap water → مياه الحنفية (Muhannad 2026-07-04). Filter and non-potable
+    # subtypes are left untouched.
+    if canon == W_DRINK and _prefix(sample_id) == "ubot":
+        return W_TAP, flag
     return canon, flag
 
 
