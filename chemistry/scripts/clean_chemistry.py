@@ -468,6 +468,14 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
         if before - len(records):
             audit["flags"]["food_chem_2024_months_dropped"] = before - len(records)
 
+    # Beverages don't belong in the pesticide (fresh-produce) panel — drop them
+    # (one stray "برتقال عصير" / orange-juice sample) (Muhannad 2026-07-04).
+    if section == "pesticides":
+        before = len(records)
+        records = [r for r in records if r.get("sample_category_canonical") != "المشروبات"]
+        if before - len(records):
+            audit["flags"]["pesticide_beverage_dropped"] = before - len(records)
+
     out_path = CLEAN_DIR / f"chem_{section}_{year}.parquet"
     string_cols = [
         "source_file", "sheet_name", "sheet_year_month",

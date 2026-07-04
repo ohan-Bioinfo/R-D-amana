@@ -54,6 +54,9 @@ NAME_OVERRIDE = [
     ("الحبة السوداء", C_SPICE),
     ("حبة البركة", C_SPICE), ("حبةالبركة", C_SPICE),
     ("كشنة", C_RTE),
+    # olive oil → fats. Must win over the tuna keyword "تون", which is a
+    # substring of "زيتون" (Muhannad 2026-07-04).
+    ("زيت زيتون", C_FAT),
 ]
 # water subtypes (all → GSO "Drinking Water" EXCEPT C_NONPOT)
 W_TAP = "مياه الحنفية"; W_FILTER = "مياه فلتر"; W_DRINK = "مياه شرب/معبأة"
@@ -148,6 +151,9 @@ NAME_KEYWORDS = [
     ("حمص", C_CEREAL), ("فول", C_CEREAL), ("فاصولي", C_CEREAL), ("ذرة", C_CEREAL),
     ("شعير", C_CEREAL), ("خبز", C_CEREAL), ("توست", C_CEREAL), ("طحين", C_CEREAL),
     ("سميد", C_CEREAL),
+    # table olive → fruit & veg — BEFORE the fish block, because "تون" (tuna)
+    # is a substring of "زيتون" (olive) and would otherwise steal it.
+    ("زيتون", C_FRVEG),
     # fish — before meat
     ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH),
     ("ربيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH),
