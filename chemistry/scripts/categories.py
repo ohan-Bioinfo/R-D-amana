@@ -106,7 +106,7 @@ NAME_KEYWORDS = [
     # "فول السوداني" (with the ال article) before the plain "فول"→cereal rule.
     ("لوز", C_SWEET), ("فستق", C_SWEET), ("كاجو", C_SWEET), ("بندق", C_SWEET),
     ("جوز", C_SWEET), ("مكسرات", C_SWEET), ("ترمس", C_SWEET),
-    ("فول سوداني", C_SWEET), ("سوداني", C_SWEET),
+    ("فول سوداني", C_SWEET), ("سوداني", C_SWEET), ("صنوبر", C_SWEET), ("بيكان", C_SWEET),
     # sesame → miscellaneous (REVERSED). Tahini stays a sauce/spice.
     ("طحينة", C_SPICE), ("طحينه", C_SPICE), ("سمسم", C_MISC),
     # pepper → fruit & veg (REVERSED). Before spices so فلفل never reads as spice.
@@ -117,6 +117,24 @@ NAME_KEYWORDS = [
     ("زبيب", C_FRVEG), ("سلطة", C_FRVEG), ("رقائق", C_FRVEG), ("شيبس", C_FRVEG),
     ("بطاطس", C_FRVEG), ("بصل", C_FRVEG), ("فجل", C_FRVEG), ("فطر", C_FRVEG),
     ("خوخ", C_FRVEG), ("دراق", C_FRVEG),   # peach → fruit & veg (2026-07-04)
+    # Beverages checked BEFORE the produce sweep so "عصير برتقال" (orange juice)
+    # stays a beverage rather than matching برتقال → fruit & veg.
+    ("عصير", C_BEV), ("شاي", C_BEV), ("كركدي", C_BEV), ("نسكافيه", C_BEV),
+    # Produce sweep — fresh fruits & vegetables the pesticide panel tests that
+    # were defaulting to Miscellaneous (Muhannad 2026-07-04: Misc = sesame only).
+    ("تفاح", C_FRVEG), ("طماطم", C_FRVEG), ("برتقال", C_FRVEG), ("خيار", C_FRVEG),
+    ("كيوي", C_FRVEG), ("جزر", C_FRVEG), ("باذنجان", C_FRVEG), ("ثوم", C_FRVEG),
+    ("افوكادو", C_FRVEG), ("رمان", C_FRVEG), ("كوسة", C_FRVEG), ("كوسه", C_FRVEG),
+    ("بقدونس", C_FRVEG), ("عنب", C_FRVEG), ("قرع", C_FRVEG), ("جرجير", C_FRVEG),
+    ("نعناع", C_FRVEG), ("خس", C_FRVEG), ("موز", C_FRVEG), ("كراث", C_FRVEG),
+    ("بطاطا", C_FRVEG), ("شبت", C_FRVEG), ("شمندر", C_FRVEG), ("يوسف", C_FRVEG),
+    ("مندرين", C_FRVEG), ("بامية", C_FRVEG), ("باميه", C_FRVEG), ("حبق", C_FRVEG),
+    ("فراولة", C_FRVEG), ("توت", C_FRVEG), ("ملفوف", C_FRVEG), ("مانجو", C_FRVEG),
+    ("جوافة", C_FRVEG), ("سبانخ", C_FRVEG), ("اناناس", C_FRVEG), ("بروكلي", C_FRVEG),
+    ("فاكهة", C_FRVEG), ("كرز", C_FRVEG), ("ملوخية", C_FRVEG), ("برقوق", C_FRVEG),
+    ("نكتارين", C_FRVEG), ("لفت", C_FRVEG), ("بابايا", C_FRVEG), ("شمام", C_FRVEG),
+    ("زهرة", C_FRVEG), ("رجلة", C_FRVEG), ("رجله", C_FRVEG), ("جريب", C_FRVEG),
+    ("بخارة", C_FRVEG),
     # spices / sauces
     ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE),
     ("بهار", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE),
@@ -131,13 +149,11 @@ NAME_KEYWORDS = [
     ("سميد", C_CEREAL),
     # fish — before meat
     ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH),
-    ("سلمون", C_FISH), ("بلطي", C_FISH),
+    ("ربيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH),
     # meat / poultry
     ("لحم", C_MEAT), ("دجاج", C_MEAT), ("فروج", C_MEAT), ("شاورما", C_MEAT), ("كباب", C_MEAT),
     # dairy
     ("حليب", C_DAIRY), ("لبن", C_DAIRY), ("جبن", C_DAIRY), ("زبادي", C_DAIRY), ("قشطة", C_DAIRY),
-    # beverages
-    ("عصير", C_BEV), ("شاي", C_BEV), ("كركدي", C_BEV), ("نسكافيه", C_BEV),
     # fats
     ("زيت", C_FAT), ("سمن", C_FAT),
     # sweets (bakery/confectionery)
@@ -168,6 +184,31 @@ _WATER_HINTS = ("مياه", "مياة", "موية", "مويه", "حنفي", "ف�
 _NONPOTABLE = ("حوض", "راكد", "متحرك")   # basin / standing / mobile → non-potable
 
 _SHATTA = re.compile(r"شط[ةه]")
+
+# Per-section default for unmatched rows. The pesticide panel only tests fresh
+# produce, so its leftovers are fruit & veg (Muhannad 2026-07-04: Miscellaneous
+# is reserved for sesame). Every other section falls to Miscellaneous.
+SECTION_DEFAULT = {"pesticides": C_FRVEG}
+
+# Precise per-sample_id corrections from Muhannad's validated sheet-8
+# «التصنيف الصحيح» column (chemistry/scripts/category_corrections.csv). These
+# WIN over every rule below — the correction column is the source of truth.
+import csv as _csv
+from pathlib import Path as _Path
+
+def _load_corrections() -> dict:
+    p = _Path(__file__).with_name("category_corrections.csv")
+    out = {}
+    if p.exists():
+        with p.open(encoding="utf-8") as f:
+            for row in _csv.DictReader(f):
+                sid = (row.get("sample_id") or "").strip()
+                cat = (row.get("canonical_category") or "").strip()
+                if sid and cat:
+                    out[sid] = cat
+    return out
+
+CORRECTIONS = _load_corrections()
 
 
 def _norm(s) -> str:
@@ -220,6 +261,13 @@ def classify(section, raw_category, sample_name, sample_id=None):
     """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
     n = _norm(sample_name)
 
+    # -1. Precise per-sample_id correction from Muhannad's «التصنيف الصحيح»
+    #     column — the authoritative source of truth, wins over every rule.
+    if sample_id is not None:
+        hit = CORRECTIONS.get(str(sample_id).strip())
+        if hit:
+            return hit, None
+
     # 0. Explicit product-name overrides — win over the (wrong/shared) prefix.
     #    Bread items skip this so "خبز ... بالحبة السوداء" stays a cereal.
     if "خبز" not in n and "توست" not in n:
@@ -247,8 +295,9 @@ def classify(section, raw_category, sample_name, sample_id=None):
     if base:
         return base, None
 
-    # 5. Default.
-    return C_MISC, "defaulted"
+    # 5. Default — Miscellaneous is reserved for sesame; pesticide leftovers are
+    #    fresh produce (Muhannad 2026-07-04).
+    return SECTION_DEFAULT.get(section, C_MISC), "defaulted"
 
 
 def name_group(sample_name) -> str | None:
