@@ -38,6 +38,7 @@ CHEM_TO_GSO = {
     "الحبوب والبقوليات":             "Cereals; Legumes and their Products",
     "البهارات والصوصات":             "Tomato Concentrates, Sauces, Vinegar, Spices and Herbs",
     "الأطعمة الجاهزه للاكل":         "Ready to Eat Foods",
+    "الأطعمة الجاهزة للأكل":         "Ready to Eat Foods",  # canonical C_RTE (كشنة, 2026-07-04)
     "اللحوم والدواجن":               "Meat, Poultry and its Products",
     "الحلويات والشوكولاتة":          "Chocolate, Sweets and their Ingredients",
     "الحلويات والشكولاته":           "Chocolate, Sweets and their Ingredients",  # actual chem spelling
@@ -124,12 +125,15 @@ SECTOR_AR_TO_EN = {
 }
 
 def _sector_en(sector):
+    # Rows with no mapped amanah sector (no municipality, private samples, or
+    # unmapped junk) go to an explicit "None" bucket so they remain filterable
+    # and visible in the charts instead of silently dropping out (2026-07-04).
     if sector is None:
-        return None
+        return "None"
     return SECTOR_AR_TO_EN.get(str(sector).strip(), sector)
 
 SECTIONS = [
-    ("aflatoxins",           "Aflatoxins",            "Aflatoxins B1+B2+G1+G2 summed to Total (ppb); only Total has a regulatory limit (per lab practice 2026-06-25)"),
+    ("aflatoxins",           "Aflatoxins",            ""),  # section blurb removed 2026-07-04 (Muhannad)
     ("food_chemistry",       "Food chemistry",        "Moisture, ash, acidity, pH, peroxide, sensory tests"),
     ("heavy_metals",         "Heavy metals",          "Up to 25 metals incl. Lead, Arsenic, Cadmium, Mercury"),
     ("honey",                "Honey analysis",        "Sugars profile, HMF, moisture, acidity (each with its own limit)"),
@@ -206,8 +210,9 @@ def build_payload() -> dict:
                 # restored 2026-06-25). Rows without a sector (junk values,
                 # private-sample placeholders, sections without municipality
                 # column like pesticides 2024) get None — no raw fallback.
-                (_sector_en(_val(getattr(r, "sector", None)))
-                  if "sector" in df.columns else None),
+                # Always emit a location bucket — mapped sector or "None"
+                # (sections without a municipality column also fall to "None").
+                _sector_en(_val(getattr(r, "sector", None))),
                 _val(getattr(r, "district_name", None)),
                 (1 if r.is_valid is True else (0 if r.is_valid is False else None))
                   if "is_valid" in df.columns else None,
@@ -820,7 +825,7 @@ try {
       else if (r[COLS.is_valid] === 0) totalInvalid++;
       else totalUnknown++;
       if (r[COLS.facility]) facSet.add(r[COLS.facility]);
-      if (r[COLS.municipality]) munSet.add(r[COLS.municipality]);
+      if (r[COLS.municipality] && r[COLS.municipality] !== 'None') munSet.add(r[COLS.municipality]);
     });
     // Also compute total test events (sum across sections) for context.
     let totalEvents = 0;
@@ -971,11 +976,20 @@ try {
     const wrap = document.getElementById('sector-chips');
     if (!wrap) return;
     wrap.innerHTML = '';
-    // 5-sector taxonomy (Central restored 2026-06-25)
-    ['Central','East','North','South','West'].forEach(v => {
+    // Count rows per sector in the current section/year scope so the chip
+    // labels reflect real numbers. "None" = rows with no mapped amanah sector
+    // (no municipality, private, or unmapped). 5-sector taxonomy + None
+    // (Central restored 2026-06-25; None bucket added 2026-07-04).
+    const counts = new Map();
+    chipScopeRows().forEach(r => {
+      const s = r[COLS.municipality] || 'None';
+      counts.set(s, (counts.get(s) || 0) + 1);
+    });
+    ['Central','East','North','South','West','None'].forEach(v => {
+      const n = counts.get(v) || 0;
       const c = document.createElement('div');
       c.className = 'chip' + (activeSectors.has(v) ? ' active' : '');
-      c.textContent = v;
+      c.textContent = `${v} (${n.toLocaleString()})`;
       c.onclick = () => {
         if (activeSectors.has(v)) activeSectors.delete(v);
         else activeSectors.add(v);

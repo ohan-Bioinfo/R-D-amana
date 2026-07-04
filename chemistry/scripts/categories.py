@@ -41,7 +41,19 @@ C_FRVEG = "الفواكه والخضار"; C_SWEET = "الحلويات والش�
 C_MEAT = "اللحوم والدواجن"; C_FISH = "الأسماك والمأكولات البحرية"; C_DAIRY = "الحليب ومنتجات الألبان"
 C_FAT = "الدهون والزيوت"; C_FEED = "الأعلاف"
 C_JAM = "المربى والجلي"          # → GSO "Jelly, Jam and Marmalade"
+C_RTE = "الأطعمة الجاهزة للأكل"   # → GSO "Ready to Eat Foods" (re-added 2026-07-04 for كشنة)
 C_MISC = "أغذية متنوعة"
+
+# Explicit product-name overrides that WIN over the sample_id prefix — for
+# products whose lab prefix is wrong/shared (Muhannad 2026-07-04). Black seed
+# (حبة البركة / الحبة السوداء) carries a `ses` (sesame) prefix but is a spice;
+# كشنة carries a `spic` prefix but Muhannad classes it Ready-to-Eat. Skipped
+# for bread items (see classify) so "خبز بالحبة السوداء" stays a cereal.
+NAME_OVERRIDE = [
+    ("الحبة السوداء", C_SPICE),
+    ("حبة البركة", C_SPICE), ("حبةالبركة", C_SPICE),
+    ("كشنة", C_RTE),
+]
 # water subtypes (all → GSO "Drinking Water" EXCEPT C_NONPOT)
 W_TAP = "مياه الحنفية"; W_FILTER = "مياه فلتر"; W_DRINK = "مياه شرب/معبأة"
 C_NONPOT = "مياه غير صالحة للشرب"   # → GSO "Non-potable Water" (2026-07-04)
@@ -90,9 +102,11 @@ NAME_KEYWORDS = [
     # honey / molasses / jam → sweets & jam
     ("مربى", C_JAM),
     ("عسل", C_SWEET), ("دبس", C_SWEET),
-    # nuts → sweets (REVERSED 2026-07-04)
+    # nuts → sweets (REVERSED 2026-07-04). "سوداني" catches both "فول سوداني" and
+    # "فول السوداني" (with the ال article) before the plain "فول"→cereal rule.
     ("لوز", C_SWEET), ("فستق", C_SWEET), ("كاجو", C_SWEET), ("بندق", C_SWEET),
-    ("جوز", C_SWEET), ("مكسرات", C_SWEET), ("ترمس", C_SWEET), ("فول سوداني", C_SWEET),
+    ("جوز", C_SWEET), ("مكسرات", C_SWEET), ("ترمس", C_SWEET),
+    ("فول سوداني", C_SWEET), ("سوداني", C_SWEET),
     # sesame → miscellaneous (REVERSED). Tahini stays a sauce/spice.
     ("طحينة", C_SPICE), ("طحينه", C_SPICE), ("سمسم", C_MISC),
     # pepper → fruit & veg (REVERSED). Before spices so فلفل never reads as spice.
@@ -102,6 +116,7 @@ NAME_KEYWORDS = [
     # raisin / dried fruit, salad, chips, fresh veg → fruit & veg
     ("زبيب", C_FRVEG), ("سلطة", C_FRVEG), ("رقائق", C_FRVEG), ("شيبس", C_FRVEG),
     ("بطاطس", C_FRVEG), ("بصل", C_FRVEG), ("فجل", C_FRVEG), ("فطر", C_FRVEG),
+    ("خوخ", C_FRVEG), ("دراق", C_FRVEG),   # peach → fruit & veg (2026-07-04)
     # spices / sauces
     ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE),
     ("بهار", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE),
@@ -203,6 +218,15 @@ def _cat_from_raw(raw) -> str | None:
 
 def classify(section, raw_category, sample_name, sample_id=None):
     """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
+    n = _norm(sample_name)
+
+    # 0. Explicit product-name overrides — win over the (wrong/shared) prefix.
+    #    Bread items skip this so "خبز ... بالحبة السوداء" stays a cereal.
+    if "خبز" not in n and "توست" not in n:
+        for kw, canon in NAME_OVERRIDE:
+            if kw in n:
+                return canon, None
+
     pfx = _prefix(sample_id)
 
     # 1. Explicit product prefix (overrides mislabeled raw categories).
