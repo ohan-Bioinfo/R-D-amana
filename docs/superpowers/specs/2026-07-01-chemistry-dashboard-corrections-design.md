@@ -234,7 +234,8 @@ and issued a series of rulings that **revise several 2026-07-01 decisions**.
    product in the id prefix (al=almond, uu-pe=pepper, zab=raisin, ses=sesame,
    milk=dairy, raw=meat, bot/ubot=water …); overrides mislabeled raw categories.
 4. Water sub-classifier → 5. name keywords → 6. raw keyword → 7. default («أخرى»,
-   except the pesticide section which defaults to fruit & veg).
+   except pesticides → fruit & veg and water_analysis → potable water, since
+   those sections only test produce / water respectively).
 
 **Taxonomy rulings (these REVERSE the 2026-07-01 taxonomy):**
 - Nuts (لوز/فستق/كاجو/بندق/جوز/ترمس/مكسرات) → **sweets** (were grains/legumes).
@@ -273,7 +274,7 @@ Total chemistry **15,786 → 15,762**.
 | الحبوب والبقوليات | Cereals; Legumes | 3,300 |
 | الحلويات والشوكولاتة | Chocolate, Sweets | 1,557 |
 | البهارات والصوصات | Spices / Sauces | 1,527 |
-| مياه صالحة للشرب | Drinking Water | 1,050 |
+| مياه صالحة للشرب | Drinking Water | 1,051 |
 | اللحوم والدواجن | Meat, Poultry | 427 |
 | أغذية متنوعة (sesame only) | Miscellaneous | 273 |
 | الأسماك والمأكولات البحرية | Fish | 167 |
@@ -282,7 +283,7 @@ Total chemistry **15,786 → 15,762**.
 | المشروبات | Beverages | 40 |
 | مياه غير صالحة للشرب | Non-potable Water | 23 |
 | المربى والجلي | Jelly, Jam | 16 |
-| أخرى | Others | 15 |
+| أخرى | Others | 14 |
 | الدهون والزيوت | Fats and Oils | 4 |
 | الأطعمة الجاهزة للأكل | Ready to Eat | 3 |
 

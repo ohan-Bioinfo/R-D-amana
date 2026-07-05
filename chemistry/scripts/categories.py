@@ -199,7 +199,7 @@ _SHATTA = re.compile(r"شط[ةه]")
 # Per-section default for unmatched rows. The pesticide panel only tests fresh
 # produce, so its leftovers are fruit & veg (Muhannad 2026-07-04: Miscellaneous
 # is reserved for sesame). Every other section falls to Miscellaneous.
-SECTION_DEFAULT = {"pesticides": C_FRVEG}
+SECTION_DEFAULT = {"pesticides": C_FRVEG, "water_analysis": W_POTABLE}
 
 # Precise per-sample_id corrections from Muhannad's validated sheet-8
 # «التصنيف الصحيح» column (chemistry/scripts/category_corrections.csv). These
