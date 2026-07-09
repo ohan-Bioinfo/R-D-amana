@@ -289,6 +289,36 @@ Total chemistry **15,786 → 15,762**.
 
 Sectors: Central 4,504 · West 3,153 · North 1,833 · East 1,817 · South 1,022 · **None 3,433**.
 
+## 9f. Full audit + cleanup (2026-07-09)
+
+Read-only audit of the whole chemistry pipeline (data, GSO bridge, location
+filters, tables, KPIs, interaction) — came back clean:
+
+- **Data:** 15,756 rows · 7 sections · 2024+2025; 0 null canonical category;
+  verdict 14,659 compliant / 1,086 non-compliant / 17 no-spec.
+- **GSO bridge:** 16 canonical categories, **100% direct-map** (bridge trimmed to
+  18 entries — one Arabic spelling per GSO); no name-fallback anywhere.
+- **Water:** exactly two classes — «مياه صالحة للشرب» (potable) and «مياه غير
+  صالحة للشرب» (non-potable); the tap/filter/bottled subtypes are retired.
+- **Categories:** Miscellaneous = sesame-only (273); junk isolated in «أخرى»
+  Others (8).
+- **Location:** 5 sectors + None bucket (Central/West/North/East/South + None
+  3,433); private variants merged to «عينة خاصة»; 0 junk product-names in the
+  municipality field.
+- **Dashboard:** all tables/chips/filters present; per-section test KPIs for all
+  7 sections; data-driven Riyadh map; JS lints clean; 2,401 per-sample_id
+  corrections applied.
+
+**Cleanup applied:** dropped 6 junk rows that had no sample_id AND fell to «أخرى»
+(placeholder text «تغيرت فيها الحدود» / «NA»); kept the 3 real products that
+merely lacked an id (لوز/سميد/فول). Total 15,762 → 15,756.
+
+Also this session: filled classifier keyword gaps from the full sheet-8 review
+(coconut→fruit&veg, seafood محار/كابوريا/سبيط→fish, jelly→jelly&jam, liver
+كبدة→meat, bulgur/flour/popcorn/balila→cereals, dagoos→spices); merged the
+private-municipality variants to «عينة خاصة» and cleared out-of-place junk in the
+municipality field into no_municipality; de-duplicated the GSO bridge.
+
 ## 10. Regeneration commands
 ```bash
 PY=microbiology/.venv/bin/python

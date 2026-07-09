@@ -486,6 +486,17 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
         if before - len(records):
             audit["flags"]["pesticide_beverage_dropped"] = before - len(records)
 
+    # Drop junk rows that have NO sample identity AND fell to «أخرى» (Others) —
+    # placeholder text such as "تغيرت فيها الحدود" / "NA" (Muhannad 2026-07-09
+    # audit). Real products that merely lack an id (لوز/سميد/فول) are kept.
+    def _no_id(v):
+        return v is None or (isinstance(v, float) and v != v) or str(v).strip() in ("", "<NA>", "nan", "NA")
+    before = len(records)
+    records = [r for r in records if not (
+        _no_id(r.get("sample_id")) and r.get("sample_category_canonical") == "أخرى")]
+    if before - len(records):
+        audit["flags"]["null_id_junk_dropped"] = before - len(records)
+
     out_path = CLEAN_DIR / f"chem_{section}_{year}.parquet"
     string_cols = [
         "source_file", "sheet_name", "sheet_year_month",
