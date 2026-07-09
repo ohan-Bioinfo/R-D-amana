@@ -1753,10 +1753,15 @@ function normSubtypeName(n) {
   s = s.replace(/^قطع\s+/, '');   // "pieces of X" → "X"
   return s;
 }
-function renderTopSubtypes(rowsFull) {
+function renderTopSubtypes(rowsScope, rowsSliced) {
   const MIN_SAMPLES = 20;
+  // Denominator = every scope sample of the subtype. Numerator = the subtype's
+  // non-compliant samples that ALSO pass the active slice (pathogen/microbe/
+  // severity). So picking an organism re-ranks subtypes by THAT organism's rate
+  // instead of collapsing every subtype to a meaningless 100%. (Muhannad 2026-07-09)
+  if (rowsSliced === undefined) rowsSliced = rowsScope;
   const stats = new Map();   // key = normalized sample_name → {total, nc, gso, organisms}
-  for (const r of rowsFull) {
+  for (const r of rowsScope) {
     const name = normSubtypeName(r[COLS.sample_name]);
     if (!name) continue;
     let slot = stats.get(name);
@@ -1765,17 +1770,22 @@ function renderTopSubtypes(rowsFull) {
       stats.set(name, slot);
     }
     slot.total++;
-    if (r[COLS.failure] === 1) {
-      slot.nc++;
-      // Tally distinct organisms that caused failures in this subtype
-      const seen = new Set();
-      for (const t of (r[COLS.failed_tests] || [])) {
-        if (seen.has(t)) continue;
-        seen.add(t);
-        slot.organisms.set(t, (slot.organisms.get(t) || 0) + 1);
-      }
-    }
     if (!slot.gso && r[COLS.gso_category]) slot.gso = r[COLS.gso_category];
+  }
+  for (const r of rowsSliced) {
+    if (r[COLS.failure] !== 1) continue;
+    const name = normSubtypeName(r[COLS.sample_name]);
+    if (!name) continue;
+    const slot = stats.get(name);
+    if (!slot) continue;   // rowsSliced ⊆ rowsScope, so the subtype always exists
+    slot.nc++;
+    // Tally distinct organisms that caused failures in this subtype
+    const seen = new Set();
+    for (const t of (r[COLS.failed_tests] || [])) {
+      if (seen.has(t)) continue;
+      seen.add(t);
+      slot.organisms.set(t, (slot.organisms.get(t) || 0) + 1);
+    }
   }
   const items = [];
   for (const [name, s] of stats) {
@@ -1804,7 +1814,7 @@ function renderTopSubtypes(rowsFull) {
     const orgChips = it.organisms.length
       ? it.organisms.map(([org, n]) => {
           const pill = PATH.has(org) ? PATHOGEN_PILL : INDICATOR_PILL;
-          return `<span style="${pill}; padding:2px 8px; border-radius:999px; font-size:11px; white-space:nowrap; margin-right:4px; display:inline-block; margin-bottom:2px"><span class="ar">${escapeHtml(org)}</span> · ${n}</span>`;
+          return `<span data-org="${escapeHtml(org)}" title="Click to filter the dashboard to this organism" style="${pill}; padding:2px 8px; border-radius:999px; font-size:11px; white-space:nowrap; margin-right:4px; display:inline-block; margin-bottom:2px; cursor:pointer"><span class="ar">${escapeHtml(org)}</span> · ${n}</span>`;
         }).join('')
       : '<span class="muted" style="font-size:11px">—</span>';
     return `<tr style="vertical-align:middle">
@@ -1830,6 +1840,20 @@ function renderTopSubtypes(rowsFull) {
     + '<tbody>' + rows + '</tbody></table>'
     + '<div class="muted" style="margin-top:8px; font-size:11px">Red pill = pathogen · amber pill = indicator. Counts are samples in the subtype that failed that organism. A row can list up to 3 organisms; click the chip on the right to filter the whole dashboard to that organism.</div>';
 }
+
+// Delegated click on the organism pills in the most-contaminated ranking:
+// toggles that organism in the microbe filter (and keeps the microbe chip UI
+// in sync), fulfilling the "click to filter" affordance. (Muhannad 2026-07-09)
+document.getElementById('top-subtypes').addEventListener('click', e => {
+  const pill = e.target.closest('[data-org]');
+  if (!pill) return;
+  const org = pill.getAttribute('data-org');
+  if (state.microbe.has(org)) state.microbe.delete(org); else state.microbe.add(org);
+  document.querySelectorAll('#f_microbe .chip').forEach(c => {
+    if (c.dataset.value === org) c.classList.toggle('active', state.microbe.has(org));
+  });
+  applyFilters();
+});
 
 // Distinct colour per microbe — picked to stay readable on the light theme
 // and clearly different from each other. Pathogens use warmer reds/oranges;
@@ -2214,14 +2238,14 @@ document.querySelectorAll('[data-metric]').forEach(t => {
   t.addEventListener('click', () => {
     mapMetric = t.dataset.metric;
     _activate('[data-metric]', 'metric', mapMetric);
-    renderMap(window.__lastFiltered || ROWS);
+    renderMap(window.__mapRows || ROWS);
   });
 });
 document.querySelectorAll('[data-tiles]').forEach(t => {
   t.addEventListener('click', () => {
     mapTiles = t.dataset.tiles;
     _activate('[data-tiles]', 'tiles', mapTiles);
-    renderMap(window.__lastFiltered || ROWS);
+    renderMap(window.__mapRows || ROWS);
   });
 });
 
@@ -2371,14 +2395,9 @@ function renderMap(rows) {
 
 // Shared helper: stacked-by-year volume bars + single non-compliance % line
 // on a secondary axis. Cleaner replacement for the old 3-series grouped bars
-// that overlapped each other. Used by GSO categories, Sectors, and
-// Sub-municipality charts so they read consistently.
-//
-// When a microbe filter is active, the rate line becomes meaningless
-// (every row in `rows` is a failure of the selected organism → rate is
-// 100% everywhere). In that mode we drop the rate trace and instead let
-// the bars carry the story: how the selected organism's failures are
-// distributed across categories.
+// that overlapped each other. Used by the Sectors and Sub-municipality charts
+// so they read consistently. Both are fed rowsScope, so the rate line is always
+// a valid scope non-compliance rate (the microbe filter is slice-only).
 function _renderVolumeVsRate(domId, items, labelKey, opts) {
   // items: [{key, byYear: {year: count}, inv, total, rate}, ...]
   const labels = items.map(i => i[labelKey]);
@@ -2391,18 +2410,17 @@ function _renderVolumeVsRate(domId, items, labelKey, opts) {
     marker: { color: YEAR_COLOR[yr] || YEAR_COLOR_DEFAULT, line: { width: 0 } },
     hovertemplate: '<b>%{x}</b><br>' + yr + ': %{y:,} samples<extra></extra>',
   }));
-  const microbeActive = (state.microbe && state.microbe.size > 0);
-  if (!microbeActive) {
-    // Non-compliance rate as a single orange line on the right axis.
-    traces.push({
-      type: 'scatter', mode: 'lines+markers',
-      x: labels, y: items.map(i => i.rate),
-      name: 'Non-compliance %', yaxis: 'y2',
-      line: { color: '#ea580c', width: 3, shape: 'spline' },
-      marker: { size: 9, line: { color: '#fff', width: 1.5 } },
-      hovertemplate: '<b>%{x}</b><br>Non-compliance: %{y:.1f}%<extra></extra>',
-    });
-  }
+  // Non-compliance rate as a single orange line on the right axis. These charts
+  // are fed rowsScope (the microbe filter is a SLICE, not a scope constraint),
+  // so the rate is always over the full scope and stays meaningful. (2026-07-09)
+  traces.push({
+    type: 'scatter', mode: 'lines+markers',
+    x: labels, y: items.map(i => i.rate),
+    name: 'Non-compliance %', yaxis: 'y2',
+    line: { color: '#ea580c', width: 3, shape: 'spline' },
+    marker: { size: 9, line: { color: '#fff', width: 1.5 } },
+    hovertemplate: '<b>%{x}</b><br>Non-compliance: %{y:.1f}%<extra></extra>',
+  });
   Plotly.react(domId, traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
@@ -2618,6 +2636,9 @@ function renderAll(rowsActive, rowsSliced, rowsScope) {
   document.getElementById('meta_range').textContent = FACETS.date_min + ' → ' + FACETS.date_max;
 
   window.__lastFiltered = rowsActive;
+  // The map is drawn from rowsScope; remember it so the metric/tile toggles
+  // re-render on the SAME dataset instead of the severity-events subset. (2026-07-09)
+  window.__mapRows = rowsScope;
 
   // ── SCOPE-bound (slice-independent) ──────────────────────────
   refreshMicrobeChipCounts(rowsScope);
@@ -2633,7 +2654,7 @@ function renderAll(rowsActive, rowsSliced, rowsScope) {
   renderRepeatTable(rowsScope);
 
   // ── SLICE-aware (5 components) ───────────────────────────────
-  renderTopSubtypes(rowsSliced);     // most-contaminated ranking now reflects the pathogen/microbe/severity slice (Muhannad 2026-07-09)
+  renderTopSubtypes(rowsScope, rowsSliced);  // scope denominators, slice numerators (Muhannad 2026-07-09)
   renderSeverityMonth(rowsActive);   // severity-event subset of slice
   renderHeatmap(rowsActive);
   renderTests(rowsActive);
