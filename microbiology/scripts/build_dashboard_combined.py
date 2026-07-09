@@ -55,75 +55,74 @@ RIYADH_CENTROIDS: dict[str, tuple[float, float]] = {
 }
 
 # Sector centroids — used as the bubble location for sector-only rows that
-# have no specific sub-municipality. Keyed by the 4-sector English labels
-# that derive_sector_4 produces.
+# have no specific sub-municipality. Keyed by the 5-sector English labels
+# that derive_sector produces.
 SECTOR_CENTROIDS: dict[str, tuple[float, float]] = {
-    "East":  (24.7275, 46.7840),
-    "North": (24.8400, 46.6900),
-    "West":  (24.6300, 46.6033),
-    "South": (24.5470, 46.7800),
+    "East":    (24.7275, 46.7840),
+    "North":   (24.8400, 46.6900),
+    "West":    (24.6300, 46.6033),
+    "Central": (24.6740, 46.6950),
+    "South":   (24.5470, 46.7800),
 }
 
 
-# 4-sector canonical mapping (user direction 2026-06-14): every Arabic
-# sub-municipality maps to one of East / West / North / South. The 5
-# ex-Central districts are redistributed geographically:
-#   Al Olaya & Al Shumaisi   → North
-#   Al Malaz                 → East
-#   Al Maaadher              → West
-#   Al Bathaa                → South
-SECTOR_4_OF_SUBMUNI: dict[str, str] = {
+# 5-sector canonical mapping (user direction 2026-07-09): mirrors the chemistry
+# taxonomy — the five central districts form their own Central sector rather
+# than being redistributed into the compass sectors.
+#   الملز / المعذر / العليا / الشميسي / البطحاء → Central
+SECTOR_5_OF_SUBMUNI: dict[str, str] = {
     # North
     "الشمال":   "North",
-    "العليا":   "North",
-    "الشميسي":  "North",
     # East
     "الروضة":   "East",
     "الشرق":    "East",
-    "الملز":    "East",
     # West
     "عرقة":     "West",
     "نمار":     "West",
     "العريجاء": "West",
-    "المعذر":   "West",
+    # Central
+    "الملز":    "Central",
+    "المعذر":   "Central",
+    "العليا":   "Central",
+    "الشميسي":  "Central",
+    "البطحاء":  "Central",
     # South
     "الشفا":    "South",
     "العزيزية": "South",
     "الحاير":   "South",
     "النسيم":   "South",
     "السلي":    "South",
-    "البطحاء":  "South",
 }
-# Arabic sector-only labels (no sub-municipality) → 4-sector English. The
-# old "Central" sector ('فرع أمانة في المنطقة الوسطى', 'وسط الرياض') has
-# no canonical target and is left NULL (unknown of N/S/E/W).
-SECTOR_4_OF_RAW_SECTOR: dict[str, str | None] = {
+# Arabic sector-only labels (no sub-municipality) → 5-sector English. The
+# Central sector ('فرع أمانة في المنطقة الوسطى', 'وسط الرياض') now maps to
+# Central (restored to match the chemistry 5-sector taxonomy).
+SECTOR_5_OF_RAW_SECTOR: dict[str, str | None] = {
     "فرع أمانة في الشرق":           "East",
     "فرع أمانة في الشمال":          "North",
     "فرع أمانة في الغرب":           "West",
     "فرع أمانة في الجنوب":          "South",
-    "فرع أمانة في المنطقة الوسطى":  None,
+    "فرع أمانة في المنطقة الوسطى":  "Central",
     "قطاع الشمال":                  "North",
-    "وسط الرياض":                   None,
-    "القطاع وسط الرياض":            None,
+    "وسط الرياض":                   "Central",
+    "القطاع وسط الرياض":            "Central",
 }
 
 # Map sector to English label everywhere downstream. Order = canonical
-# compass order used by sector selectors and KPI charts.
-SECTORS_4 = ["East", "North", "West", "South"]
+# taxonomy order used by sector selectors and KPI charts.
+SECTORS_5 = ["East", "North", "West", "Central", "South"]
 
 
-def derive_sector_4(municipality, raw_sector):
-    """Return one of East/West/North/South or None.
+def derive_sector_5(municipality, raw_sector):
+    """Return one of East/West/North/Central/South or None.
     Priority: sub-municipality (precise) over sector-only label."""
     if municipality is not None and not (isinstance(municipality, float) and pd.isna(municipality)):
         s = str(municipality).strip()
-        if s in SECTOR_4_OF_SUBMUNI:
-            return SECTOR_4_OF_SUBMUNI[s]
+        if s in SECTOR_5_OF_SUBMUNI:
+            return SECTOR_5_OF_SUBMUNI[s]
     if raw_sector is not None and not (isinstance(raw_sector, float) and pd.isna(raw_sector)):
         s = str(raw_sector).strip()
-        if s in SECTOR_4_OF_RAW_SECTOR:
-            return SECTOR_4_OF_RAW_SECTOR[s]
+        if s in SECTOR_5_OF_RAW_SECTOR:
+            return SECTOR_5_OF_RAW_SECTOR[s]
     return None
 
 
@@ -236,6 +235,8 @@ SAMPLE_TYPE_TO_GSO: dict[str, str] = {
     "prepared_meal":       "Ready to Eat Foods",
     "raw_meat":            "Meat, Poultry and its Products",
     "cooked_meat_poultry": "Meat, Poultry and its Products",
+    "fish":                "Fish and Shellfish their Products",
+    "egg":                 "Egg and Egg Products",
     "sweets_bakery":       "Chocolate, Sweets and their Ingredients",
     "beverage":            "Beverages",
     "water":               "Drinking Water",
@@ -409,10 +410,9 @@ def build_data(df: pd.DataFrame) -> dict:
             _val(r.facility_name),
             _val(r.municipality),
             _val(r.municipality_type),
-            # 4-sector taxonomy (East/West/North/South). Derived from the
+            # 5-sector taxonomy (East/North/West/Central/South). Derived from the
             # sub-municipality when present, else from the raw sector label.
-            # Old "Central" rows that can't be geographically resolved → None.
-            derive_sector_4(_val(r.municipality), _val(r.sector)),
+            derive_sector_5(_val(r.municipality), _val(r.sector)),
             valid,
             failure_b,
             pathogen_b,
@@ -447,10 +447,9 @@ def build_facets(df: pd.DataFrame) -> dict:
     mun_types = [t for t in ["بلدية", "قطاع", "خاص"] if t in set(df["municipality_type"].dropna())]
     municipalities = sorted([m for m in df["municipality"].dropna().unique().tolist()])
     years = sorted([int(y) for y in df["year"].dropna().unique().tolist()])
-    # 4-sector canonical order (East → North → West → South). Central was
-    # dropped per user direction 2026-06-14; its districts redistributed.
-    # All 4 sectors are always listed so empty ones still appear (at zero).
-    sectors = list(SECTORS_4)
+    # 5-sector canonical order (East → North → West → Central → South).
+    # All 5 sectors are always listed so empty ones still appear (at zero).
+    sectors = list(SECTORS_5)
     # GSO categories — combine the 15 real 2024 categories with the 12
     # 2025-derived categories (from sample_type) for one cross-year list.
     cat_counts: dict[str, int] = {}
@@ -571,7 +570,7 @@ def build_facets(df: pd.DataFrame) -> dict:
         "municipalities": municipalities,
         # Sub-municipality → sector lookup so the dashboard can cascade the
         # municipality multi-select when a sector chip is selected.
-        "muni_to_sector": SECTOR_4_OF_SUBMUNI,
+        "muni_to_sector": SECTOR_5_OF_SUBMUNI,
         "sectors": sectors,
         "test_classes": test_classes,
         "pathogen_chips": pathogen_chips,
@@ -1540,8 +1539,8 @@ function applyFilters() {
         + ' &nbsp;·&nbsp; <span style="opacity:0.75">'
         + rowsSliced.length.toLocaleString() + ' samples in slice (of '
         + rowsScope.length.toLocaleString() + ' in scope). '
-        + 'Only the Severity-month / Heatmap / Tests / Drilldown views below respond to slice filters '
-        + '— KPIs and rate charts above show the full scope view.</span>';
+        + 'The Most-contaminated subtypes ranking plus the Severity-month / Heatmap / Tests / Drilldown views respond to slice filters '
+        + '— the KPIs and rate charts show the full scope view.</span>';
     } else {
       banner.style.display = 'none';
     }
@@ -1744,11 +1743,20 @@ function renderKpis(rows, rowsFull, rowsBase) {
 // sees the actual Arabic subtype (e.g. تبولة, مسحة ثلاجة) instead of just
 // the broad GSO bucket like "Dairy Products". Min 20 samples per row to
 // keep statistical noise out.
+// Collapse subtype-name variants so one product doesn't split across rows in
+// the most-contaminated ranking — e.g. "قطع بقدونس" (parsley pieces) groups
+// with "بقدونس". (Muhannad 2026-07-09)
+function normSubtypeName(n) {
+  if (!n) return n;
+  let s = String(n).trim().replace(/\s+/g, ' ');
+  s = s.replace(/^قطع\s+/, '');   // "pieces of X" → "X"
+  return s;
+}
 function renderTopSubtypes(rowsFull) {
   const MIN_SAMPLES = 20;
-  const stats = new Map();   // key = sample_name → {total, nc, gso, organisms}
+  const stats = new Map();   // key = normalized sample_name → {total, nc, gso, organisms}
   for (const r of rowsFull) {
-    const name = r[COLS.sample_name];
+    const name = normSubtypeName(r[COLS.sample_name]);
     if (!name) continue;
     let slot = stats.get(name);
     if (!slot) {
@@ -2613,7 +2621,6 @@ function renderAll(rowsActive, rowsSliced, rowsScope) {
   // ── SCOPE-bound (slice-independent) ──────────────────────────
   refreshMicrobeChipCounts(rowsScope);
   renderKpis(rowsActive, rowsScope, rowsScope);
-  renderTopSubtypes(rowsScope);
   renderMap(rowsScope);
   renderTrend(rowsScope);
   renderYoY(rowsScope);
@@ -2624,7 +2631,8 @@ function renderAll(rowsActive, rowsSliced, rowsScope) {
   renderDow(rowsScope);
   renderRepeatTable(rowsScope);
 
-  // ── SLICE-aware (4 components) ───────────────────────────────
+  // ── SLICE-aware (5 components) ───────────────────────────────
+  renderTopSubtypes(rowsSliced);     // most-contaminated ranking now reflects the pathogen/microbe/severity slice (Muhannad 2026-07-09)
   renderSeverityMonth(rowsActive);   // severity-event subset of slice
   renderHeatmap(rowsActive);
   renderTests(rowsActive);

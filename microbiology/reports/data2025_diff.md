@@ -5,7 +5,7 @@
 - **Rows after empty-row drop:** 11571
 - **Rows out (canonical):** 11564
 - **Rows dropped:** 0
-- **Flags raised (total):** 4485
+- **Flags raised (total):** 4482
 
 ## Cells changed per column
 
@@ -27,7 +27,7 @@
 |---|---:|---|
 | `date_parsed_from_text` | 4227 | '13/4/2025' |
 | `category_merged_to_canonical` | 153 | "'القشطة (cream)' → '(cream) قشطة'" |
-| `sample_type_unbucketed` | 62 | 'ايدام مصقع' |
+| `sample_type_unbucketed` | 59 | 'ايدام مصقع' |
 | `sample_id_collision` | 22 | 'so-0004-r01 → so-0004-r01-a (differs in: sample_name_raw,sampling_date,category |
 | `validity_says_valid_but_has_failures` | 8 | 'is_valid=true, n_failed_tests=1' |
 | `sample_id_duplicate_dropped` | 7 | 'sw-2725-r01' |
@@ -73,7 +73,7 @@
 | `category_canonical` | `string` | 11562 | 2 | 353 |
 | `category_en` | `string` | 11181 | 383 | 182 |
 | `category_raw` | `string` | 11562 | 2 | 361 |
-| `sample_type` | `string` | 11564 | 0 | 12 |
+| `sample_type` | `string` | 11564 | 0 | 14 |
 | `facility_name` | `string` | 11549 | 15 | 656 |
 | `facility_chain` | `string` | 11549 | 15 | 620 |
 | `facility_branch` | `string` | 7379 | 4185 | 71 |
@@ -91,6 +91,6 @@
 | `failed_indicators` | `object` | 11564 | 0 | n/a |
 | `has_pathogen_failure` | `boolean` | 11564 | 0 | 2 |
 | `severity_tier` | `string` | 11564 | 0 | 4 |
-| `data_quality_flags` | `string` | 4427 | 7137 | 13 |
+| `data_quality_flags` | `string` | 4424 | 7140 | 13 |
 | `chain_invalid_count_90d` | `int32` | 11564 | 0 | 30 |
 | `is_repeat_offender_90d` | `boolean` | 11564 | 0 | 2 |

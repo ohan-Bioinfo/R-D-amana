@@ -9,13 +9,13 @@ Resolve each section by editing the source xlsx or extending the YAML schema.
 |---|---:|---|
 | Source-data conflict: marked VALID but has failed tests | 8 | validity_says_valid_but_has_failures |
 | Source-data conflict: marked INVALID but no failed tests listed | 1 | validity_says_invalid_but_no_failures |
-| Categories not yet covered by sample_type_buckets (sample_type='other') | 62 | sample_type_unbucketed |
+| Categories not yet covered by sample_type_buckets (sample_type='other') | 59 | sample_type_unbucketed |
 | Failed tests not classified as pathogen or indicator | 0 | test_unclassified |
 | Municipality values that didn't match any split rule | 0 | municipality_unrecognised |
 | Failed tests not in the canonical test-name list | 0 | invalid_test_unmapped |
 | Sample IDs reused for different physical samples (suffixed -a/-b/...) | 22 | sample_id_collision |
 
-**Total review items:** 93
+**Total review items:** 90
 
 ## Source-data conflict: marked VALID but has failed tests
 
@@ -46,7 +46,7 @@ _Count: 1_  ·  _Flag: `validity_says_invalid_but_no_failures`_
 
 ## Categories not yet covered by sample_type_buckets (sample_type='other')
 
-_Count: 62_  ·  _Flag: `sample_type_unbucketed`_
+_Count: 59_  ·  _Flag: `sample_type_unbucketed`_
 
 **How to resolve:** Add the category's distinguishing keyword(s) to the right bucket in `schemas/lab_data_2025_v1.yaml` → `sample_type_buckets`. Re-run the cleaner.
 
@@ -67,14 +67,12 @@ _Count: 62_  ·  _Flag: `sample_type_unbucketed`_
 | 'كريم كراميل' | 1 |
 | '(Waffle) وافل' | 1 |
 | 'الزيت القلي' | 1 |
-| 'ربيان' | 1 |
 | '(Kofta) كفتة' | 1 |
 | '(Halloumi) حلومي' | 1 |
 | 'الصنوبر (Pine)' | 1 |
 | 'كبة جاج' | 1 |
 | 'تبولة' | 1 |
 | 'حلا مانجا' | 1 |
-| 'حلا فراولة' | 1 |
 | 'حلا ام علي' | 1 |
 | 'بابا غنوج' | 1 |
 | 'مصقع' | 1 |
@@ -100,10 +98,8 @@ _Count: 62_  ·  _Flag: `sample_type_unbucketed`_
 | 'باربكيو' | 1 |
 | 'الخوخ (Peaches)' | 1 |
 | '(Seasoning) تتبيلة' | 1 |
-| '(shrimp) روبيان' | 1 |
 | 'القمح (wheat)' | 1 |
-
-_…+1 more distinct values_
+| 'المهلبية (Mahalibah)' | 1 |
 
 ## Sample IDs reused for different physical samples (suffixed -a/-b/...)
 
