@@ -237,6 +237,7 @@ SAMPLE_TYPE_TO_GSO: dict[str, str] = {
     "cooked_meat_poultry": "Meat, Poultry and its Products",
     "fish":                "Fish and Shellfish their Products",
     "egg":                 "Egg and Egg Products",
+    "cereals":             "Cereals; Legumes and their Products",
     "sweets_bakery":       "Chocolate, Sweets and their Ingredients",
     "beverage":            "Beverages",
     "water":               "Drinking Water",
