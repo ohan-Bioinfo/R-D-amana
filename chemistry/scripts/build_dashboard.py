@@ -33,38 +33,30 @@ OUT_HTML  = ROOT / "reports" / "chemistry_dashboard.html"
 # Maps Arabic sample_category_canonical values to the 15 official GSO 1016
 # categories that the microbio dashboard uses, so both dashboards share one
 # product-taxonomy vocabulary. Unmapped → "Miscellaneous Foods".
+# De-duplicated 2026-07-09 (Muhannad's GSO_bridge merge/delete annotations): one
+# canonical Arabic per GSO — the exact spelling categories.py produces. The old
+# variant spellings (الحلويات والشكولاته, منتجات الألبان/الحليب ومنتجات الالبان,
+# الزيوت والدهون, tap/filter/bottled water, اعلاف, الأطعمة الجاهزه للاكل) and the
+# "عينات خاصه" entry were removed — no data row carries them.
 CHEM_TO_GSO = {
     "الفواكه والخضار":               "Fruit and Vegetables",
     "الحبوب والبقوليات":             "Cereals; Legumes and their Products",
     "البهارات والصوصات":             "Tomato Concentrates, Sauces, Vinegar, Spices and Herbs",
-    "الأطعمة الجاهزه للاكل":         "Ready to Eat Foods",
-    "الأطعمة الجاهزة للأكل":         "Ready to Eat Foods",  # canonical C_RTE (كشنة, 2026-07-04)
+    "الأطعمة الجاهزة للأكل":         "Ready to Eat Foods",                          # C_RTE
     "اللحوم والدواجن":               "Meat, Poultry and its Products",
-    "الحلويات والشوكولاتة":          "Chocolate, Sweets and their Ingredients",
-    "الحلويات والشكولاته":           "Chocolate, Sweets and their Ingredients",  # actual chem spelling
-    "منتجات الألبان":                "Dairy Products",
-    "الحليب ومنتجات الالبان":        "Dairy Products",  # actual chem spelling (no hamza)
-    "الحليب ومنتجات الألبان":        "Dairy Products",  # canonical form from categories.py (C_DAIRY)
+    "الحلويات والشوكولاتة":          "Chocolate, Sweets and their Ingredients",     # C_SWEET
+    "الحليب ومنتجات الألبان":        "Dairy Products",                              # C_DAIRY
     "المشروبات":                     "Beverages",
     "الأسماك والمأكولات البحرية":     "Fish and Shellfish their Products",
-    "البيض ومنتجاته":                "Egg and Egg Products",
-    "الزيوت والدهون":                "Fats and Oils",
-    "الدهون والزيوت":                "Fats and Oils",  # word-order variant
-    "المياه المعبأة":                "Drinking Water",
-    "مياه الحنفية":                  "Drinking Water",
-    "مياه فلتر":                     "Drinking Water",  # canonical W_FILTER — direct map (was name-fallback)
-    "مياه شرب/معبأة":                "Drinking Water",  # canonical W_DRINK — direct map (was name-fallback)
-    "مياه صالحة للشرب":              "Drinking Water",  # merged potable water W_POTABLE (2026-07-04)
-    "مياه شرب":                      "Drinking Water",
-    "مياه غير صالحة للشرب":          "Non-potable Water",  # C_NONPOT — basin/standing/mobile (2026-07-04)
-    "المربى والجلي":                 "Jelly, Jam and Marmalade",
-    "أغذية أطفال":                   "Infants, Children and Certain Categories of Dietetic Foods",
-    "اعلاف":                         "Animal Feed",
-    "الأعلاف":                       "Animal Feed",   # canonical form from categories.py (C_FEED)
-    # "عينات خاصه" mapping deleted 2026-07-04 (Muhannad's GSO_bridge annotation);
-    # private-sample rows now classify by their product name instead.
-    "أغذية متنوعة":                  "Miscellaneous Foods",  # canonical C_MISC (sesame only) — must NOT fall through to a name-guessed GSO
-    "أخرى":                          "Others",  # canonical C_OTHER — unclassified / junk leftovers (2026-07-04)
+    "البيض ومنتجاته":                "Egg and Egg Products",                        # GSO reference
+    "الدهون والزيوت":                "Fats and Oils",                               # C_FAT
+    "مياه صالحة للشرب":              "Drinking Water",                              # W_POTABLE (tap/filter/bottled merged)
+    "مياه غير صالحة للشرب":          "Non-potable Water",                           # C_NONPOT
+    "المربى والجلي":                 "Jelly, Jam and Marmalade",                    # C_JAM
+    "أغذية أطفال":                   "Infants, Children and Certain Categories of Dietetic Foods",  # GSO reference
+    "الأعلاف":                       "Animal Feed",                                 # C_FEED
+    "أغذية متنوعة":                  "Miscellaneous Foods",                         # C_MISC (sesame only)
+    "أخرى":                          "Others",                                      # C_OTHER
 }
 # Fallback name → GSO mapping (added 2026-06-25 because 2024 chemistry xlsx
 # have no Sample Category column — without this every 2024 row would collapse
