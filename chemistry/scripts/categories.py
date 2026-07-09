@@ -108,8 +108,9 @@ _PREFIX_RE = re.compile(r"^([a-z]+(?:-[a-z]+)*)-\d")
 # the aflatoxin `1-####` IDs, and 2024 rows with no raw category). ORDER MATTERS.
 NAME_KEYWORDS = [
     # honey / molasses / jam → sweets & jam
-    ("مربى", C_JAM),
+    ("مربى", C_JAM), ("جيلي", C_JAM), ("جلي", C_JAM),
     ("عسل", C_SWEET), ("دبس", C_SWEET),
+    ("جوز هند", C_FRVEG),   # coconut → fruit & veg (must precede "جوز"/walnut → sweets)
     # nuts → sweets (REVERSED 2026-07-04). "سوداني" catches both "فول سوداني" and
     # "فول السوداني" (with the ال article) before the plain "فول"→cereal rule.
     ("لوز", C_SWEET), ("فستق", C_SWEET), ("كاجو", C_SWEET), ("بندق", C_SWEET),
@@ -142,27 +143,31 @@ NAME_KEYWORDS = [
     ("فاكهة", C_FRVEG), ("كرز", C_FRVEG), ("ملوخية", C_FRVEG), ("برقوق", C_FRVEG),
     ("نكتارين", C_FRVEG), ("لفت", C_FRVEG), ("بابايا", C_FRVEG), ("شمام", C_FRVEG),
     ("زهرة", C_FRVEG), ("رجلة", C_FRVEG), ("رجله", C_FRVEG), ("جريب", C_FRVEG),
-    ("بخارة", C_FRVEG),
+    ("بخارة", C_FRVEG), ("تين", C_FRVEG), ("مشمش", C_FRVEG), ("ليمون", C_FRVEG),
+    ("تمر", C_FRVEG), ("فاصوليا", C_FRVEG),   # dried figs/apricot, lemon, dates, green beans
     # spices / sauces
     ("شط", C_SPICE), ("صلصة", C_SPICE), ("صوص", C_SPICE), ("خل", C_SPICE),
     ("بهار", C_SPICE), ("كركم", C_SPICE), ("زنجبيل", C_SPICE), ("هيل", C_SPICE),
     ("قرفة", C_SPICE), ("كمون", C_SPICE), ("كزبرة", C_SPICE), ("حبة البركة", C_SPICE),
-    ("حبةالبركة", C_SPICE),
+    ("حبةالبركة", C_SPICE), ("دقوس", C_SPICE),
     # cereals / legumes / grains — coffee lives here (aflatoxin commodity)
     ("قهوة", C_CEREAL), ("قهوه", C_CEREAL),
     ("هريس", C_CEREAL), ("جريش", C_CEREAL), ("جريس", C_CEREAL),
     ("ارز", C_CEREAL), ("أرز", C_CEREAL), ("قمح", C_CEREAL), ("عدس", C_CEREAL),
     ("حمص", C_CEREAL), ("فول", C_CEREAL), ("فاصولي", C_CEREAL), ("ذرة", C_CEREAL),
     ("شعير", C_CEREAL), ("خبز", C_CEREAL), ("توست", C_CEREAL), ("طحين", C_CEREAL),
-    ("سميد", C_CEREAL),
+    ("سميد", C_CEREAL), ("بليلة", C_CEREAL), ("دقيق", C_CEREAL), ("برغل", C_CEREAL),
+    ("فشار", C_CEREAL),
     # table olive → fruit & veg — BEFORE the fish block, because "تون" (tuna)
     # is a substring of "زيتون" (olive) and would otherwise steal it.
     ("زيتون", C_FRVEG),
-    # fish — before meat
+    # fish / seafood — before meat
     ("سمك", C_FISH), ("تون", C_FISH), ("جمبري", C_FISH), ("روبيان", C_FISH),
-    ("ربيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH),
+    ("ربيان", C_FISH), ("سلمون", C_FISH), ("بلطي", C_FISH), ("محار", C_FISH),
+    ("كابوريا", C_FISH), ("سبيط", C_FISH), ("حبار", C_FISH), ("سردين", C_FISH),
     # meat / poultry
     ("لحم", C_MEAT), ("دجاج", C_MEAT), ("فروج", C_MEAT), ("شاورما", C_MEAT), ("كباب", C_MEAT),
+    ("كبدة", C_MEAT), ("كبد", C_MEAT),
     # dairy
     ("حليب", C_DAIRY), ("لبن", C_DAIRY), ("جبن", C_DAIRY), ("زبادي", C_DAIRY), ("قشطة", C_DAIRY),
     # fats
