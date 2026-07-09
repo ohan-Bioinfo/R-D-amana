@@ -411,6 +411,16 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
             sec_name, sec_flag = sectors.sector_for(rec.get("municipality"))
             rec["sector"] = sec_name
             rec["sector_flag"] = sec_flag
+            # Normalize the municipality label per Muhannad's Sector_observed
+            # rulings (2026-07-09): merge the private-sample variants to a single
+            # «عينة خاصة»; an out-of-place value (a product name / stray number /
+            # "NA"/"-" that leaked into the municipality field) is cleared and
+            # folded into no_municipality.
+            if sec_flag == "private":
+                rec["municipality"] = "عينة خاصة"
+            elif sec_flag in ("unmapped", "no_municipality"):
+                rec["municipality"] = None
+                rec["sector_flag"] = "no_municipality"
 
             # M1: surface water failed-tests that have no numeric basis.
             if section == "water_analysis" and not rec.get("failed_tests_derived"):
