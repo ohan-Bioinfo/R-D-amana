@@ -200,18 +200,18 @@ NAME_KEYWORDS_TO_GSO: list[tuple[list[str], str]] = [
     (['ماء','مياه','مياة'], 'Drinking Water'),
     (['علف','أعلاف'], 'Animal Feed'),
     (['بيض','بيوض'], 'Egg and Egg Products'),
-    (['سمك','تونة','كابوريا','جمبري','سبيط','حبار','محار','أسماك','اسماك'], 'Fish and Shellfish their Products'),
-    (['حليب','لبن','زبادي','جبن','جبنة','أجبان','زبدة','قشطة','لبنة','جبنه','مرتديلا','حلوم','كريمة','كريم','قشدة'], 'Dairy Products'),
+    (['سمك','تونة','كابوريا','جمبري','ربيان','روبيان','سبيط','حبار','محار','أسماك','اسماك'], 'Fish and Shellfish their Products'),
+    (['حليب','لبن','زبادي','جبن','جبنة','أجبان','زبدة','قشطة','لبنة','جبنه','مرتديلا','حلوم','كريمة','كريم','قشدة','تشيز','شيدر'], 'Dairy Products'),
     (['لحم','لحوم','دجاج','كباب','شاورما','هامبرغر','نقانق','سجق','ديك رومي','بسطرمة','كفتة'], 'Meat, Poultry and its Products'),
     (['عصير','مشروب','شاي','قهوة','كوكا','بيبسي','كركدية','نسكافيه'], 'Beverages'),
-    (['شوكولا','بسكويت','كعك','كيك','حلوى','حلويات','معمول','بقلاوة','كنافة','بسبوسة','حلويه','بقلاوه'], 'Chocolate, Sweets and their Ingredients'),
+    (['شوكولا','بسكويت','كعك','كيك','حلوى','حلويات','حلا','معمول','بقلاوة','كنافة','بسبوسة','حلويه','بقلاوه','صنوبر','شيرة','مهلبية','بيتي فور'], 'Chocolate, Sweets and their Ingredients'),
     (['مربى','جلي','مرملاد'], 'Jelly, Jam and Marmalade'),
     (['عسل الأطفال','حلويات الأطفال','حليب اطفال','حليب أطفال'], 'Infants, Children and Certain Categories of Dietetic Foods'),
     (['زيت','زيوت','سمن','دهن'], 'Fats and Oils'),
-    (['خبز','عجين','معكرون','مكرون','رز','أرز','ارز','عدس','فاصوليا','فول','بقول','حبوب','شوفان','نشا','قمح','طحين','بليلة','ذرة'], 'Cereals; Legumes and their Products'),
-    (['طماطم','خيار','خس','بصل','فلفل','جزر','بطاطا','بطاطس','ثوم','بقدونس','نعناع','كزبرة','خضار','خضروات','فواكه','تفاح','موز','برتقال','عنب','مانجو','مانجا','فراولة','ليمون','رمان','بطيخ','شمام','تين','مشمش','كرز','أناناس','افوكادو','بروكلي','قرنبيط','زعتر','جرجير','جيرجير','بنجر','شمر','ملفوف','كرنب','قرع','كوسا','شمندر','باذنجان','هلابينو'], 'Fruit and Vegetables'),
-    (['صوص','شطة','مايونيز','كاتشب','خل','بهارات','توابل','مخلل','معجون طماطم','كركم','قرفة','صوصات'], 'Tomato Concentrates, Sauces, Vinegar, Spices and Herbs'),
-    (['تبولة','سلطة','حمص','متبل','بابا غنوج','باباغنوج','محمرة','محشي','منسف','مقلوبة','كبة','ورق عنب','فطيرة','معجنات','شوربة','شربة','صيادية','وجبة','وجبه','فلافل','شكشوكة','مكدوس'], 'Ready to Eat Foods'),
+    (['خبز','عجين','معكرون','مكرون','رز','أرز','ارز','عدس','فاصوليا','فول','بقول','حبوب','شوفان','نشا','قمح','طحين','بليلة','ذرة','فشار','فريكة','شابور','وافل'], 'Cereals; Legumes and their Products'),
+    (['طماطم','خيار','خس','بصل','فلفل','جزر','بطاطا','بطاطس','ثوم','بقدونس','نعناع','كزبرة','خضار','خضروات','فواكه','تفاح','موز','برتقال','عنب','مانجو','مانجا','فراولة','ليمون','رمان','بطيخ','شمام','تين','مشمش','كرز','أناناس','افوكادو','بروكلي','قرنبيط','زعتر','جرجير','جيرجير','بنجر','شمر','ملفوف','كرنب','قرع','كوسا','شمندر','باذنجان','هلابينو','فجل','كرفس','خوخ','بامية'], 'Fruit and Vegetables'),
+    (['صوص','شطة','مايونيز','كاتشب','خل','بهارات','توابل','مخلل','معجون طماطم','كركم','قرفة','صوصات','تتبيلة','باربكيو'], 'Tomato Concentrates, Sauces, Vinegar, Spices and Herbs'),
+    (['ايدام','مصقع','ملوخية','حواوش','ممبار','تبولة','سلطة','حمص','متبل','بابا غنوج','باباغنوج','محمرة','محشي','منسف','مقلوبة','كبة','ورق عنب','فطيرة','معجنات','شوربة','شربة','صيادية','وجبة','وجبه','فلافل','شكشوكة','مكدوس'], 'Ready to Eat Foods'),
 ]
 
 
@@ -241,8 +241,30 @@ SAMPLE_TYPE_TO_GSO: dict[str, str] = {
     "water":               "Drinking Water",
     "swab":                "Environmental Swabs",
     "animal_feed":         "Animal Feed",
-    "other":               "Miscellaneous Foods",
+    # "other" deliberately unmapped (was → Miscellaneous) so those rows fall
+    # through to classify_sample_name() and get a real category by name where
+    # possible (Muhannad 2026-07-09).
 }
+
+
+# Per-sample_id GSO-category overrides — Muhannad's micro sheet-8 targets
+# (2026-07-09). Authoritative: applied BEFORE the native/sample_type/name
+# derivation. Handles categories sample_type cannot express (Fish, Cereals,
+# Fats) and his specific per-sample calls. Keyed by lowercased sample_id.
+def _load_gso_corrections() -> dict:
+    import csv
+    p = ROOT / "scripts" / "gso_category_corrections.csv"
+    out = {}
+    if p.exists():
+        with p.open(encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                sid = (row.get("sample_id") or "").strip().lower()
+                cat = (row.get("gso_category") or "").strip()
+                if sid and cat:
+                    out[sid] = cat
+    return out
+
+GSO_CORRECTIONS = _load_gso_corrections()
 
 
 def load_test_classification() -> dict:
@@ -354,7 +376,11 @@ def build_data(df: pd.DataFrame) -> dict:
         #   1. Native GSO category from the parquet (best — direct from source)
         #   2. Bridge from sample_type (2025 — derived from category mapping)
         #   3. Keyword-classify the Arabic sample_name (catches 2023/2024 gaps)
-        gso_cat = _val(getattr(r, "gso_category_name_en", None))
+        # 0. Per-sample_id override (Muhannad's targets) — wins over everything.
+        _sid = _val(getattr(r, "sample_id", None))
+        gso_cat = GSO_CORRECTIONS.get(str(_sid).strip().lower()) if _sid is not None else None
+        if gso_cat is None:
+            gso_cat = _val(getattr(r, "gso_category_name_en", None))
         if gso_cat is None:
             st = _val(getattr(r, "sample_type", None))
             if st is not None:
@@ -569,15 +595,14 @@ def build_facets(df: pd.DataFrame) -> dict:
         "date_max": default_max.strftime("%Y-%m-%d"),
         "row_count": len(df),
         # Test counts per year — derived purely from our cleaned parquets.
-        # 2023/2024 read exact totals from the matching `data<YEAR>_long.parquet`
-        # (one row per test). 2025 has no long-format file, so we leave it
-        # absent; the KPI card falls back to the parquet-derived ratio for it.
+        # 2024 reads exact totals from `data2024_long.parquet` (one row per
+        # test). 2025 has no long-format file, so we leave it absent; the KPI
+        # card falls back to the parquet-derived ratio for it.
+        # (2023 discarded 2026-07-04.)
         "exact_total_tests_by_year": {
-            "2023": 10310,
             "2024": 31583,
         },
         "exact_non_comp_tests_by_year": {
-            "2023": 930,
             "2024": 3407,
         },
         # Tests-per-sample ratio derived from 2024 long-format (31,583 / 8,094
@@ -989,8 +1014,8 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_severity_month" class="chart"></div>
   </div>
 
-  <div class="card tall" data-needs-year="2023,2025">
-    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2023 + 2025 source</span></h2>
+  <div class="card tall" data-needs-year="2025">
+    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2025 source</span></h2>
     <div id="chart_chains" class="chart tall"></div>
   </div>
 

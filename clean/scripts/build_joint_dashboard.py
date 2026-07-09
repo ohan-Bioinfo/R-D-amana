@@ -126,8 +126,8 @@ def collect_chemistry() -> dict[tuple[int, str], dict]:
 
 
 def add_microbiology(by_sample: dict):
-    """Add microbiology rows. Year 2023 is micro-only."""
-    for year in (2023, 2024, 2025):
+    """Add microbiology rows. (2023 discarded 2026-07-04.)"""
+    for year in (2024, 2025):
         p = MICRO_DIR / f"data{year}.parquet"
         if not p.exists():
             continue
@@ -963,7 +963,7 @@ function renderAll() {
     const total = DATA.rows.length;
     const both = DATA.rows.filter(r => r[COLS.domain] === 'both').length;
     document.getElementById('subtitle').textContent =
-      `${total.toLocaleString()} unique physical samples · ${both.toLocaleString()} tested in BOTH labs · years 2023–2025`;
+      `${total.toLocaleString()} unique physical samples · ${both.toLocaleString()} tested in BOTH labs · years 2024–2025`;
     const fRows = filteredRows();
     document.getElementById('filter-status').textContent =
       `→ ${fRows.length.toLocaleString()} match`;
