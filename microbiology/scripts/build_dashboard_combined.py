@@ -891,7 +891,6 @@ tbody tr:hover { background: var(--sand-100); }
 
 <div class="page-body">
 <h1>Riyadh Municipality Lab</h1>
-<div class="subtitle" id="subtitle">Loading…</div>
 
 <section id="annual-band" class="card" style="margin:12px 0">
   <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
@@ -1631,7 +1630,7 @@ function renderKpis(rowsBase) {
     compRateCard,
     // ── Severity breakdown (3 cards) ────────────────────────
     { label: 'Pathogen failures', value: fmtNum(pathogenFails),
-      sub: total > 0 ? pct(pathogenFails, total).toFixed(2) + '% of ' + fmtNum(total) + ' total' : 'no data',
+      sub: total > 0 ? pct(pathogenFails, total).toFixed(2) + '% pathogen-failure rate — not a compliance figure' : 'no data',
       cls: pathogenFails > 0 ? 'crit' : 'good' },
     { label: 'Indicator failures', value: fmtNum(indicatorFails),
       sub: total > 0 ? pct(indicatorFails, total).toFixed(2) + '% of ' + fmtNum(total) + ' total' : 'no data',
@@ -1642,38 +1641,9 @@ function renderKpis(rowsBase) {
         ? fmtNum(nonCompliant) + ' samples · ' + testsPerNcSample.toFixed(1) + ' failed tests per non-compliant sample'
         : 'no failed tests',
       cls: '' },
-    // Total tests performed — derived directly from our cleaned parquets.
-    // 2023/2024 read exact counts from the long-format parquet (one row per
-    // test). 2025 source is short-format (one row per sample) so we report
-    // the sum of n_failed_tests as the lower bound of non-compliant tests
-    // and the parquet-derived test count otherwise.
-    // Compose Total tests by year: exact long-format counts when available
-    // (2023/2024), per-sample ratio for years that don\'t have a long parquet
-    // (2025). All numbers derive from our cleaned data — no external lookup.
-    ...(() => {
-      const yearsInView = Array.from(new Set(rowsBase.map(r => r[COLS.year]))).sort();
-      const exactByYear = FACETS.exact_total_tests_by_year || {};
-      const ncByYear    = FACETS.exact_non_comp_tests_by_year || {};
-      const ratio       = FACETS.tests_per_sample_ratio || 3.90;
-      let testsTotal = 0, ncTotal = 0;
-      // Per-year sums: exact when long parquet exists; ratio × samples otherwise.
-      for (const y of yearsInView) {
-        const yearRows = rowsBase.filter(r => r[COLS.year] === y);
-        if (exactByYear[String(y)]) {
-          testsTotal += exactByYear[String(y)];
-          ncTotal    += ncByYear[String(y)] || 0;
-        } else {
-          testsTotal += Math.round(yearRows.length * ratio);
-          ncTotal    += yearRows.reduce((s, r) => s + (r[COLS.n_failed] || 0), 0);
-        }
-      }
-      return [{ label: 'Total tests performed',
-        value: total > 0 ? fmtNum(testsTotal) : '—',
-        sub: total > 0
-          ? fmtNum(ncTotal) + ' non-compliant tests'
-          : 'no data',
-        cls: '' }];
-    })(),
+    // Interactive test-count KPI removed 2026-07-16 — exact test counts now live
+    // in the Official Annual Figures band (the estimate could not compete
+    // honestly, and 2025 has no per-test source).
     // ── Rankings (3 cards) ──────────────────────────────────
     // "Most contaminated sample type" KPI removed 2026-06-18: it was a
     // broad GSO-category single pick (e.g. "Dairy Products") that conflicted
