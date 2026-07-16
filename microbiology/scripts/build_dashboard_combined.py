@@ -1949,26 +1949,39 @@ function renderTestsDrilldown(organism) {
   const topFac = Array.from(facCounts.entries()).sort((a,b) => b[1]-a[1]).slice(0, 10);
   const topCat = Array.from(catCounts.entries()).sort((a,b) => b[1]-a[1]).slice(0, 10);
   const yrList = Array.from(yrCounts.entries()).sort((a,b) => a[0]-b[0]);
-  function table(title, rows) {
-    return `<div style="flex:1; min-width:260px">
-      <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">${title}</div>
-      <table style="width:100%; font-size:12px"><tbody>
-        ${rows.map(([k, n]) => `<tr><td style="padding:2px 6px">${k}</td><td style="text-align:right; padding:2px 6px; font-variant-numeric:tabular-nums">${n.toLocaleString()}</td></tr>`).join('')}
-      </tbody></table></div>`;
-  }
   document.getElementById('tests_drilldown').innerHTML = `
     <div style="padding:12px 14px; background:var(--bg-2); border:1px solid var(--line); border-radius:10px">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
-        <div><span style="font-weight:600">${organism}</span>
+        <div><span style="font-weight:600" class="ar">${escapeHtml(organism)}</span>
         <span class="muted" style="margin-left:10px">${rows.length.toLocaleString()} failures · clicked drilldown</span></div>
         <button class="btn" onclick="document.getElementById('tests_drilldown').innerHTML=''">Close</button>
       </div>
       <div style="display:flex; flex-wrap:wrap; gap:18px">
-        ${table('By year', yrList)}
-        ${table('Top facilities', topFac)}
-        ${table('Top GSO categories', topCat)}
+        <div style="flex:1; min-width:220px"><div class="section-note" style="margin-bottom:4px">By year</div><div id="dd_year" style="height:180px"></div></div>
+        <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Top facilities</div><div id="dd_fac" style="height:260px"></div></div>
+        <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Top GSO categories</div><div id="dd_cat" style="height:260px"></div></div>
       </div>
     </div>`;
+  const ddLayout = (l, b) => ({
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#1c2742', size: 10, family: 'Segoe UI, Tahoma, sans-serif' },
+    margin: { l: l, r: 34, t: 6, b: b }, showlegend: false,
+    xaxis: { gridcolor: '#e5e7eb', rangemode: 'tozero' }, yaxis: { automargin: true, gridcolor: '#e5e7eb' },
+  });
+  Plotly.react('dd_year', [{ type: 'bar', x: yrList.map(e => String(e[0])), y: yrList.map(e => e[1]),
+    marker: { color: yrList.map(e => yearColor(e[0])) }, text: yrList.map(e => e[1].toLocaleString()),
+    textposition: 'outside', cliponaxis: false, hovertemplate: '%{x}: %{y} failures<extra></extra>' }],
+    ddLayout(36, 24), PLOTLY_CONFIG);
+  const fac = topFac.slice().reverse();
+  Plotly.react('dd_fac', [{ type: 'bar', orientation: 'h', x: fac.map(e => e[1]), y: fac.map(e => e[0]),
+    marker: { color: '#ea580c' }, text: fac.map(e => e[1].toLocaleString()),
+    textposition: 'outside', cliponaxis: false, hovertemplate: '<b>%{y}</b>: %{x} failures<extra></extra>' }],
+    ddLayout(150, 24), PLOTLY_CONFIG);
+  const cat = topCat.slice().reverse();
+  Plotly.react('dd_cat', [{ type: 'bar', orientation: 'h', x: cat.map(e => e[1]), y: cat.map(e => e[0]),
+    marker: { color: '#3b82f6' }, text: cat.map(e => e[1].toLocaleString()),
+    textposition: 'outside', cliponaxis: false, hovertemplate: '<b>%{y}</b>: %{x} failures<extra></extra>' }],
+    ddLayout(150, 24), PLOTLY_CONFIG);
 }
 
 // renderMunicipality removed 2026-07-16 — the sub-municipality chart is
@@ -2291,26 +2304,29 @@ function renderRepeatTable(rows) {
     stats.push({ chain, total, inv: invR, path, peak, rate: pct(invR, total) });
   }
   stats.sort((a, b) => b.peak - a.peak);
-  const maxPeak = stats[0]?.peak || 1;
-
-  let html = '<table id="repeat_tbl"><thead><tr>'
-    + '<th>Chain</th><th class="r">Samples</th><th class="r">Non-compliant</th>'
-    + '<th class="r">Rate %</th><th class="r">Pathogen</th>'
-    + '<th class="r">Max non-compliance streak (90d)</th></tr></thead><tbody>';
-  for (const s of stats.slice(0, 50)) {
-    const cls = s.peak >= 10 ? 'row-bad' : (s.peak >= 5 ? 'row-warn' : '');
-    const barW = Math.max(20, 120 * s.peak / maxPeak);
-    html += '<tr class="' + cls + '"><td class="ar">' + escapeHtml(s.chain) + '</td>'
-      + '<td class="r">' + s.total + '</td>'
-      + '<td class="r">' + s.inv + '</td>'
-      + '<td class="r">' + s.rate.toFixed(1) + '%</td>'
-      + '<td class="r">' + s.path + '</td>'
-      + '<td class="r"><span class="bar-inline" style="width:' + barW + 'px"></span>' + s.peak + '</td></tr>';
+  const node = document.getElementById('repeat_table');
+  if (!stats.length) {
+    Plotly.purge('repeat_table');
+    node.innerHTML = '<div class="muted" style="padding:20px">No repeat-offender chains in current view.</div>';
+    return;
   }
-  html += '</tbody></table>';
-  if (stats.length > 50) html += '<div class="muted" style="margin-top:8px">…+' + (stats.length - 50) + ' more chains</div>';
-  if (stats.length === 0) html = '<div class="muted">No repeat-offender chains in current view.</div>';
-  document.getElementById('repeat_table').innerHTML = html;
+  const top = stats.slice(0, 15).reverse();   // reverse so the worst chain is on top
+  const color = s => s.peak >= 10 ? '#dc2626' : s.peak >= 5 ? '#f97316' : '#3b82f6';
+  Plotly.react('repeat_table', [{
+    type: 'bar', orientation: 'h',
+    x: top.map(s => s.peak), y: top.map(s => s.chain),
+    marker: { color: top.map(color) },
+    text: top.map(s => String(s.peak)), textposition: 'outside', cliponaxis: false,
+    customdata: top.map(s => [s.total, s.inv, s.rate, s.path]),
+    hovertemplate: '<b>%{y}</b><br>Max 90-day non-compliance streak: %{x}<br>%{customdata[1]}/%{customdata[0]} non-compliant (%{customdata[2]:.1f}%)<br>Pathogen failures: %{customdata[3]}<extra></extra>',
+  }], {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
+    margin: { l: 230, r: 50, t: 6, b: 34 },
+    height: 70 + top.length * 26,
+    xaxis: { gridcolor: '#e5e7eb', title: { text: 'Max non-compliance streak (90d)', font: { size: 10 } }, rangemode: 'tozero', dtick: 1 },
+    yaxis: { automargin: true },
+  }, PLOTLY_CONFIG);
 }
 
 function escapeHtml(s) {
