@@ -1168,19 +1168,57 @@ try {
     'fipronil':                 'Fipronil',
     '2-phenylphenol':           '2-Phenylphenol',
     'thpi(tetrahydrophthalimide)': 'THPI (Tetrahydrophthalimide)',
+    // #8 — arsenic variants merge to one label
+    'arsenic':                  'Arsenic',
+    'total arsenic':            'Arsenic',
+    'الزرنيخ الكلي':            'Arsenic',
+    // #5/#12 — water analytes → canonical English
+    'sulphate':                 'Sulphate',
+    'الكبريتات':                'Sulphate',
+    'chloride':                 'Chloride',
+    'nitrate':                  'Nitrate',
+    'nitrate(no3)':             'Nitrate',
+    'النترات':                  'Nitrate',
+    'nitrite':                  'Nitrite',
+    'floride':                  'Fluoride',
+    'fluorid':                  'Fluoride',
+    'fluoride':                 'Fluoride',
+    'tds':                      'TDS',
+    'total dissolved salt tds': 'TDS',
+    't.hardness':               'Total hardness',
+    'total hardness':           'Total hardness',
+    'sodium':                   'Sodium',
+    'ph':                       'pH',
+    'turbidity':                'Turbidity',
   };
   // Sensory-only tests are excluded (mostly compliant noise).
   const SENSORY_TOKENS = ['اختبار حسي','sensory','texture','اللون','الرائحة','الطعم','القوام'];
   // Placeholder "names" the lab wrote in pesticide_name to indicate "all
   // pesticides below 0.01 ppm" — drop them too.
-  const PLACEHOLDER_TOKENS = ['تراكيز المبيدات أقل','أقل من 0.01','below detection','below 0.01'];
+  const PLACEHOLDER_TOKENS = ['تراكيز المبيدات أقل','أقل من 0.01','below detection','below 0.01',
+                              'مياه فلتر','مياة فلتر','فلتر','مياه','مياة','موية'];
   function normaliseFail(label) {
     if (!label) return null;
     const trimmed = String(label).trim();
     const lc = trimmed.toLowerCase();
+    if (lc === 'na' || lc === 'nan' || lc === 'n/a') return null;
     for (const tok of SENSORY_TOKENS)     if (lc.includes(tok.toLowerCase())) return null;
     for (const tok of PLACEHOLDER_TOKENS) if (lc.includes(tok.toLowerCase())) return null;
     return FAIL_LABEL_MAP[lc] || trimmed;
+  }
+
+  // Multi-word water analyte names that must survive the space-split.
+  const WATER_MULTIWORD = [
+    [/total\s+dissolved\s+salt\s+tds/ig, 'TDS'],
+    [/t\.?\s*hardness/ig, 'T.Hardness'],
+    [/total\s+hardness/ig, 'T.Hardness'],
+    [/nitrate\s*\(no3\)/ig, 'Nitrate'],
+  ];
+  function splitWaterTests(raw) {
+    if (!raw) return [];
+    let s = String(raw).replace(/\|/g, ' ');
+    WATER_MULTIWORD.forEach(([re, tok]) => { s = s.replace(re, ' ' + tok + ' '); });
+    return s.split(/\s+/).map(t => t.trim()).filter(Boolean);
   }
 
   function renderFail() {
@@ -1210,6 +1248,12 @@ try {
         const conc = r[COLS.conc_ppm];
         const trace = (conc !== null && conc !== undefined && conc < 0.01);
         if (r[COLS.is_valid] === 0 && r[COLS.pesticide_name] && !trace) add(r[COLS.pesticide_name]);
+      } else if (sec === 'water_analysis') {
+        // #12 — water lab records several failed analytes as ONE space-joined
+        // string (e.g. "TDS T.Hardness Chloride Nitrate Sulphate Sodium").
+        // Split into individual analytes so each is counted on its own.
+        const raw = r[COLS.failed_tests_derived] || (r[COLS.is_valid] === 0 ? r[COLS.invalid_test] : '');
+        splitWaterTests(raw).forEach(add);
       } else if (r[COLS.failed_tests_derived]) {
         // Per-test column may list multiple failures separated by '|'.
         String(r[COLS.failed_tests_derived]).split('|').forEach(t => add(t.trim()));
@@ -1645,10 +1689,16 @@ try {
       let issueStr = '';
       const raw = r[COLS.failed_tests_derived] || r[COLS.invalid_test] || '';
       if (raw) {
-        issueStr = String(raw).split('|').map(s => s.trim())
-          .map(t => t.replace(/^\[[^\]]+\]\s*/, ''))
-          .map(normaliseFail)
-          .filter(Boolean).join(' · ');
+        if (rowSection(r) === 'water_analysis') {
+          // #12 — mirror the chart's space-split (see renderFail) so the
+          // drilldown text matches the "Top non-compliant tests" chart.
+          issueStr = splitWaterTests(raw).map(normaliseFail).filter(Boolean).join(', ');
+        } else {
+          issueStr = String(raw).split('|').map(s => s.trim())
+            .map(t => t.replace(/^\[[^\]]+\]\s*/, ''))
+            .map(normaliseFail)
+            .filter(Boolean).join(' · ');
+        }
       }
       if (rowSection(r) === 'pesticides' && r[COLS.pesticide_name]) {
         const conc = r[COLS.conc_ppm];
