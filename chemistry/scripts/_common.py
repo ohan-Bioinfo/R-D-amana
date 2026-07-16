@@ -212,6 +212,8 @@ def iter_data_sheets(path: Path, year: int, schema: dict):
     Filters applied:
       * sheet name starts with 'final' (case-insensitive)  → skip (summary tabs)
       * sheet name contains any schema.skip_sheets token   → skip
+      * schema.only_sheets set and name not whitelisted    → skip (name matched
+        by strip+lower equality or startswith; targets one sheet in a file)
       * non-monthly sheet name when require_monthly_sheet  → skip
       * detected year != file's declared year              → skip (year purity)
       * sheet with no data rows                            → skip naturally

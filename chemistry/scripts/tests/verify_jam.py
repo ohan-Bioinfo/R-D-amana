@@ -15,6 +15,6 @@ assert false_n == 1, f"expected 1 non-compliant jam row, got {false_n}"
 for col in ["fructose_value", "glucose_value", "glucose_plus_fructose_value",
             "sucrose_value", "hmf_value", "moisture_value", "ph_value"]:
     assert col in df.columns, f"missing column {col}"
-    assert df[col].notna().sum() >= 70, f"{col} mostly empty ({df[col].notna().sum()}/84)"
+    assert df[col].notna().sum() >= 70, f"{col} mostly empty ({df[col].notna().sum()}/{len(df)})"
 
 print("JAM VERIFY OK  (rows:", len(df), ")")

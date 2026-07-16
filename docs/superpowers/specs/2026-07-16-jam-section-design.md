@@ -1,7 +1,7 @@
 # Jam section — design (2026-07-16)
 
 Ingest the lab's jam (مربى) dataset — currently unread — as a new `jam`
-analytical section, so ~84 jam samples appear in the dashboard under the GSO
+analytical section, so ~83 jam samples appear in the dashboard under the GSO
 "Jelly, Jam and Marmalade" category. Point #15 from the 2026-07-16 review;
 Amjad supplied the sheet.
 
@@ -9,7 +9,7 @@ Amjad supplied the sheet.
 
 The jam data is **already in the raw tree**, in a sheet the cleaner skips:
 `raw/2024/Food chemistry section.xlsx`, sheet **`"Jams "`** (trailing space),
-84 data rows, dated 2024. The cleaner ignores it because it is a non-monthly
+83 data rows, dated 2024. The cleaner ignores it because it is a non-monthly
 sheet and the `food_chemistry` schema only reads monthly sheets. (The same file
 also holds an unread `"Honey section"` sheet — 2024 honey with limits+verdicts —
 **out of scope** here, noted for a later task.)
@@ -24,7 +24,7 @@ Header row 2 (row 1 is a `"Jam samples "` title). Columns:
   Sucrose, Maltose, Carbohydrate QC %, HMF %, Concentration, Moisture, pH,
   Acidity.
 - Sensory: القوام (texture), اللون (colour).
-- Verdict: `Matched/not matched` — **blank for 83 of 84 rows**; one row is
+- Verdict: `Matched/not matched` — **blank for 82 of 83 rows**; one row is
   `غير مطابقة`.
 - Testing Notes.
 
@@ -108,9 +108,12 @@ logic changes — the generic schema-driven path handles a limit-less section.
 
 ### 4. Classification (`scripts/categories.py`)
 
-Sample names are `مربى …`, which the existing `مربى → C_JAM` keyword already
-classifies to `المربى والجلي`. Add `SECTION_DEFAULT["jam"] = C_JAM` as a
-belt-and-braces default so any oddly-named jam row still lands in Jelly/Jam.
+Sample names are `مربى …`, which the existing `مربى → C_JAM` keyword classifies
+to `المربى والجلي`. But 2 rows are typo'd `مربو …` whose fruit-flavour keywords
+(توت/مشمش) would misroute them to fruit/veg before any section default fires.
+Since the `"Jams "` sheet is entirely jam, `classify()` **force-classifies the
+`jam` section** to `C_JAM` via a `section == "jam"` short-circuit at the top —
+so all 83 rows land in Jelly/Jam regardless of name.
 
 ### 5. Dashboard (`scripts/build_dashboard.py`)
 
@@ -126,7 +129,7 @@ already renders. No dashboard logic changes beyond the SECTIONS entry.
 - Deriving jam compliance / GSO jam limits — none available.
 
 ## Verification
-- Cleaner emits `cleaned/chem_jam_2024.parquet` with **84 rows**, all
+- Cleaner emits `cleaned/chem_jam_2024.parquet` with **83 rows**, all
   `sample_category_canonical == المربى والجلي`, sugar-panel values populated,
   `is_valid` = False for 1 row (`غير مطابقة`) and null for the rest.
 - `only_sheets` reads exactly the `"Jams "` sheet (not the 14 other sheets), and

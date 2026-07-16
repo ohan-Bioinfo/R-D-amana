@@ -27,6 +27,10 @@ Muhannad's 2026-07-04 rulings (reverse the earlier 2026-07-01 taxonomy):
   * Per-section valid-category gating RETIRED — category comes purely from the
     product (prefix/name); no more section-based `suspect` overrides.
 
+2026-07-16: the `jam` section is an exception — `classify()` short-circuits it
+to «المربى والجلي» before the ordered scheme runs, because the "Jams " sheet is
+entirely jam and some rows are typo'd «مربو» that fruit keywords would misroute.
+
 Public API:
   classify(section, raw_category, sample_name, sample_id) -> (canonical, flag)
       flag ∈ {None, 'defaulted'}
