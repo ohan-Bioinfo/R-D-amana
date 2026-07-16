@@ -833,14 +833,6 @@ tbody tr:hover { background: var(--sand-100); }
 <div class="page-body">
 <h1>Riyadh Municipality Lab</h1>
 
-<section id="annual-band" class="card" style="margin:12px 0">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
-    <h2 style="margin:0">Official Annual Figures <span class="section-note">source: Annual Report</span></h2>
-    <div id="annual-tabs" style="display:flex; gap:6px"></div>
-  </div>
-  <div id="annual-body"></div>
-</section>
-
 <div class="year-bar" id="year_bar">
   <span class="year-bar-label">Year</span>
   <div class="chips" id="f_year"></div>
@@ -1012,6 +1004,14 @@ tbody tr:hover { background: var(--sand-100); }
   </div>
 
 </div>
+
+<section id="annual-band" class="card" style="margin:16px 0">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+    <h2 style="margin:0">Official Annual Figures <span class="section-note">(per-year reference · click a year)</span></h2>
+    <div id="annual-tabs" style="display:flex; gap:6px"></div>
+  </div>
+  <div id="annual-body"></div>
+</section>
 
 <footer>Generated from data&lt;YEAR&gt;.parquet (auto-discovered) — <span id="meta_rows">…</span> rows · date range <span id="meta_range">…</span></footer>
 
@@ -2346,14 +2346,19 @@ function renderAnnual() {
   const b = ANNUAL[String(annualYear)] || {};
   const n = v => (v==null?'—':Number(v).toLocaleString());
   const kpi = (label,val,sub)=>`<div class="kpi"><div class="label">${label}</div><div class="value">${val}</div><div class="sub">${sub||''}</div></div>`;
+  const isReport = b.source === 'Annual Report';
   const kpis = [
-    kpi('Total samples', n(b.total_samples), 'MICRO · annual report'),
+    kpi('Total samples', n(b.total_samples), 'MICRO'),
     kpi('Compliance rate', b.compliance_rate!=null? b.compliance_rate.toFixed(2)+'%':'—', n(b.compliant)+' compliant'),
-    kpi('Total tests', n(b.total_tests), 'test runs (incl. replicates)'),
+    kpi('Total tests', n(b.total_tests), isReport?'test runs (incl. replicates)':'individual test results'),
     kpi('Non-compliant tests', n(b.non_compliant_tests), b.total_tests? (100*b.non_compliant_tests/b.total_tests).toFixed(1)+'% of tests':''),
   ].join('');
+  const srcNote = isReport
+    ? 'source: Annual Report ' + annualYear + ' — official figures'
+    : 'source: our cleaned data — computed from our parquet; does NOT match the official ' + annualYear + ' report';
   document.getElementById('annual-body').innerHTML =
-    `<div class="kpis" style="margin:12px 0">${kpis}</div>
+    `<div class="section-note" style="margin:2px 0 6px; color:${isReport?'var(--muted)':'#92400e'}">${srcNote}</div>
+     <div class="kpis" style="margin:12px 0">${kpis}</div>
      <div style="display:flex; gap:24px; flex-wrap:wrap">
        <div style="flex:1; min-width:320px"><div class="section-note" style="margin-bottom:4px">Failure rate by test (ranked)</div>
          <div id="annual_pertest" style="height:320px"></div></div>
@@ -2378,21 +2383,27 @@ function renderAnnual() {
     yaxis:{ automargin:true },
   }, PLOTLY_CONFIG);
 
-  // Samples collected by sector — horizontal bars (report basis).
+  // Samples by sector — horizontal bars (empty for 2024, which has no geography).
   const sc = (b.sectors||[]).slice().sort((a,b2)=>a.samples-b2.samples);
-  Plotly.react('annual_sector', [{
-    type:'bar', orientation:'h',
-    x: sc.map(s=>s.samples), y: sc.map(s=>s.name_ar),
-    marker:{ color:'#3b82f6' },
-    text: sc.map(s=>s.samples.toLocaleString()+' · '+s.pct.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
-    hovertemplate:'<b>%{y}</b><br>%{x:,} samples<extra></extra>',
-  }], {
-    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
-    font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
-    margin:{ l:120, r:80, t:6, b:28 },
-    xaxis:{ gridcolor:'#e5e7eb', rangemode:'tozero' },
-    yaxis:{ automargin:true },
-  }, PLOTLY_CONFIG);
+  if (!sc.length) {
+    Plotly.purge('annual_sector');
+    document.getElementById('annual_sector').innerHTML =
+      '<div class="muted" style="padding:20px; font-size:12px">No geography in this source — 2024 samples have no sector.</div>';
+  } else {
+    Plotly.react('annual_sector', [{
+      type:'bar', orientation:'h',
+      x: sc.map(s=>s.samples), y: sc.map(s=>s.name_ar),
+      marker:{ color:'#3b82f6' },
+      text: sc.map(s=>s.samples.toLocaleString()+' · '+s.pct.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
+      hovertemplate:'<b>%{y}</b><br>%{x:,} samples<extra></extra>',
+    }], {
+      paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+      font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
+      margin:{ l:120, r:80, t:6, b:28 },
+      xaxis:{ gridcolor:'#e5e7eb', rangemode:'tozero' },
+      yaxis:{ automargin:true },
+    }, PLOTLY_CONFIG);
+  }
 }
 document.getElementById('annual-tabs').addEventListener('click', e => {
   const t = e.target.closest('[data-annual-year]'); if (!t) return;

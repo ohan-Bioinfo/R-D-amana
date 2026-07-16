@@ -41,7 +41,7 @@ def _num(v):
 def load_annual_report(path, year: int) -> dict:
     """Parse one Annual Report workbook into the MICRO per-year figures block."""
     xl = pd.ExcelFile(path)
-    out: dict = {"year": year}
+    out: dict = {"year": year, "source": "Annual Report"}
     sheets = set(xl.sheet_names)
 
     # --- Compliance rate: the "Total" row carries samples / valid / rate (MICRO) ---
@@ -108,11 +108,53 @@ def load_annual_report(path, year: int) -> dict:
     return out
 
 
-def load_all_annual_figures(base_dir) -> dict:
-    """Load every Annual Report present under base_dir into {year: figures}.
+def compute_annual_from_data(base_dir, year: int) -> dict | None:
+    """Compute a per-year figures block from our cleaned parquets (NOT the
+    official report). Used for years that have no Annual Report file. Clearly
+    marked source='our cleaned data' so it is never mistaken for official."""
+    base = Path(base_dir)
+    wide_p = base / "cleaned" / f"data{year}.parquet"
+    if not wide_p.exists():
+        return None
+    df = pd.read_parquet(wide_p)
+    out: dict = {"year": year, "source": "our cleaned data"}
+    total = len(df)
+    nc = int((df["is_failure"] == True).sum()) if "is_failure" in df.columns else 0  # noqa: E712
+    out["total_samples"] = total
+    out["compliant"] = total - nc
+    out["compliance_rate"] = round(100 * (total - nc) / total, 2) if total else 0.0
 
-    2025 is expected; 2024 is included only if its report file has been added.
-    """
+    long_p = base / "cleaned" / f"data{year}_long.parquet"
+    if long_p.exists():
+        lg = pd.read_parquet(long_p)
+        tcol = "test_canonical" if "test_canonical" in lg.columns else "test"
+        out["total_tests"] = len(lg)
+        out["non_compliant_tests"] = int((lg["validity"] == False).sum())  # noqa: E712
+        per = []
+        for name, grp in lg.groupby(tcol):
+            tot = len(grp)
+            inv = int((grp["validity"] == False).sum())  # noqa: E712
+            per.append({"name_en": str(name), "name_ar": str(name),
+                        "total": tot, "invalid": inv,
+                        "rate": round(100 * inv / tot, 1) if tot else 0.0})
+        per.sort(key=lambda t: -t["rate"])
+        out["per_test"] = per
+
+    # 2024 has no geography → empty sector list (rendered as a note).
+    if "sector" in df.columns and df["sector"].notna().any():
+        vc = df["sector"].dropna().value_counts()
+        tot_s = int(vc.sum()) or 1
+        out["sectors"] = [{"name_ar": str(k), "samples": int(v), "pct": round(100 * v / tot_s, 1)}
+                          for k, v in vc.items()]
+    else:
+        out["sectors"] = []
+    return out
+
+
+def load_all_annual_figures(base_dir) -> dict:
+    """Per-year figures {year: block}. A year uses its Annual Report if the file
+    exists; otherwise it is computed from our cleaned parquet (marked as such)."""
+    import re as _re
     base = Path(base_dir)
     figs: dict = {}
     p25 = base / "2025-original" / "Annual Report 2025.xlsx"
@@ -121,4 +163,14 @@ def load_all_annual_figures(base_dir) -> dict:
     p24 = base / "2024-original" / "Annual Report 2024.xlsx"
     if p24.exists():
         figs[2024] = load_annual_report(p24, 2024)
+    # Fill any remaining cleaned year from our data.
+    for pq in sorted((base / "cleaned").glob("data*.parquet")):
+        m = _re.match(r"^data(\d{4})\.parquet$", pq.name)
+        if not m:
+            continue
+        y = int(m.group(1))
+        if y not in figs:
+            blk = compute_annual_from_data(base, y)
+            if blk:
+                figs[y] = blk
     return figs
