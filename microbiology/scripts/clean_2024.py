@@ -333,8 +333,13 @@ def clean_one_file(path: Path, schema: dict) -> tuple[pd.DataFrame | None, dict]
     }
 
     try:
-        # Probe workbook for emptiness first.
-        wb = load_workbook(path, data_only=True, read_only=True, keep_links=False)
+        # Probe workbook for emptiness first. NOTE: opened WITHOUT read_only —
+        # ~20 Apr/Aug files omit the workbook <dimension> tag, so read_only
+        # reports ws.max_row = None, which the old check mis-read as "empty" and
+        # silently skipped ~1,287 real samples. Normal mode reports the true
+        # dimension. (2026-07-16) Genuinely-empty files still fail header
+        # detection below and skip with header_row_not_found.
+        wb = load_workbook(path, data_only=True, keep_links=False)
         ws = wb.active
         if not ws.max_row or not ws.max_column:
             wb.close()
