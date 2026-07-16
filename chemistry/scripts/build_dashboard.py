@@ -137,6 +137,10 @@ SECTIONS = [
     ("water_analysis",       "Water analysis",        "Drinking-water tests: pH, electrical conductivity (EC), total dissolved solids (TDS), dissolved oxygen (DO), turbidity, chlorine, metals"),
 ]
 
+# Sections with no derivable compliance (no limits, essentially no verdicts) —
+# their test cells are "not evaluated", never counted compliant (2026-07-16).
+DISPLAY_ONLY_SECTIONS = {"jam"}
+
 
 def _val(x):
     if x is None:
@@ -311,23 +315,33 @@ def _compute_test_counts() -> dict:
                     c = nc = 0
             else:
                 n = c = nc = 0
+        # Display-only sections have no meaningful pass/fail — bucket their
+        # test cells as 'not_evaluated' instead of compliant (2026-07-16).
+        if section in DISPLAY_ONLY_SECTIONS:
+            ne = n
+            c = nc = 0
+        else:
+            ne = 0
         by_year[year] = by_year.get(year, 0) + n
-        slot = split_by_year.setdefault(year, {"compliant": 0, "non_compliant": 0})
+        slot = split_by_year.setdefault(year, {"compliant": 0, "non_compliant": 0, "not_evaluated": 0})
         slot["compliant"]     += c
         slot["non_compliant"] += nc
+        slot["not_evaluated"] += ne
         by_section_year.setdefault(section, {})[year] = n
         ssl = split_by_section_year.setdefault(section, {}).setdefault(
-            year, {"compliant": 0, "non_compliant": 0})
+            year, {"compliant": 0, "non_compliant": 0, "not_evaluated": 0})
         ssl["compliant"]     += c
         ssl["non_compliant"] += nc
+        ssl["not_evaluated"] += ne
     grand = sum(by_year.values())
     g_compliant     = sum(v["compliant"]     for v in split_by_year.values())
     g_non_compliant = sum(v["non_compliant"] for v in split_by_year.values())
+    g_not_evaluated = sum(v["not_evaluated"] for v in split_by_year.values())
     return {
         "by_year": by_year,
         "grand": grand,
         "compliance_split_by_year": split_by_year,
-        "compliance_split": {"compliant": g_compliant, "non_compliant": g_non_compliant},
+        "compliance_split": {"compliant": g_compliant, "non_compliant": g_non_compliant, "not_evaluated": g_not_evaluated},
         "by_section_year": by_section_year,
         "compliance_split_by_section_year": split_by_section_year,
     }
@@ -765,8 +779,8 @@ try {
   // NOT reflect compliance/sector/GSO/search narrowing (not in the split).
   function testCountsScope() {
     const tc = DATA.test_counts || {};
-    let total = 0, compliant = 0, non_compliant = 0;
-    const addSplit = s => { if (s) { compliant += s.compliant || 0; non_compliant += s.non_compliant || 0; } };
+    let total = 0, compliant = 0, non_compliant = 0, not_evaluated = 0;
+    const addSplit = s => { if (s) { compliant += s.compliant || 0; non_compliant += s.non_compliant || 0; not_evaluated += s.not_evaluated || 0; } };
     if (isAllSections()) {
       if (currentYear === 'all') {
         total = tc.grand || 0; addSplit(tc.compliance_split);
@@ -780,7 +794,7 @@ try {
       const years = currentYear === 'all' ? Object.keys(bsy) : [String(currentYear)];
       years.forEach(y => { total += bsy[y] || 0; addSplit(ssy[y]); });
     }
-    return { total, compliant, non_compliant };
+    return { total, compliant, non_compliant, not_evaluated };
   }
   function totalTestsThisFilter() { return testCountsScope().total; }
 
@@ -874,6 +888,7 @@ try {
     const totalTests = _tsc.total;
     const cTests = _tsc.compliant;
     const ncTests = _tsc.non_compliant;
+    const neTests = _tsc.not_evaluated;
     // "Without specifications" bucket (added 2026-06-25 per user direction):
     // these samples have no regulatory limit on file (validity_status='no_limit'
     // or 'unknown' or 'rejected'). They were previously dropped silently from
@@ -917,6 +932,7 @@ try {
     testBanner.style.display = '';
     const tFailPct = totalTests > 0 ? (100 * ncTests / totalTests).toFixed(2) : '0';
     const tCompPct = totalTests > 0 ? (100 * cTests / totalTests).toFixed(2) : '0';
+    const tNePct = totalTests > 0 ? (100 * neTests / totalTests).toFixed(2) : '0';
     testBanner.innerHTML = `
       <div class="gb-item"><div class="gb-label">${yrLabel} · total chemistry tests</div>
         <div class="gb-value" style="color:var(--accent)">${totalTests.toLocaleString()}</div>
@@ -927,6 +943,9 @@ try {
       <div class="gb-item"><div class="gb-label">Non-compliant tests</div>
         <div class="gb-value" style="color:var(--crit)">${ncTests.toLocaleString()}</div>
         <div class="gb-sub">${tFailPct}% of tests failed</div></div>
+      <div class="gb-item"><div class="gb-label">Not evaluated</div>
+        <div class="gb-value" style="color:var(--warn)">${neTests.toLocaleString()}</div>
+        <div class="gb-sub">${tNePct}% — no limit on file</div></div>
     `;
   }
 

@@ -3,7 +3,9 @@
 # Acidity, plus a qualitative sensory check.
 section: honey
 applies_to:
+  2024: "Food chemistry section.xlsx"   # unread "Honey section" sheet
   2025: "Copy of Honey analysis 2025.xlsx"
+only_sheets: ["Honey"]                   # matches "Honey Section"(2025) + "Honey section"(2024), nothing else
 
 # Honey file has one sheet 'Honey Section' — not monthly.
 skip_sheets: []
