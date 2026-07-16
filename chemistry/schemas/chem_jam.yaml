@@ -1,0 +1,47 @@
+# Jam (مربى) — the unread "Jams " sheet inside the 2024 Food-chemistry file.
+# Sugar/HMF/moisture/pH/acidity panel with NO limit columns → display-only.
+# Validity comes solely from the lab's "Matched/not matched" column.
+section: jam
+applies_to:
+  2024: "Food chemistry section.xlsx"
+
+single_sheet: true
+only_sheets: ["Jams"]      # matches the "Jams " sheet (trailing space)
+skip_sheets: []
+header_row_max: 4
+
+columns:
+  sampling_date:    ["Receiving Date"]     # only date present → drives the monthly chart
+  sample_name:      ["Sample name", "Sample Name"]
+  sample_id:        ["Sample ID"]
+  facility_name:    ["Facility Name"]
+  municipality:     ["Municipality name"]
+  validity_raw:     ["Matched/not matched", "Matched/ not matched"]
+  fructose:              ["Fructose %"]
+  glucose:               ["Glucose %"]
+  glucose_plus_fructose: ["(Glucose + Fructose) %"]
+  sucrose:               ["Sucrose"]
+  maltose:               ["Maltose"]
+  carb_qc:               ["Carbohydrate QC %"]
+  hmf:                   ["HMF %"]
+  concentration:         ["Concentration"]
+  moisture:              ["Moisture"]
+  ph:                    ["pH"]
+  acidity:               ["Acidity"]
+  texture:               ["القوام"]
+  colour:                ["اللون"]
+  testing_notes:         ["Testing Notes"]
+
+tests:
+  - { name: "Fructose",           result: fructose,              limit: null, unit: "%" }
+  - { name: "Glucose",            result: glucose,               limit: null, unit: "%" }
+  - { name: "Glucose + Fructose", result: glucose_plus_fructose, limit: null, unit: "%" }
+  - { name: "Sucrose",            result: sucrose,               limit: null, unit: "%" }
+  - { name: "Maltose",            result: maltose,               limit: null, unit: "%" }
+  - { name: "HMF",                result: hmf,                   limit: null, unit: "%" }
+  - { name: "Concentration",      result: concentration,         limit: null, unit: "%" }
+  - { name: "Moisture",           result: moisture,              limit: null, unit: "%" }
+  - { name: "pH",                 result: ph,                    limit: null }
+  - { name: "Acidity",            result: acidity,               limit: null, unit: "%" }
+  - { name: "Texture",            result: texture,               kind: string }
+  - { name: "Colour",             result: colour,                kind: string }

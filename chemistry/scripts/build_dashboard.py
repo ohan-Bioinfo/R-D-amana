@@ -131,6 +131,7 @@ SECTIONS = [
     ("food_chemistry",       "Food chemistry",        "Moisture, ash, acidity, pH, peroxide, sensory tests"),
     ("heavy_metals",         "Heavy metals",          "Up to 25 metals incl. Lead, Arsenic, Cadmium, Mercury"),
     ("honey",                "Honey analysis",        "Sugars profile, HMF, moisture, acidity (each with its own limit)"),
+    ("jam",                  "Jam & jelly",           "Sugar profile (Fructose/Glucose/Sucrose), HMF, moisture, pH — display-only, no GSO limits"),
     ("hormones_antibiotics", "Hormones & antibiotics", "Amoxicillin, Sulfamerazine, Sulfamethoxazole, Testosterone, Progesterone"),
     ("pesticides",           "Pesticides",            "One row per (sample, detected pesticide)"),
     ("water_analysis",       "Water analysis",        "Drinking-water tests: pH, electrical conductivity (EC), total dissolved solids (TDS), dissolved oxygen (DO), turbidity, chlorine, metals"),

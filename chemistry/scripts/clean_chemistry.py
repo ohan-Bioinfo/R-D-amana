@@ -550,13 +550,13 @@ def main() -> int:
     ap.add_argument("--section", required=True,
                     choices=["aflatoxins", "food_chemistry", "heavy_metals", "honey",
                              "hormones_antibiotics", "pesticides", "water_analysis",
-                             "all"])
+                             "jam", "all"])
     ap.add_argument("--year", type=int, default=None)
     args = ap.parse_args()
 
     sections = [args.section] if args.section != "all" else [
         "aflatoxins", "food_chemistry", "heavy_metals", "honey",
-        "hormones_antibiotics", "pesticides", "water_analysis",
+        "hormones_antibiotics", "pesticides", "water_analysis", "jam",
     ]
     grand_total = 0
     for sec in sections:
