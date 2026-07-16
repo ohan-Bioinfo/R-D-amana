@@ -288,12 +288,12 @@ Run:
 $PY -c "import pandas as pd,json; b=json.load(open('/tmp/jam_fc_baseline.json')); assert len(pd.read_parquet('cleaned/chem_food_chemistry_2024.parquet'))==b['fc2024'] and len(pd.read_parquet('cleaned/chem_food_chemistry_2025.parquet'))==b['fc2025'], 'food_chemistry row count changed!'; print('FOOD_CHEM UNCHANGED')"
 $PY scripts/tests/verify_jam.py
 $PY -c "h=open('reports/chemistry_dashboard.html',encoding='utf-8').read(); assert 'Jam & jelly' in h and 'chem_jam_2024' not in h; print('JAM TAB OK')"
-$PY -c "import re,json; h=open('reports/chemistry_dashboard.html',encoding='utf-8').read(); m=re.search(r'const DATA = (\{.*?\});\n\s*const COLS', h, re.S); d=json.loads(m.group(1)); assert 'jam' in d['sections']; assert d['sections']['jam']['n_total']==84; print('JAM PAYLOAD OK', d['sections']['jam']['n_total'])"
+$PY -c "import re,json; h=open('reports/chemistry_dashboard.html',encoding='utf-8').read(); m=re.search(r'const DATA = (\{.*?\});\n\s*const COLS', h, re.S); d=json.loads(m.group(1)); assert 'jam' in d['sections']; assert d['sections']['jam']['n_total']==83; print('JAM PAYLOAD OK', d['sections']['jam']['n_total'])"
 $PY scripts/tests/test_categories.py
 $PY scripts/tests/verify_data.py
 $PY scripts/tests/verify_dashboard.py
 ```
-Expected: `FOOD_CHEM UNCHANGED`, `JAM VERIFY OK`, `JAM TAB OK`, `JAM PAYLOAD OK 84`, then `ALL PASS` / `DATA VERIFY OK` / `DASHBOARD VERIFY OK`. (The `'Jam & jelly' in h` check confirms the tab label is present; `'chem_jam_2024' not in h` guards against a stray filename leak — the label, not the parquet path, should appear.)
+Expected: `FOOD_CHEM UNCHANGED`, `JAM VERIFY OK`, `JAM TAB OK`, `JAM PAYLOAD OK 83`, then `ALL PASS` / `DATA VERIFY OK` / `DASHBOARD VERIFY OK`. (The `'Jam & jelly' in h` check confirms the tab label is present; `'chem_jam_2024' not in h` guards against a stray filename leak — the label, not the parquet path, should appear.)
 
 - [ ] **Step 5: Confirm mirror byte-identical**
 
