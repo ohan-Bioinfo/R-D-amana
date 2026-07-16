@@ -29,33 +29,6 @@ YEAST_MOULD_NAMES = ["الخمائر والاعفان"]
 EXCLUDE_RAW_MEAT_SAMPLE_TYPES = ["raw_meat", "cooked_meat_poultry"]
 EXCLUDE_ANIMAL_FEED_SAMPLE_TYPES = ["animal_feed"]
 
-# Approximate centroid coordinates for Riyadh's 16 canonical sub-municipalities.
-# Sourced from public maps (district centers); precise to a few hundred metres,
-# which is plenty for a city-scale bubble map.
-RIYADH_CENTROIDS: dict[str, tuple[float, float]] = {
-    # East sector
-    "الروضة": (24.7150, 46.7480),
-    "الشرق":  (24.7400, 46.8200),
-    # North sector
-    "الشمال": (24.8400, 46.6900),
-    # West sector
-    "العريجاء": (24.6300, 46.6300),
-    "عرقة":     (24.7050, 46.5700),
-    "نمار":     (24.5550, 46.6100),
-    # Central sector
-    "الملز":    (24.6810, 46.7470),
-    "المعذر":   (24.6830, 46.6600),
-    "العليا":   (24.6920, 46.6850),
-    "الشميسي":  (24.6420, 46.7100),
-    "البطحاء":  (24.6280, 46.7130),
-    # South sector
-    "العزيزية": (24.5600, 46.7800),
-    "الحاير":   (24.3800, 46.8800),
-    "الشفا":    (24.5150, 46.6850),
-    "السلي":    (24.5800, 46.8700),
-    "النسيم":   (24.7700, 46.8800),
-}
-
 # Sector centroids — used as the bubble location for sector-only rows that
 # have no specific sub-municipality. Keyed by the 5-sector English labels
 # that derive_sector produces.
@@ -451,8 +424,6 @@ def build_facets(df: pd.DataFrame) -> dict:
     # compliant samples are excluded from the dashboard entirely, so the
     # filter offers only the 3 actual severity tiers.
     severity = ["indicator_only", "pathogen", "multi_pathogen"]
-    mun_types = [t for t in ["بلدية", "قطاع", "خاص"] if t in set(df["municipality_type"].dropna())]
-    municipalities = sorted([m for m in df["municipality"].dropna().unique().tolist()])
     years = sorted([int(y) for y in df["year"].dropna().unique().tolist()])
     # 5-sector canonical order (East → North → West → Central → South).
     # All 5 sectors are always listed so empty ones still appear (at zero).
@@ -573,11 +544,6 @@ def build_facets(df: pd.DataFrame) -> dict:
         "months": months,
         "sample_types": sample_types,
         "severity": severity,
-        "mun_types": mun_types,
-        "municipalities": municipalities,
-        # Sub-municipality → sector lookup so the dashboard can cascade the
-        # municipality multi-select when a sector chip is selected.
-        "muni_to_sector": SECTOR_5_OF_SUBMUNI,
         "sectors": sectors,
         "test_classes": test_classes,
         "pathogen_chips": pathogen_chips,
@@ -586,7 +552,6 @@ def build_facets(df: pd.DataFrame) -> dict:
         "gso_products": gso_products,
         "audit_counts": audit_counts,
         "map_centroids": {
-            "municipalities": {name: list(coords) for name, coords in RIYADH_CENTROIDS.items()},
             "sectors":        {name: list(coords) for name, coords in SECTOR_CENTROIDS.items()},
             "default_center": [24.7000, 46.7000],
             "default_zoom":   9.5,
@@ -600,21 +565,6 @@ def build_facets(df: pd.DataFrame) -> dict:
         "date_min": default_min.strftime("%Y-%m-%d"),
         "date_max": default_max.strftime("%Y-%m-%d"),
         "row_count": len(df),
-        # Test counts per year — derived purely from our cleaned parquets.
-        # 2024 reads exact totals from `data2024_long.parquet` (one row per
-        # test). 2025 has no long-format file, so we leave it absent; the KPI
-        # card falls back to the parquet-derived ratio for it.
-        # (2023 discarded 2026-07-04.)
-        "exact_total_tests_by_year": {
-            "2024": 31583,
-        },
-        "exact_non_comp_tests_by_year": {
-            "2024": 3407,
-        },
-        # Tests-per-sample ratio derived from 2024 long-format (31,583 / 8,094
-        # = 3.90). Used to estimate 2025 totals from our parquet without
-        # referencing any external/manual baseline.
-        "tests_per_sample_ratio": 3.90,
     }
 
 
@@ -903,9 +853,6 @@ tbody tr:hover { background: var(--sand-100); }
 <div class="year-bar" id="year_bar">
   <span class="year-bar-label">Year</span>
   <div class="chips" id="f_year"></div>
-  <span style="width:1px;height:24px;background:var(--line);margin:0 4px"></span>
-  <span class="year-bar-label">Muni type</span>
-  <div class="chips" id="f_mun_type_top"></div>
   <span class="filter-pill" id="filter_status">All filters cleared</span>
   <button class="btn-reset" id="btn_reset" style="margin-left:auto" disabled>Reset all filters</button>
 </div>
@@ -968,7 +915,7 @@ tbody tr:hover { background: var(--sand-100); }
       <div class="toggle-row">
         <div class="toggle" id="t_pathogen">Pathogen only <span class="section-note">(any year)</span></div>
         <div class="toggle" id="t_repeat">Repeat offender (≥2 non-compliant in 90d) <span class="section-note">(any year)</span></div>
-        <div class="toggle" id="x_raw_meat">Exclude raw / cooked meat &amp; poultry <span class="section-note">(reduces noise on Salmonella etc.)</span></div>
+        <div class="toggle" id="x_raw_meat">Exclude meat &amp; poultry <span class="section-note">(reduces noise on Salmonella etc.)</span></div>
       </div>
     </div>
   </div>
@@ -982,7 +929,7 @@ tbody tr:hover { background: var(--sand-100); }
      level (e.g. Tabouleh, Feta cheese, refrigerator swab), so the GSO
      category isn\'t the only granularity. -->
 <div class="card full" style="margin-bottom:14px">
-  <h2>Top 10 most-contaminated subtypes <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row to filter noise.</span></h2>
+  <h2>Top 10 most-contaminated subtypes <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active).</span></h2>
   <div id="top-subtypes" style="overflow:auto"></div>
 </div>
 
@@ -1019,7 +966,7 @@ tbody tr:hover { background: var(--sand-100); }
   <div id="slice-banner" style="display:none; grid-column:1/-1; background:#fef3c7; border:1px solid #fbbf24; border-radius:10px; padding:10px 14px; font-size:12px; color:#92400e; margin-bottom:6px"></div>
 
   <div class="card">
-    <h2>Severity breakdown by month <span style="font-size:10px; color:#92400e; background:#fef3c7; padding:2px 8px; border-radius:999px; margin-left:8px; text-transform:uppercase; letter-spacing:0.5px">slice-aware</span></h2>
+    <h2>Severity breakdown by month</h2>
     <div id="chart_severity_month" class="chart"></div>
   </div>
 
@@ -1029,7 +976,7 @@ tbody tr:hover { background: var(--sand-100); }
   </div>
 
   <div class="card full">
-    <h2>Non-compliant tests · pathogens vs indicators  <span style="font-size:10px; color:#92400e; background:#fef3c7; padding:2px 8px; border-radius:999px; margin-left:8px; text-transform:uppercase; letter-spacing:0.5px">slice-aware</span>  <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
+    <h2>Non-compliant tests · pathogens vs indicators   <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
       <div>
         <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
@@ -1054,7 +1001,7 @@ tbody tr:hover { background: var(--sand-100); }
   </div>
 
   <div class="card full">
-    <h2>Severity tier × GSO 1016 category <span style="font-size:10px; color:#92400e; background:#fef3c7; padding:2px 8px; border-radius:999px; margin-left:8px; text-transform:uppercase; letter-spacing:0.5px">slice-aware</span></h2>
+    <h2>Severity tier × GSO 1016 category</h2>
     <div id="chart_heatmap" class="chart"></div>
   </div>
 
@@ -1074,7 +1021,7 @@ tbody tr:hover { background: var(--sand-100); }
   </div>
 
   <div class="card full">
-    <h2>Sample drill-down (filtered rows) <span style="font-size:10px; color:#92400e; background:#fef3c7; padding:2px 8px; border-radius:999px; margin-left:8px; text-transform:uppercase; letter-spacing:0.5px">slice-aware</span></h2>
+    <h2>Sample drill-down (filtered rows)</h2>
     <div class="muted" style="margin-bottom:10px">Showing first 200 rows after filters.</div>
     <div id="drilldown_table"></div>
   </div>
@@ -1103,7 +1050,7 @@ const SEVERITY_ORDER = ['indicator_only', 'pathogen', 'multi_pathogen'];
 // Per-year accent colours. Any year not listed here falls back to '#3b82f6'
 // — covers future years without code changes. Keep keys as numeric type so
 // state.years (which stores numbers) can index this dict.
-const YEAR_COLOR = { 2023: '#db2777', 2024: '#7c3aed', 2025: '#3b82f6' };
+const YEAR_COLOR = { 2024: '#7c3aed', 2025: '#3b82f6' };
 const YEAR_COLOR_DEFAULT = '#3b82f6';
 const yearColor = y => YEAR_COLOR[y] || YEAR_COLOR_DEFAULT;
 const yearBadgeClass = y => 'y' + String(y).slice(2);   // 2023 → 'y23', 2024 → 'y24', 2025 → 'y25'
@@ -1127,15 +1074,9 @@ const state = {
   date_from: FACETS.date_min,
   date_to: FACETS.date_max,
   compliance: new Set(),
-  mun_type: new Set(),
   sector: new Set(),
   severity: new Set(),
-  // sample_type slot is no longer wired to any UI (GSO category replaced it).
-  // Kept in state for backwards compatibility but always empty.
-  sample_type: new Set(),
-  municipality: new Set(),
   gso_category: new Set(),
-  gso_product: new Set(),         // multi-select dropdown values (gso_code canonicals)
   microbe: new Set(),             // Set of pathogen names + optional INDICATOR_TOKEN; empty = no constraint
   pathogen_only: false,
   repeat_only: false,
@@ -1175,27 +1116,6 @@ document.getElementById('f_date_to').addEventListener('change', e => {
 buildChips('f_year',          FACETS.years.map(y => String(y)), 'years', v => parseInt(v, 10));
 buildChips('f_compliance',    COMPLIANCE_OPTIONS,                'compliance');
 buildChips('f_sector',        FACETS.sectors,                    'sector');
-// Municipality type chips live in the sticky top bar. Each raw Arabic value
-// gets a friendly English label, but the underlying state still stores the
-// raw Arabic so filtering matches the parquet column.
-(function buildMunTypeChips() {
-  const LABELS = { 'بلدية': 'Sub-municipality', 'قطاع': 'Sector-only', 'خاص': 'Special' };
-  const parent = document.getElementById('f_mun_type_top');
-  if (!parent) return;
-  parent.innerHTML = '';
-  FACETS.mun_types.forEach(v => {
-    const el = document.createElement('div');
-    el.className = 'chip';
-    el.textContent = LABELS[v] || v;
-    el.dataset.value = v;
-    el.addEventListener('click', () => {
-      el.classList.toggle('active');
-      if (state.mun_type.has(v)) state.mun_type.delete(v); else state.mun_type.add(v);
-      applyFilters();
-    });
-    parent.appendChild(el);
-  });
-})();
 buildChips('f_severity',      FACETS.severity,                   'severity');
 buildChips('f_gso_category',  FACETS.gso_categories || [],       'gso_category');
 
@@ -1293,11 +1213,8 @@ function refreshMicrobeChipCounts(rowsScope) {
 // Sub-municipality filter removed 2026-07-16 — geography is now sector-level
 // (5 sectors + Special), matching the Annual Report.
 
-// GSO product multi-select removed 2026-06-18: 2024-only data made it
-// inconsistent across years. Filter on GSO category (which spans both years)
-// instead. We define a no-op `gsoProdSel` so existing reset-button code that
-// references its options stays safe.
-const gsoProdSel = { options: [] };
+// GSO product multi-select removed 2026-06-18; its state/reset stub removed
+// 2026-07-16. Filter on GSO category (which spans both years) instead.
 
 document.getElementById('t_pathogen').addEventListener('click', e => {
   e.target.classList.toggle('active');
@@ -1320,16 +1237,14 @@ document.getElementById('btn_reset').addEventListener('click', () => {
   state.date_from = FACETS.date_min;
   state.date_to = FACETS.date_max;
   state.compliance.clear();
-  state.mun_type.clear(); state.severity.clear(); state.sample_type.clear();
-  state.municipality.clear(); state.sector.clear(); state.microbe.clear();
-  state.gso_category.clear(); state.gso_product.clear();
+  state.severity.clear(); state.sector.clear(); state.microbe.clear();
+  state.gso_category.clear();
   state.pathogen_only = false; state.repeat_only = false;
   state.exclude_raw_meat = false;
   document.getElementById('f_date_from').value = FACETS.date_min;
   document.getElementById('f_date_to').value = FACETS.date_max;
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('.toggle').forEach(t => t.classList.remove('active'));
-  Array.from(gsoProdSel.options).forEach(o => o.selected = false);
   applyFilters();
 });
 
@@ -1344,11 +1259,8 @@ function rowHasTestIn(row, set) {
 const CHIP_FILTERS = [
   { state_key: 'years',        col_key: 'year' },
   { state_key: 'sector',       col_key: 'sector' },
-  { state_key: 'mun_type',     col_key: 'mun_type' },
   { state_key: 'severity',     col_key: 'severity' },
-  { state_key: 'sample_type',  col_key: 'sample_type' },
   { state_key: 'gso_category', col_key: 'gso_category' },
-  { state_key: 'gso_product',  col_key: 'gso_code' },
 ];
 
 // Boolean quick toggles. When the toggle is on, the row must satisfy `test`.
@@ -1410,11 +1322,7 @@ function applyFilters() {
   if (state.compliance.size > 0) activeCount++;
   if (state.severity.size > 0) activeCount++;
   if (state.sector.size > 0) activeCount++;
-  if (state.mun_type.size > 0) activeCount++;
-  if (state.municipality.size > 0) activeCount++;
-  if (state.sample_type.size > 0) activeCount++;
   if (state.gso_category.size > 0) activeCount++;
-  if (state.gso_product.size > 0) activeCount++;
   if (state.microbe.size > 0) activeCount++;
   if (state.pathogen_only) activeCount++;
   if (state.repeat_only) activeCount++;
@@ -1433,9 +1341,9 @@ function applyFilters() {
   }
 
   // ─── Single filter tier (2026-07-16) ────────────────────────────────────
-  // Every active filter — year, date, compliance, sector, mun_type,
-  // gso_category, severity, microbe, pathogen_only, repeat_only,
-  // exclude_raw_meat — contributes to ONE `rowsFiltered` set that feeds every
+  // Every active filter — year, date, compliance, sector, gso_category,
+  // severity, microbe, pathogen_only, repeat_only, exclude_raw_meat —
+  // contributes to ONE `rowsFiltered` set that feeds every
   // chart and KPI. (Replaces the old scope/slice/active split, where severity
   // and microbe drove only 5 of 15 figures and appeared to do nothing.)
   function isPass(r) {
@@ -1519,25 +1427,6 @@ function renderKpis(rowsBase) {
   const allNonCompliant = (total > 0 && compliantN === 0);
 
   // --- Rankings ---
-  function rankByRate(keyIdx, minDenom) {
-    // Use `rowsBase` (excludes severity filter) so the denominators are
-    // honest. Severity-event subsets come from `rows`.
-    if (minDenom === undefined) minDenom = 5;
-    const allByKey = new Map(), failByKey = new Map();
-    for (const r of rowsBase) {
-      const k = r[keyIdx]; if (!k) continue;
-      allByKey.set(k, (allByKey.get(k) || 0) + 1);
-      if (r[COLS.failure] === 1) failByKey.set(k, (failByKey.get(k) || 0) + 1);
-    }
-    let bestK = null, bestRate = -1, bestFail = 0, bestTotal = 0;
-    for (const [k, n] of allByKey) {
-      if (n < minDenom) continue;
-      const f = failByKey.get(k) || 0;
-      const rate = 100 * f / n;
-      if (rate > bestRate) { bestRate = rate; bestK = k; bestFail = f; bestTotal = n; }
-    }
-    return { key: bestK, rate: bestRate, fail: bestFail, total: bestTotal };
-  }
   function rankByVolume(keyIdx, rowSet) {
     const counts = new Map();
     for (const r of rowSet) {
@@ -1548,24 +1437,7 @@ function renderKpis(rowsBase) {
     for (const [k, n] of counts) if (n > bestN) { bestN = n; bestK = k; }
     return { key: bestK, count: bestN };
   }
-  function rankOrganism(predicate) {
-    const counts = new Map();
-    for (const r of rows) {
-      for (const t of (r[COLS.failed_tests] || [])) {
-        if (!predicate(t)) continue;
-        counts.set(t, (counts.get(t) || 0) + 1);
-      }
-    }
-    let bestK = null, bestN = 0;
-    for (const [k, n] of counts) if (n > bestN) { bestN = n; bestK = k; }
-    return { key: bestK, count: bestN };
-  }
 
-  // When all-non-compliant: rate-based ranking is meaningless (every
-  // category is at 100%). Switch to volume-based ranking on the active set.
-  const mostContamCat = allNonCompliant
-    ? (() => { const v = rankByVolume(COLS.sample_type, rows); return {...v, _byVolume: true}; })()
-    : rankByRate(COLS.sample_type, 30);   // ≥30 samples for sample-type ranking
   // Highest-risk sector = the sector contributing the MOST non-compliant
   // samples (matches the Annual Report's framing where Central — the largest
   // sector — is the top risk). Tie-break by total volume. Min 30 samples.
