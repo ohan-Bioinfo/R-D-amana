@@ -17,6 +17,7 @@ from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from build_classification_table import classify, _val
+from build_dashboard_combined import SAMPLE_TYPE_TO_GSO
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "reports" / "classification_corrections_to_fill.xlsx"
@@ -25,29 +26,39 @@ DOUBTFUL = {"name-keyword", "Miscellaneous-fallback"}
 
 
 def build():
-    rows = []
     valid_gso = set()
-    review = defaultdict(lambda: {"n": 0, "years": set(), "cats": set(), "gso": None, "src": None})
     counts = {}
+    review_rows = []   # (year, level, key, samples, current_gso, source, example_raw_category)
     for y in (2024, 2025):
         d = pd.read_parquet(ROOT / "cleaned" / f"data{y}.parquet")
         counts[y] = (len(d), int((d["is_failure"] != True).sum()))  # noqa: E712
+        by_name = defaultdict(lambda: {"n": 0, "gso": None, "src": None, "cats": set()})
+        by_bucket = defaultdict(lambda: {"n": 0, "gso": None, "names": set()})
         for r in d.to_dict("records"):
             gso, src = classify(r)
             valid_gso.add(gso)
-            if src in DOUBTFUL:
-                nm = str(_val(r.get("sample_name")) or "(no name)")
-                g = review[nm]
-                g["n"] += 1; g["years"].add(y); g["gso"] = gso; g["src"] = src
+            nm = str(_val(r.get("sample_name")) or "(no name)")
+            st = str(_val(r.get("sample_type")) or "")
+            if src in DOUBTFUL:                       # uncertain name-keyword / Misc
+                g = by_name[nm]
+                g["n"] += 1; g["gso"] = gso; g["src"] = src
                 cat = _val(r.get("category_canonical")) or _val(r.get("gso_category_name_en"))
                 if cat:
                     g["cats"].add(str(cat))
-
-    review_rows = sorted(
-        [(nm, v["n"], "/".join(str(x) for x in sorted(v["years"])), v["gso"], v["src"],
-          " · ".join(sorted(v["cats"])[:3]))
-         for nm, v in review.items()],
-        key=lambda t: -t[1])
+            if st:                                    # bucket-classified (2025)
+                b = by_bucket[st]
+                b["n"] += 1; b["gso"] = gso; b["names"].add(nm)
+        # per-year doubtful sample names (both years; 2025 has ~none)
+        for nm, g in by_name.items():
+            review_rows.append((y, "sample name", nm, g["n"], g["gso"], g["src"],
+                                " · ".join(sorted(g["cats"])[:3])))
+        # 2025 is bucket-classified — list the bucket→GSO mappings to validate too
+        if y == 2025:
+            for st, b in by_bucket.items():
+                bg = SAMPLE_TYPE_TO_GSO.get(st, "(varies — name-classified, see examples)")
+                review_rows.append((y, "sample_type bucket", st, b["n"], bg,
+                                    "sample_type-bucket", " · ".join(sorted(b["names"])[:4])))
+    review_rows.sort(key=lambda t: (t[0], t[1], -t[3]))
 
     # ---- write ----
     HDR = PatternFill("solid", fgColor="1C2742")
@@ -66,7 +77,7 @@ def build():
             ("Compliance %", round(100 * OFF[y][1] / OFF[y][0], 2), round(100 * counts[y][1] / counts[y][0], 2)),
         ]])
     review_df = pd.DataFrame(review_rows, columns=[
-        "sample_name", "samples", "year(s)", "current_gso", "source", "example_raw_category"])
+        "year", "level", "key (name / bucket)", "samples", "current_gso", "source", "example_raw_category"])
     review_df["corrected_gso_category"] = ""
     review_df["notes"] = ""
     valid_df = pd.DataFrame(sorted(valid_gso), columns=["valid_gso_category"])
@@ -94,7 +105,7 @@ def build():
         return ws
 
     write_sheet("Numbers", numbers)
-    rv = write_sheet("To_review", review_df, yellow_cols=(6, 7))
+    rv = write_sheet("To_review", review_df, yellow_cols=(7, 8))
     write_sheet("Valid_GSO_categories", valid_df)
 
     gso_list = sorted(valid_gso)
@@ -102,17 +113,18 @@ def build():
                         formula1=f"Valid_GSO_categories!$A$2:$A${len(gso_list) + 1}",
                         allow_blank=True)
     rv.add_data_validation(dv)
-    dv.add(f"G2:G{len(review_df) + 1}")
-    for col, w in {"A": 34, "B": 9, "C": 9, "D": 34, "E": 22, "F": 34, "G": 34, "H": 40}.items():
+    dv.add(f"H2:H{len(review_df) + 1}")
+    for col, w in {"A": 7, "B": 18, "C": 32, "D": 9, "E": 30, "F": 20, "G": 30, "H": 32, "I": 40}.items():
         rv.column_dimensions[col].width = w
     for col, w in {"A": 8, "B": 16, "C": 12, "D": 22, "E": 10}.items():
         wb["Numbers"].column_dimensions[col].width = w
     wb["Valid_GSO_categories"].column_dimensions["A"].width = 40
     wb.save(OUT)
 
+    n2024 = sum(1 for r in review_rows if r[0] == 2024)
+    n2025 = sum(1 for r in review_rows if r[0] == 2025)
     print(f"wrote {OUT}")
-    print(f"  distinct doubtful sample_names to review: {len(review_rows)} "
-          f"(covering {sum(r[1] for r in review_rows)} samples)")
+    print(f"  review rows: {len(review_rows)}  (2024 names: {n2024}, 2025 buckets: {n2025})")
 
 
 if __name__ == "__main__":
