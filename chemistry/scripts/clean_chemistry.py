@@ -498,6 +498,14 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
     if before - len(records):
         audit["flags"]["null_id_junk_dropped"] = before - len(records)
 
+    # Drop «أخرى» (Others) — Muhannad 2026-07-16: genuinely-unclassified
+    # leftovers are excluded from pipeline output entirely.
+    before = len(records)
+    records = [r for r in records
+               if r.get("sample_category_canonical") != categories.C_OTHER]
+    if before - len(records):
+        audit["flags"]["others_dropped"] = before - len(records)
+
     out_path = CLEAN_DIR / f"chem_{section}_{year}.parquet"
     string_cols = [
         "source_file", "sheet_name", "sheet_year_month",
