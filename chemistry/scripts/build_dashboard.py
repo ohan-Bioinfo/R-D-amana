@@ -225,6 +225,8 @@ def build_payload() -> dict:
                       else _val(getattr(r, "sample_category", None)),
                     _val(getattr(r, "sample_name", None)),
                 ),
+                _val(getattr(r, "sample_name_group", None))
+                  if "sample_name_group" in df.columns else _val(getattr(r, "sample_name", None)),
             ])
         sections[prefix] = {
             "label": label, "desc": desc,
@@ -237,7 +239,7 @@ def build_payload() -> dict:
         "cols": ["year","date","year_month","sample_id","sample_name","sample_category",
                  "facility","municipality","district",
                  "is_valid","invalid_test","pesticide_name","conc_ppm",
-                 "failed_tests_derived","validity_status","gso_category"],
+                 "failed_tests_derived","validity_status","gso_category","sample_name_group"],
         "all_years": sorted(all_years),
         "sections": sections,
         "test_counts": test_counts,
@@ -781,20 +783,9 @@ try {
   }
   function totalTestsThisFilter() { return testCountsScope().total; }
 
-  // Apply year + search filter to current section's rows. When the synthetic
-  // "All sections" view is active, rows include a trailing _section element.
-  function filteredRows() {
-    let rows;
-    if (isAllSections()) {
-      rows = getCombinedRows();
-    } else {
-      rows = DATA.sections[currentSection].rows;
-    }
-    if (currentYear !== "all") {
-      const y = parseInt(currentYear, 10);
-      rows = rows.filter(r => r[COLS.year] === y);
-    }
-    // Compliance chip: two-state; if both selected → no filter
+  // Scope filters (compliance / sector / GSO / search) — NOT year, NOT section
+  // selection. Reused so per-section views can filter their own row arrays.
+  function applyScopeFilters(rows) {
     if (activeCompliance.size > 0) {
       const wantC = activeCompliance.has('Compliant');
       const wantN = activeCompliance.has('Non-compliant');
@@ -807,11 +798,9 @@ try {
         });
       }
     }
-    // Sector chip (the dashboard's `municipality` slot holds the sector value)
     if (activeSectors.size > 0) {
       rows = rows.filter(r => r[COLS.municipality] && activeSectors.has(r[COLS.municipality]));
     }
-    // GSO 1016 category chip
     if (activeGso.size > 0) {
       rows = rows.filter(r => r[COLS.gso_category] && activeGso.has(r[COLS.gso_category]));
     }
@@ -827,6 +816,22 @@ try {
       );
     }
     return rows;
+  }
+
+  // Apply year + search filter to current section's rows. When the synthetic
+  // "All sections" view is active, rows include a trailing _section element.
+  function filteredRows() {
+    let rows;
+    if (isAllSections()) {
+      rows = getCombinedRows();
+    } else {
+      rows = DATA.sections[currentSection].rows;
+    }
+    if (currentYear !== "all") {
+      const y = parseInt(currentYear, 10);
+      rows = rows.filter(r => r[COLS.year] === y);
+    }
+    return applyScopeFilters(rows);
   }
   function rowSection(r) {
     // For "All sections" rows we append section key at the end.
@@ -1166,19 +1171,57 @@ try {
     'fipronil':                 'Fipronil',
     '2-phenylphenol':           '2-Phenylphenol',
     'thpi(tetrahydrophthalimide)': 'THPI (Tetrahydrophthalimide)',
+    // #8 — arsenic variants merge to one label
+    'arsenic':                  'Arsenic',
+    'total arsenic':            'Arsenic',
+    'الزرنيخ الكلي':            'Arsenic',
+    // #5/#12 — water analytes → canonical English
+    'sulphate':                 'Sulphate',
+    'الكبريتات':                'Sulphate',
+    'chloride':                 'Chloride',
+    'nitrate':                  'Nitrate',
+    'nitrate(no3)':             'Nitrate',
+    'النترات':                  'Nitrate',
+    'nitrite':                  'Nitrite',
+    'floride':                  'Fluoride',
+    'fluorid':                  'Fluoride',
+    'fluoride':                 'Fluoride',
+    'tds':                      'TDS',
+    'total dissolved salt tds': 'TDS',
+    't.hardness':               'Total hardness',
+    'total hardness':           'Total hardness',
+    'sodium':                   'Sodium',
+    'ph':                       'pH',
+    'turbidity':                'Turbidity',
   };
   // Sensory-only tests are excluded (mostly compliant noise).
   const SENSORY_TOKENS = ['اختبار حسي','sensory','texture','اللون','الرائحة','الطعم','القوام'];
   // Placeholder "names" the lab wrote in pesticide_name to indicate "all
   // pesticides below 0.01 ppm" — drop them too.
-  const PLACEHOLDER_TOKENS = ['تراكيز المبيدات أقل','أقل من 0.01','below detection','below 0.01'];
+  const PLACEHOLDER_TOKENS = ['تراكيز المبيدات أقل','أقل من 0.01','below detection','below 0.01',
+                              'مياه فلتر','مياة فلتر','فلتر','مياه','مياة','موية'];
   function normaliseFail(label) {
     if (!label) return null;
     const trimmed = String(label).trim();
     const lc = trimmed.toLowerCase();
+    if (lc === 'na' || lc === 'nan' || lc === 'n/a') return null;
     for (const tok of SENSORY_TOKENS)     if (lc.includes(tok.toLowerCase())) return null;
     for (const tok of PLACEHOLDER_TOKENS) if (lc.includes(tok.toLowerCase())) return null;
     return FAIL_LABEL_MAP[lc] || trimmed;
+  }
+
+  // Multi-word water analyte names that must survive the space-split.
+  const WATER_MULTIWORD = [
+    [/total\s+dissolved\s+salt\s+tds/ig, 'TDS'],
+    [/t\.?\s*hardness/ig, 'T.Hardness'],
+    [/total\s+hardness/ig, 'T.Hardness'],
+    [/nitrate\s*\(no3\)/ig, 'Nitrate'],
+  ];
+  function splitWaterTests(raw) {
+    if (!raw) return [];
+    let s = String(raw).replace(/\|/g, ' ');
+    WATER_MULTIWORD.forEach(([re, tok]) => { s = s.replace(re, ' ' + tok + ' '); });
+    return s.split(/\s+/).map(t => t.trim()).filter(Boolean);
   }
 
   function renderFail() {
@@ -1208,11 +1251,20 @@ try {
         const conc = r[COLS.conc_ppm];
         const trace = (conc !== null && conc !== undefined && conc < 0.01);
         if (r[COLS.is_valid] === 0 && r[COLS.pesticide_name] && !trace) add(r[COLS.pesticide_name]);
+      } else if (sec === 'water_analysis') {
+        // #12 — water lab records several failed analytes as ONE space-joined
+        // string (e.g. "TDS T.Hardness Chloride Nitrate Sulphate Sodium").
+        // Split into individual analytes so each is counted on its own.
+        const raw = r[COLS.failed_tests_derived] || (r[COLS.is_valid] === 0 ? r[COLS.invalid_test] : '');
+        splitWaterTests(raw).forEach(add);
       } else if (r[COLS.failed_tests_derived]) {
         // Per-test column may list multiple failures separated by '|'.
         String(r[COLS.failed_tests_derived]).split('|').forEach(t => add(t.trim()));
       } else if (r[COLS.is_valid] === 0 && r[COLS.invalid_test]) {
         add(r[COLS.invalid_test]);
+      } else if (r[COLS.is_valid] === 0) {
+        // #10 — invalid but the lab recorded no failing test.
+        add('Unspecified');
       }
     });
     const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25);
@@ -1304,41 +1356,17 @@ try {
     }, { responsive: true, displayModeBar: false });
   }
 
-  // Canonicalise sample-name variants so "ليمون", "ليمون اخضر", "ليمون اصفر"
-  // collapse to a single "ليمون" row (user direction 2026-06-25 — matches the
-  // way the annual statistics report counts non-conformity). Extend as new
-  // family groupings are discovered.
-  const SAMPLE_NAME_FAMILY = [
-    { re: /ليمون/, name: 'ليمون' },
-    { re: /برتقال/, name: 'برتقال' },
-    { re: /يوسف/, name: 'يوسفي' },
-    { re: /فراولة|فراوله/, name: 'فراولة' },
-    { re: /تفاح/, name: 'تفاح' },
-    { re: /عنب/, name: 'عنب' },
-    { re: /بصل/, name: 'بصل' },
-    { re: /طماطم|طماطه|بندورة/, name: 'طماطم' },
-    { re: /خس/, name: 'خس' },
-    { re: /موية|مياه|ماء/, name: 'مياه' },
-    { re: /فلفل/, name: 'فلفل' },
-  ];
-  function canonName(n) {
-    if (!n) return n;
-    const s = String(n).trim();
-    for (const f of SAMPLE_NAME_FAMILY) {
-      if (f.re.test(s)) return f.name;
-    }
-    return s;
-  }
-
   // Top 10 most-contaminated subtypes — ranked by ABSOLUTE non-conformity
   // count (user direction 2026-06-25 — matches the lab's annual statistics
-  // which count failed samples, not failure rates). Lemon / orange / etc.
-  // sub-variants are collapsed via SAMPLE_NAME_FAMILY first.
+  // which count failed samples, not failure rates). Sub-variant grouping
+  // (e.g. lemon / orange variants) is computed once, upstream, in the
+  // `sample_name_group` payload column (single source of truth — see
+  // clean_chemistry.py) rather than duplicated here in JS.
   function renderTopSubtypes() {
     const rows = filteredRows();
     const stats = new Map();
     rows.forEach(r => {
-      const n = canonName(r[COLS.sample_name]); if (!n) return;
+      const n = r[COLS.sample_name_group] || r[COLS.sample_name]; if (!n) return;
       const slot = stats.get(n) || { total: 0, inv: 0, gso: r[COLS.gso_category] };
       slot.total++;
       if (r[COLS.is_valid] === 0) slot.inv++;
@@ -1478,10 +1506,14 @@ try {
       const [y1, y2] = years;
       // First: per-section table (using EVENTS per panel — keeps each panel's
       // pass/fail rate visible) plus an aggregate row for total samples.
+      // #9 — respect active scope filters at the per-section EVENT level.
+      // Combined rows can't be split back per section (a sample may belong to
+      // several), so filter each section's own rows directly.
       const tr = Object.entries(DATA.sections).map(([key, sec]) => {
         if (!sec.years.includes(y1) || !sec.years.includes(y2)) return '';
-        const r1 = sec.rows.filter(r => r[COLS.year] === y1);
-        const r2 = sec.rows.filter(r => r[COLS.year] === y2);
+        const secRows = applyScopeFilters(sec.rows);
+        const r1 = secRows.filter(r => r[COLS.year] === y1);
+        const r2 = secRows.filter(r => r[COLS.year] === y2);
         const i1 = r1.filter(r => r[COLS.is_valid] === 0).length;
         const i2 = r2.filter(r => r[COLS.is_valid] === 0).length;
         const p1 = r1.length ? i1 * 100 / r1.length : 0;
@@ -1502,8 +1534,8 @@ try {
         </tr>`;
       }).join('');
       // Aggregate total-sample row at the bottom.
-      const a1 = getCombinedRows().filter(r => r[COLS.year] === y1);
-      const a2 = getCombinedRows().filter(r => r[COLS.year] === y2);
+      const a1 = filteredRows().filter(r => r[COLS.year] === y1);
+      const a2 = filteredRows().filter(r => r[COLS.year] === y2);
       const ai1 = a1.filter(r => r[COLS.is_valid] === 0).length;
       const ai2 = a2.filter(r => r[COLS.is_valid] === 0).length;
       const ap1 = a1.length ? ai1 * 100 / a1.length : 0;
@@ -1526,9 +1558,10 @@ try {
     const sec = DATA.sections[currentSection];
     if (sec.years.length < 2) { card.style.display = 'none'; return; }
     card.style.display = '';
+    const fr = filteredRows();   // #9 — YoY must reflect compliance/sector/GSO/search
     const stats = {};
     sec.years.forEach(y => {
-      const sub = sec.rows.filter(r => r[COLS.year] === y);
+      const sub = fr.filter(r => r[COLS.year] === y);
       const inv = sub.filter(r => r[COLS.is_valid] === 0).length;
       stats[y] = {total: sub.length, invalid: inv,
                   pct: sub.length ? inv * 100 / sub.length : 0};
@@ -1667,10 +1700,16 @@ try {
       let issueStr = '';
       const raw = r[COLS.failed_tests_derived] || r[COLS.invalid_test] || '';
       if (raw) {
-        issueStr = String(raw).split('|').map(s => s.trim())
-          .map(t => t.replace(/^\[[^\]]+\]\s*/, ''))
-          .map(normaliseFail)
-          .filter(Boolean).join(' · ');
+        if (rowSection(r) === 'water_analysis') {
+          // #12 — mirror the chart's space-split (see renderFail) so the
+          // drilldown text matches the "Top non-compliant tests" chart.
+          issueStr = splitWaterTests(raw).map(normaliseFail).filter(Boolean).join(', ');
+        } else {
+          issueStr = String(raw).split('|').map(s => s.trim())
+            .map(t => t.replace(/^\[[^\]]+\]\s*/, ''))
+            .map(normaliseFail)
+            .filter(Boolean).join(' · ');
+        }
       }
       if (rowSection(r) === 'pesticides' && r[COLS.pesticide_name]) {
         const conc = r[COLS.conc_ppm];

@@ -8,4 +8,5 @@
 
 ## Flags raised
 - `is_valid_derived_from_limits`: 217
+- `others_dropped`: 8
 - `intra_sheet_duplicates_dropped`: 1

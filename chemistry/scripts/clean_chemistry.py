@@ -404,7 +404,8 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
                 rec.get("sample_id"))
             rec["sample_category_canonical"] = canon
             rec["category_flag"] = cat_flag
-            grp = categories.name_group(rec.get("sample_name"))
+            grp = categories.name_group(rec.get("sample_name"), canon,
+                                        rec.get("sample_id"))
             rec["sample_name_group"] = grp or rec.get("sample_name")
 
             # Amanah sector from municipality (2026-07-01 spec).
@@ -496,6 +497,14 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
         _no_id(r.get("sample_id")) and r.get("sample_category_canonical") == "أخرى")]
     if before - len(records):
         audit["flags"]["null_id_junk_dropped"] = before - len(records)
+
+    # Drop «أخرى» (Others) — Muhannad 2026-07-16: genuinely-unclassified
+    # leftovers are excluded from pipeline output entirely.
+    before = len(records)
+    records = [r for r in records
+               if r.get("sample_category_canonical") != categories.C_OTHER]
+    if before - len(records):
+        audit["flags"]["others_dropped"] = before - len(records)
 
     out_path = CLEAN_DIR / f"chem_{section}_{year}.parquet"
     string_cols = [
