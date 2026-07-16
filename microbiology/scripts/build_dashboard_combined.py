@@ -1441,10 +1441,10 @@ function renderKpis(rowsBase) {
 
   // Compliance rate card: when filter restricts to non-compliant samples,
   // showing 0.0% misleads — switch to a "Filter mode" badge instead.
-  // Fixed reference to the official 2025 Annual Report compliance (73.18%);
-  // 2024 has no official report, so only the 2025 figure is cited.
-  const OFFICIAL_2025_COMPLIANCE = 73.18;
-  const officialRef = ' · official 2025 report: ' + OFFICIAL_2025_COMPLIANCE.toFixed(1) + '%';
+  // Fixed reference to the official Annual Report compliance (73.18%). Per
+  // Muhannad this is the annual figure covering both years (2024 + 2025).
+  const OFFICIAL_COMPLIANCE = 73.18;
+  const officialRef = ' · official annual report: ' + OFFICIAL_COMPLIANCE.toFixed(1) + '%';
   const compRateCard = allNonCompliant
     ? { label: 'Compliance rate', value: '—',
         sub: 'filter restricts view to non-compliant samples only' + officialRef,
