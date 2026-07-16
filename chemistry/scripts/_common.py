@@ -223,6 +223,7 @@ def iter_data_sheets(path: Path, year: int, schema: dict):
     the bilingual full header if header_en fails.
     """
     skip_tokens = [t.lower() for t in schema.get("skip_sheets", [])]
+    only_sheets = [t.strip().lower() for t in schema.get("only_sheets", [])]
     header_row_max = int(schema.get("header_row_max", 5))
     single_sheet   = bool(schema.get("single_sheet", False))
     require_month  = bool(schema.get("require_monthly_sheet", True)) and not single_sheet
@@ -234,6 +235,10 @@ def iter_data_sheets(path: Path, year: int, schema: dict):
             continue
         if any(t in sn_low for t in skip_tokens):
             continue
+        if only_sheets:
+            sn_norm = sn.strip().lower()
+            if not any(sn_norm == t or sn_norm.startswith(t) for t in only_sheets):
+                continue
 
         ws = wb[sn]
         max_r = ws.max_row or 0
