@@ -1441,10 +1441,18 @@ function renderKpis(rowsBase) {
 
   // Compliance rate card: when filter restricts to non-compliant samples,
   // showing 0.0% misleads — switch to a "Filter mode" badge instead.
-  // Fixed reference to the official Annual Report compliance (73.18%). Per
-  // Muhannad this is the annual figure covering both years (2024 + 2025).
-  const OFFICIAL_COMPLIANCE = 73.18;
-  const officialRef = ' · official annual report: ' + OFFICIAL_COMPLIANCE.toFixed(1) + '%';
+  // Official Annual Report compliance per year (MICRO stream), provided by
+  // Muhannad. The footnote reflects the year(s) currently selected: both years
+  // → combined 71.9%, 2024 → 70.3%, 2025 → 73.2%.
+  const OFFICIAL_COMPLIANCE = {
+    2024: { samples: 9108,  compliant: 6399 },
+    2025: { samples: 11404, compliant: 8345 },
+  };
+  const _oYears = state.years.size ? Array.from(state.years) : Object.keys(OFFICIAL_COMPLIANCE).map(Number);
+  let _oSamp = 0, _oComp = 0;
+  for (const y of _oYears) { const o = OFFICIAL_COMPLIANCE[y]; if (o) { _oSamp += o.samples; _oComp += o.compliant; } }
+  const _oLabel = (state.years.size === 1) ? ('official ' + _oYears[0] + ' report') : 'official annual report';
+  const officialRef = _oSamp ? ' · ' + _oLabel + ': ' + (100 * _oComp / _oSamp).toFixed(1) + '%' : '';
   const compRateCard = allNonCompliant
     ? { label: 'Compliance rate', value: '—',
         sub: 'filter restricts view to non-compliant samples only' + officialRef,
