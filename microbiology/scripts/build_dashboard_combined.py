@@ -1743,7 +1743,7 @@ function renderTopSubtypes(rows) {
   const INDICATOR_PILL= 'background:#fef3c7; color:#92400e; border:1px solid #fde68a';
   const PATH = new Set(FACETS.test_classes.pathogen);
   const maxRate = Math.max(1, top[0].rate);
-  const rows = top.map((it, i) => {
+  const tableRows = top.map((it, i) => {
     const barW = Math.max(20, 200 * it.rate / maxRate);
     const cls = it.rate >= 50 ? '#dc2626' : it.rate >= 30 ? '#f97316' : '#facc15';
     const orgChips = it.organisms.length
@@ -1772,7 +1772,7 @@ function renderTopSubtypes(rows) {
     + '<th style="text-align:right; padding:10px 12px">Non-comp / total</th>'
     + '<th style="text-align:right; padding:10px 12px">Rate</th>'
     + '<th style="padding:10px 12px"></th></tr></thead>'
-    + '<tbody>' + rows + '</tbody></table>'
+    + '<tbody>' + tableRows + '</tbody></table>'
     + '<div class="muted" style="margin-top:8px; font-size:11px">Red pill = pathogen · amber pill = indicator. Counts are samples in the subtype that failed that organism. A row can list up to 3 organisms; click the chip on the right to filter the whole dashboard to that organism.</div>';
 }
 
