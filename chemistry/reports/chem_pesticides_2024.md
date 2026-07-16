@@ -9,3 +9,4 @@
 ## Flags raised
 - `validity_non_verdict:مرفوضة`: 4
 - `intra_sheet_duplicates_dropped`: 2
+- `pesticide_beverage_dropped`: 1

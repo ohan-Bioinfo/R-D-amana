@@ -7,6 +7,7 @@
 - tests in panel: 16
 
 ## Flags raised
+- `food_chem_2024_months_dropped`: 23
 - `is_valid_derived_from_limits`: 15
 - `intra_sheet_duplicates_dropped`: 15
 - `is_valid_derived_from_verdict_text`: 12
