@@ -225,6 +225,8 @@ def build_payload() -> dict:
                       else _val(getattr(r, "sample_category", None)),
                     _val(getattr(r, "sample_name", None)),
                 ),
+                _val(getattr(r, "sample_name_group", None))
+                  if "sample_name_group" in df.columns else _val(getattr(r, "sample_name", None)),
             ])
         sections[prefix] = {
             "label": label, "desc": desc,
@@ -237,7 +239,7 @@ def build_payload() -> dict:
         "cols": ["year","date","year_month","sample_id","sample_name","sample_category",
                  "facility","municipality","district",
                  "is_valid","invalid_test","pesticide_name","conc_ppm",
-                 "failed_tests_derived","validity_status","gso_category"],
+                 "failed_tests_derived","validity_status","gso_category","sample_name_group"],
         "all_years": sorted(all_years),
         "sections": sections,
         "test_counts": test_counts,
@@ -1304,41 +1306,17 @@ try {
     }, { responsive: true, displayModeBar: false });
   }
 
-  // Canonicalise sample-name variants so "ليمون", "ليمون اخضر", "ليمون اصفر"
-  // collapse to a single "ليمون" row (user direction 2026-06-25 — matches the
-  // way the annual statistics report counts non-conformity). Extend as new
-  // family groupings are discovered.
-  const SAMPLE_NAME_FAMILY = [
-    { re: /ليمون/, name: 'ليمون' },
-    { re: /برتقال/, name: 'برتقال' },
-    { re: /يوسف/, name: 'يوسفي' },
-    { re: /فراولة|فراوله/, name: 'فراولة' },
-    { re: /تفاح/, name: 'تفاح' },
-    { re: /عنب/, name: 'عنب' },
-    { re: /بصل/, name: 'بصل' },
-    { re: /طماطم|طماطه|بندورة/, name: 'طماطم' },
-    { re: /خس/, name: 'خس' },
-    { re: /موية|مياه|ماء/, name: 'مياه' },
-    { re: /فلفل/, name: 'فلفل' },
-  ];
-  function canonName(n) {
-    if (!n) return n;
-    const s = String(n).trim();
-    for (const f of SAMPLE_NAME_FAMILY) {
-      if (f.re.test(s)) return f.name;
-    }
-    return s;
-  }
-
   // Top 10 most-contaminated subtypes — ranked by ABSOLUTE non-conformity
   // count (user direction 2026-06-25 — matches the lab's annual statistics
-  // which count failed samples, not failure rates). Lemon / orange / etc.
-  // sub-variants are collapsed via SAMPLE_NAME_FAMILY first.
+  // which count failed samples, not failure rates). Sub-variant grouping
+  // (e.g. lemon / orange variants) is computed once, upstream, in the
+  // `sample_name_group` payload column (single source of truth — see
+  // clean_chemistry.py) rather than duplicated here in JS.
   function renderTopSubtypes() {
     const rows = filteredRows();
     const stats = new Map();
     rows.forEach(r => {
-      const n = canonName(r[COLS.sample_name]); if (!n) return;
+      const n = r[COLS.sample_name_group] || r[COLS.sample_name]; if (!n) return;
       const slot = stats.get(n) || { total: 0, inv: 0, gso: r[COLS.gso_category] };
       slot.total++;
       if (r[COLS.is_valid] === 0) slot.inv++;
