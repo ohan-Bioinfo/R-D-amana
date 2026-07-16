@@ -404,7 +404,8 @@ def clean_section(section: str, year: int) -> tuple[int, dict]:
                 rec.get("sample_id"))
             rec["sample_category_canonical"] = canon
             rec["category_flag"] = cat_flag
-            grp = categories.name_group(rec.get("sample_name"))
+            grp = categories.name_group(rec.get("sample_name"), canon,
+                                        rec.get("sample_id"))
             rec["sample_name_group"] = grp or rec.get("sample_name")
 
             # Amanah sector from municipality (2026-07-01 spec).

@@ -30,7 +30,7 @@ Muhannad's 2026-07-04 rulings (reverse the earlier 2026-07-01 taxonomy):
 Public API:
   classify(section, raw_category, sample_name, sample_id) -> (canonical, flag)
       flag ∈ {None, 'defaulted'}
-  name_group(sample_name) -> str | None
+  name_group(sample_name, category=None, sample_id=None) -> str | None
 """
 from __future__ import annotations
 import re
@@ -334,16 +334,76 @@ def _classify_core(section, raw_category, sample_name, sample_id=None):
     return SECTION_DEFAULT.get(section, C_OTHER), "defaulted"
 
 
-def name_group(sample_name) -> str | None:
-    """D4/D5 display-name grouping. Returns a group label, or None to keep the
-    original name."""
+# --------------------------------------------------------- name-group tables
+# Re-test / unit markers the lab appends: م.ك / م ك / م-ك / م - ك.
+_MARKER_RE  = re.compile(r"م[\s.\-]*ك\b")
+_DIGIT_RE   = re.compile(r"\d+")
+_PRIVATE_RE = re.compile(r"عين[ةه]\s*خاص[ةه]")
+
+_FRUIT_FAMILIES = [
+    (re.compile(r"ليمون"), "ليمون"), (re.compile(r"برتقال"), "برتقال"),
+    (re.compile(r"يوسف"), "يوسفي"), (re.compile(r"فراول[ةه]"), "فراولة"),
+    (re.compile(r"تفاح"), "تفاح"), (re.compile(r"عنب"), "عنب"),
+    (re.compile(r"بصل"), "بصل"), (re.compile(r"طماط[مه]|بندورة"), "طماطم"),
+    (re.compile(r"خس"), "خس"), (re.compile(r"شط[ةه]"), "شطة"),
+    (re.compile(r"فلفل"), "فلفل"),
+]
+_FISH_FAMILIES = [
+    (re.compile(r"روبيان|ربيان"), "ربيان"), (re.compile(r"سلمون"), "سلمون"),
+    (re.compile(r"دنيس"), "دنيس"), (re.compile(r"هامور"), "هامور"),
+    (re.compile(r"كنعد"), "كنعد"), (re.compile(r"شعور"), "شعور"),
+    (re.compile(r"بلطي"), "بلطي"), (re.compile(r"بوري"), "بوري"),
+    (re.compile(r"ساردين"), "ساردين"), (re.compile(r"ناجل"), "ناجل"),
+    (re.compile(r"كابوريا|سلطعون"), "كابوريا"), (re.compile(r"فيلي[ةه]"), "سمك فيليه"),
+    (re.compile(r"محار"), "محار"),
+]
+
+
+def _clean_suffixes(s: str) -> str:
+    """Strip re-test markers, standalone numbers, «عينة خاصة»; squeeze spaces."""
+    s = _MARKER_RE.sub(" ", s)
+    s = _DIGIT_RE.sub(" ", s)
+    s = _PRIVATE_RE.sub(" ", s)
+    return " ".join(s.split())
+
+
+def name_group(sample_name, category=None, sample_id=None) -> str | None:
+    """Category-aware display-name grouping. Returns a group label, or None to
+    keep the caller's original name. Never changes canonical category — this is
+    a display/rollup label only (Muhannad 2026-07-16)."""
     s = _norm(sample_name)
+
+    # #1/#2 — nameless water rows take their name from the id prefix.
     if not s:
+        pfx = _prefix(sample_id)
+        if pfx == "ubot":
+            return W_TAP            # «مياه الحنفية»
+        if pfx == "bot":
+            return "مياه معبأة"
         return None
+
+    # #4 — every filter-water spelling/purpose variant collapses to one label.
     if "فلتر" in s:
-        return W_FILTER
-    if _SHATTA.search(s):
-        return "شطة"
-    if "فلفل" in s:
-        return "فلفل"
-    return None
+        return W_FILTER            # «مياه فلتر»
+
+    # #11 — fruit families fire ONLY inside fruit & veg, so flavoured milk
+    # («حليب جمل فراولة») is never mislabelled as the fruit.
+    if category == C_FRVEG:
+        for rx, lab in _FRUIT_FAMILIES:
+            if rx.search(s):
+                return lab
+
+    # #7 — fish sub-variants.
+    if category == C_FISH:
+        for rx, lab in _FISH_FAMILIES:
+            if rx.search(s):
+                return lab
+        return _clean_suffixes(s) or None
+
+    # #3 — meats: token-order-insensitive key merges reorderings + markers.
+    if category == C_MEAT:
+        toks = _clean_suffixes(s).split()
+        return " ".join(sorted(toks)) or None
+
+    # #6 — everything else: strip trailing numbers / «عينة خاصة» / markers.
+    return _clean_suffixes(s) or None
