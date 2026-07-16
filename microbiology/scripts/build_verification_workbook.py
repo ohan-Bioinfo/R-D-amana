@@ -26,9 +26,15 @@ MNUM = {f"{i:02d}": m for i, m in enumerate(
     ["", "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"])}
 
 
+def real_id(r):
+    # 2024 mis-populates sample_id with the GSO code; the real barcode is in
+    # `barcode`. Prefer barcode, fall back to sample_id (2025 has no barcode col).
+    return _val(r.get("barcode")) or _val(r.get("sample_id")) or ""
+
+
 def flags_for(r, gso, src):
     f = []
-    if _val(r.get("sample_id")) is None:       f.append("no_sample_id")
+    if not real_id(r):                         f.append("no_sample_id")
     if _val(r.get("sample_name")) is None:     f.append("no_sample_name")
     if _val(r.get("category_canonical")) is None and _val(r.get("gso_category_name_en")) is None:
         f.append("no_category")
@@ -52,7 +58,7 @@ def build():
             fl = flags_for(r, gso, src)
             valid = r.get("is_valid")
             sample_rows.append({
-                "sample_id": _val(r.get("sample_id")) or "",
+                "sample_id": real_id(r),
                 "year": y, "month": r["__month"],
                 "raw_category": str(raw),
                 "sample_name": str(_val(r.get("sample_name")) or ""),
