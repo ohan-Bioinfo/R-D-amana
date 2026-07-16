@@ -13,10 +13,18 @@ dairy = A[A["sample_category_canonical"] == C.C_DAIRY]
 bad = dairy[dairy["sample_name_group"].isin(FRUIT)]
 assert bad.empty, f"dairy rows mislabelled as fruit: {bad['sample_name'].tolist()[:5]}"
 
-# #4 — all filter water shares one group label
-filt = A[A["sample_name"].astype(str).str.contains("فلتر", na=False)]
+# #4 — all WATER filter samples share one group label; non-water products such
+# as «قهوة فلتر» are intentionally NOT relabelled (final review 2026-07-16).
+water_cats = {C.W_POTABLE, C.C_NONPOT}
+filt = A[(A["sample_name"].astype(str).str.contains("فلتر", na=False))
+         & (A["sample_category_canonical"].isin(water_cats))]
 assert set(filt["sample_name_group"].unique()) == {C.W_FILTER}, \
     f"filter water not merged: {filt['sample_name_group'].unique()}"
+# and non-water فلتر products must NOT be relabelled as filter water
+nonwater = A[(A["sample_name"].astype(str).str.contains("فلتر", na=False))
+             & (~A["sample_category_canonical"].isin(water_cats))]
+assert (nonwater["sample_name_group"] != C.W_FILTER).all(), \
+    f"non-water فلتر mislabelled: {nonwater[nonwater['sample_name_group']==C.W_FILTER]['sample_name'].tolist()}"
 
 # #1/#2 (nameless water → tap/bottled): the current corpus has NO nameless
 # water rows — every ubot/bot sample already carries a real name — so there is

@@ -1,4 +1,4 @@
-import re, json, sys
+import re, json
 html = open("reports/chemistry_dashboard.html", encoding="utf-8").read()
 m = re.search(r"const DATA = (\{.*?\});\n\s*const COLS", html, re.S)
 assert m, "could not extract DATA payload"

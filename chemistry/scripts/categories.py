@@ -41,7 +41,7 @@ C_FRVEG = "الفواكه والخضار"; C_SWEET = "الحلويات والش�
 C_MEAT = "اللحوم والدواجن"; C_FISH = "الأسماك والمأكولات البحرية"; C_DAIRY = "الحليب ومنتجات الألبان"
 C_FAT = "الدهون والزيوت"; C_FEED = "الأعلاف"
 C_JAM = "المربى والجلي"          # → GSO "Jelly, Jam and Marmalade"
-C_RTE = "الأطعمة الجاهزة للأكل"   # → GSO "Ready to Eat Foods" (re-added 2026-07-04 for كشنة)
+C_RTE = "الأطعمة الجاهزة للأكل"   # → GSO "Ready to Eat Foods" (kept for corrections-CSV Ready-to-Eat samples)
 C_MISC = "أغذية متنوعة"          # RESERVED for sesame only (Muhannad 2026-07-04)
 C_OTHER = "أخرى"                 # → GSO "Others" — unclassified / junk leftovers
 
@@ -383,7 +383,9 @@ def name_group(sample_name, category=None, sample_id=None) -> str | None:
         return None
 
     # #4 — every filter-water spelling/purpose variant collapses to one label.
-    if "فلتر" in s:
+    # Gated to water categories so non-water products (e.g. «قهوة فلتر» drip
+    # coffee) are not mislabelled as filter water (final review 2026-07-16).
+    if category in (W_POTABLE, C_NONPOT) and "فلتر" in s:
         return W_FILTER            # «مياه فلتر»
 
     # #11 — fruit families fire ONLY inside fruit & veg, so flavoured milk
