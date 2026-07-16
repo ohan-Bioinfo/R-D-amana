@@ -48,12 +48,12 @@ C_OTHER = "أخرى"                 # → GSO "Others" — unclassified / junk 
 # Explicit product-name overrides that WIN over the sample_id prefix — for
 # products whose lab prefix is wrong/shared (Muhannad 2026-07-04). Black seed
 # (حبة البركة / الحبة السوداء) carries a `ses` (sesame) prefix but is a spice;
-# كشنة carries a `spic` prefix but Muhannad classes it Ready-to-Eat. Skipped
+# كشنة carries a `spic` prefix and Muhannad classes it a spice (2026-07-16). Skipped
 # for bread items (see classify) so "خبز بالحبة السوداء" stays a cereal.
 NAME_OVERRIDE = [
     ("الحبة السوداء", C_SPICE),
     ("حبة البركة", C_SPICE), ("حبةالبركة", C_SPICE),
-    ("كشنة", C_RTE),
+    ("كشنة", C_SPICE),   # Muhannad 2026-07-16: كشنة is a spice, not RTE
     # olive oil → fats. Must win over the tuna keyword "تون", which is a
     # substring of "زيتون" (Muhannad 2026-07-04).
     ("زيت زيتون", C_FAT),

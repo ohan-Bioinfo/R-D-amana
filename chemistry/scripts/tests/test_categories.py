@@ -36,4 +36,8 @@ check(C.name_group("سمك صافي م.ك", C.C_FISH, "f-2"), "سمك صافي",
 # «سمك» inside a non-fish category name must survive the generic path
 check(C.name_group("بهارات سمك", C.C_SPICE, "s-1"), "بهارات سمك", "سمك in spice name preserved")
 
+# #14 — كشنة is a spice, not Ready-to-Eat
+cat, _ = C.classify("food_chemistry", None, "كشنة بهارات", "spic-0001-r01")
+check(cat, C.C_SPICE, "كشنة -> spices")
+
 print("ALL PASS")
