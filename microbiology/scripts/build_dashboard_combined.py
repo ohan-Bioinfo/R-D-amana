@@ -1586,7 +1586,23 @@ function renderKpis(rowsBase) {
     return best ? { key: best, fail: bF, total: bT, rate: 100 * bF / bT } : { key: null };
   })();
   const highestRiskChain = rankByVolume(COLS.chain, rows);     // always by volume
-  const mostFreqPathogen = rankOrganism(t => PATHOGEN_SET.has(t));
+  // Top failing test across ALL tests (pathogens + indicators), by number of
+  // failing samples — so the top test is العد الكلي (Total Count), matching the
+  // Annual Report, not just the top pathogen. The full rate-ranked list lives in
+  // the Official Annual Figures band.
+  const topFailingTest = (() => {
+    const fail = new Map();
+    for (const r of rowsBase) {
+      const seen = new Set();
+      for (const t of (r[COLS.failed_tests] || [])) {
+        if (seen.has(t)) continue; seen.add(t);
+        fail.set(t, (fail.get(t) || 0) + 1);
+      }
+    }
+    let bestK = null, bestN = 0;
+    for (const [k, n] of fail) if (n > bestN) { bestN = n; bestK = k; }
+    return { key: bestK, count: bestN };
+  })();
 
   const fmtNum  = v => v.toLocaleString();
   const truncate = (s, n) => s && s.length > n ? s.slice(0, n - 1) + '…' : (s || '—');
@@ -1675,10 +1691,12 @@ function renderKpis(rowsBase) {
       value: '<span style="font-size:14px; font-weight:600">' + truncate(highestRiskChain.key, 30) + '</span>',
       sub: highestRiskChain.key ? fmtNum(highestRiskChain.count) + ' non-compliant samples' : 'no data',
       cls: '' },
-    { label: 'Most frequent pathogen',
-      value: '<span style="font-size:14px; font-weight:600">' + truncate(mostFreqPathogen.key, 30) + '</span>',
-      sub: mostFreqPathogen.key ? fmtNum(mostFreqPathogen.count) + ' samples failed this organism' : 'no pathogen data',
-      cls: mostFreqPathogen.count > 0 ? 'crit' : '' },
+    { label: 'Top failing test',
+      value: '<span style="font-size:14px; font-weight:600" class="ar">' + truncate(topFailingTest.key, 30) + '</span>',
+      sub: topFailingTest.key
+        ? fmtNum(topFailingTest.count) + ' failing samples · full rate ranking in the Official band'
+        : 'no failing tests',
+      cls: topFailingTest.count > 0 ? 'crit' : '' },
   ];
   document.getElementById('kpis').innerHTML = cards.map(c =>
     '<div class="kpi ' + c.cls + '"><div class="label">' + c.label + '</div><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
@@ -1699,15 +1717,20 @@ function normSubtypeName(n) {
   s = s.replace(/^قطع\s+/, '');   // "pieces of X" → "X"
   return s;
 }
-function renderTopSubtypes(rowsScope, rowsSliced) {
-  const MIN_SAMPLES = 20;
-  // Denominator = every scope sample of the subtype. Numerator = the subtype's
-  // non-compliant samples that ALSO pass the active slice (pathogen/microbe/
-  // severity). So picking an organism re-ranks subtypes by THAT organism's rate
-  // instead of collapsing every subtype to a meaningless 100%. (Muhannad 2026-07-09)
-  if (rowsSliced === undefined) rowsSliced = rowsScope;
+function renderTopSubtypes(rows) {
+  // Single filter tier (2026-07-16): `rows` is the filtered set. When a slice-
+  // type filter (microbe / pathogen-only / severity) is active, most rows are
+  // failures so the non-compliance RATE degenerates to ~100% — in that mode we
+  // rank subtypes by non-compliant COUNT with a lower sample floor. Otherwise we
+  // rank by rate. Organism chips honour the active pathogen/microbe filter so a
+  // pathogen filter never shows indicator organisms like العد الكلي.
+  const microFilter = state.microbe && state.microbe.size ? state.microbe : null;
+  const pathOnly = !!state.pathogen_only;
+  const sliceActive = pathOnly || !!microFilter || (state.severity && state.severity.size > 0);
+  const MIN_SAMPLES = sliceActive ? 5 : 20;
+
   const stats = new Map();   // key = normalized sample_name → {total, nc, gso, organisms}
-  for (const r of rowsScope) {
+  for (const r of rows) {
     const name = normSubtypeName(r[COLS.sample_name]);
     if (!name) continue;
     let slot = stats.get(name);
@@ -1717,32 +1740,28 @@ function renderTopSubtypes(rowsScope, rowsSliced) {
     }
     slot.total++;
     if (!slot.gso && r[COLS.gso_category]) slot.gso = r[COLS.gso_category];
-  }
-  for (const r of rowsSliced) {
-    if (r[COLS.failure] !== 1) continue;
-    const name = normSubtypeName(r[COLS.sample_name]);
-    if (!name) continue;
-    const slot = stats.get(name);
-    if (!slot) continue;   // rowsSliced ⊆ rowsScope, so the subtype always exists
-    slot.nc++;
-    // Tally distinct organisms that caused failures in this subtype
-    const seen = new Set();
-    for (const t of (r[COLS.failed_tests] || [])) {
-      if (seen.has(t)) continue;
-      seen.add(t);
-      slot.organisms.set(t, (slot.organisms.get(t) || 0) + 1);
+    if (r[COLS.failure] === 1) {
+      slot.nc++;
+      const seen = new Set();
+      for (const t of (r[COLS.failed_tests] || [])) {
+        if (pathOnly && !PATHOGEN_SET.has(t)) continue;
+        if (microFilter && !microFilter.has(t)
+            && !(microFilter.has(INDICATOR_TOKEN) && INDICATOR_SET.has(t))) continue;
+        if (seen.has(t)) continue;
+        seen.add(t);
+        slot.organisms.set(t, (slot.organisms.get(t) || 0) + 1);
+      }
     }
   }
   const items = [];
   for (const [name, s] of stats) {
     if (s.total < MIN_SAMPLES) continue;
-    // Sort organisms by count desc, top 3
     const orgList = Array.from(s.organisms.entries())
       .sort((a, b) => b[1] - a[1]).slice(0, 3);
     items.push({ name, total: s.total, nc: s.nc, gso: s.gso || '(uncategorised)',
                  rate: 100 * s.nc / s.total, organisms: orgList });
   }
-  items.sort((a, b) => b.rate - a.rate);
+  items.sort((a, b) => sliceActive ? (b.nc - a.nc) : (b.rate - a.rate));
   const top = items.slice(0, 10);
   const node = document.getElementById('top-subtypes');
   if (!top.length) {
@@ -2589,7 +2608,7 @@ function renderAll(rows) {
   renderChains(rows);
   renderDow(rows);
   renderRepeatTable(rows);
-  renderTopSubtypes(rows, rows);     // scope==slice now; Task 6 refines organism tally
+  renderTopSubtypes(rows);
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
