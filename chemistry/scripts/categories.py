@@ -275,6 +275,11 @@ def _cat_from_raw(raw) -> str | None:
 
 def classify(section, raw_category, sample_name, sample_id=None):
     """Return (canonical_category, flag). flag ∈ {None, 'defaulted'}."""
+    # The jam section is entirely jam/jelly products (the "Jams " sheet), so
+    # force the category — typo'd names («مربو») and fruit-flavour keywords
+    # («توت»/«مشمش») must not misroute jam rows to fruit/veg (2026-07-16).
+    if section == "jam":
+        return C_JAM, None
     canon, flag = _classify_core(section, raw_category, sample_name, sample_id)
     # Pesticide residue testing is done on fresh produce, so anything that reads
     # as a spice or a cereal/legume in that section (كزبرة/زنجبيل, …) is really
