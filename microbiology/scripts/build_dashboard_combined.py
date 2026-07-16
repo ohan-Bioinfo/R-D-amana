@@ -1354,6 +1354,15 @@ function groupBy(rows, keyFn) {
 }
 function pct(num, den) { return den ? 100 * num / den : 0; }
 
+// Render a Plotly chart, first clearing any empty-state message ("No … data")
+// left in the mount from a previous render, so it can't sit under the bars.
+// (2026-07-16 — fixes the overlap on the chains chart and any similar transition.)
+function reactChart(id, traces, layout, config) {
+  const el = document.getElementById(id);
+  if (el && !el.classList.contains('js-plotly-plot')) el.innerHTML = '';
+  Plotly.react(id, traces, layout, config);
+}
+
 function renderKpis(rowsBase) {
   // Single filter tier (2026-07-16): `rowsBase` is the one filtered set. Sample-
   // level KPIs use it directly; when a filter restricts to non-compliant samples
@@ -1432,12 +1441,16 @@ function renderKpis(rowsBase) {
 
   // Compliance rate card: when filter restricts to non-compliant samples,
   // showing 0.0% misleads — switch to a "Filter mode" badge instead.
+  // Fixed reference to the official 2025 Annual Report compliance (73.18%);
+  // 2024 has no official report, so only the 2025 figure is cited.
+  const OFFICIAL_2025_COMPLIANCE = 73.18;
+  const officialRef = ' · official 2025 report: ' + OFFICIAL_2025_COMPLIANCE.toFixed(1) + '%';
   const compRateCard = allNonCompliant
     ? { label: 'Compliance rate', value: '—',
-        sub: 'filter restricts view to non-compliant samples only',
+        sub: 'filter restricts view to non-compliant samples only' + officialRef,
         cls: '' }
     : { label: 'Compliance rate', value: complianceRate.toFixed(1) + '%',
-        sub: fmtNum(compliantN) + ' / ' + fmtNum(total) + ' samples compliant',
+        sub: fmtNum(compliantN) + ' / ' + fmtNum(total) + ' samples compliant' + officialRef,
         cls: complianceRate >= 95 ? 'good' : complianceRate >= 80 ? 'warn' : 'bad' };
 
   const cards = [
@@ -1566,7 +1579,7 @@ function renderTopSubtypes(rows) {
   const barColor = it => it.rate >= 50 ? '#dc2626' : it.rate >= 30 ? '#f97316' : '#facc15';
   const orgStr = it => it.organisms.length
     ? it.organisms.map(([o, cnt]) => o + ' · ' + cnt).join('<br>') : '—';
-  Plotly.react('top-subtypes', [{
+  reactChart('top-subtypes', [{
     type: 'bar', orientation: 'h',
     x: ordered.map(it => it.rate),
     y: ordered.map(it => it.name),
@@ -1643,7 +1656,7 @@ function renderTrend(rows) {
     };
   });
 
-  Plotly.react('chart_trend', [
+  reactChart('chart_trend', [
     { type: 'bar', x: months, y: volume, name: 'Total samples', yaxis: 'y2',
       marker: { color: colors }, opacity: 0.55,
       hovertemplate: '%{x} · %{y} samples<extra></extra>' },
@@ -1680,7 +1693,7 @@ function renderYoY(rows) {
     marker: { color: yearColor(y) },
     hovertemplate: y + ' · %{x}: %{y}<extra></extra>',
   }));
-  Plotly.react('chart_yoy', traces, {
+  reactChart('chart_yoy', traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 12 },
     barmode: 'group',
@@ -1743,7 +1756,7 @@ function renderHeatmap(rows) {
   // customdata carries the full GSO name so hover stays informative even
   // when the visible label is truncated.
   const customMatrix = SEVERITY_ORDER.map(() => xHover);
-  Plotly.react('chart_heatmap', [{
+  reactChart('chart_heatmap', [{
     type: 'heatmap', x: xLabels, y: SEVERITY_ORDER, z: z,
     customdata: customMatrix,
     colorscale: colorscale, zmin: 0, showscale: true,
@@ -1774,7 +1787,7 @@ function renderSeverityMonth(rows) {
     marker: { color: SEVERITY_COLOR[sev] },
     hovertemplate: '%{x} · ' + sev + ': %{y}<extra></extra>',
   }));
-  Plotly.react('chart_severity_month', traces, {
+  reactChart('chart_severity_month', traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 12 },
     barmode: 'stack',
@@ -1802,7 +1815,7 @@ function renderChains(rows) {
     document.getElementById('chart_chains').innerHTML = '<div class="muted" style="padding:30px">No chain data in current view (2024 has no facility data).</div>';
     return;
   }
-  Plotly.react('chart_chains', [
+  reactChart('chart_chains', [
     { type: 'bar', orientation: 'h',
       y: top.map(s => s.chain.length > 35 ? s.chain.slice(0, 33) + '…' : s.chain),
       x: top.map(s => s.indicatorOnly), name: 'Indicator-only',
@@ -1872,7 +1885,7 @@ function renderTests(rows) {
       hovertemplate: '<b>%{y}</b><br>' + yr + ': %{x:,} failures<extra></extra>',
       customdata: items.map(i => i.test),
     }));
-    Plotly.react(domId, traces, {
+    reactChart(domId, traces, {
       paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
       font: { color: '#1c2742', size: 12 },
       barmode: 'stack',
@@ -1933,17 +1946,17 @@ function renderTestsDrilldown(organism) {
     margin: { l: l, r: 34, t: 6, b: b }, showlegend: false,
     xaxis: { gridcolor: '#e5e7eb', rangemode: 'tozero' }, yaxis: { automargin: true, gridcolor: '#e5e7eb' },
   });
-  Plotly.react('dd_year', [{ type: 'bar', x: yrList.map(e => String(e[0])), y: yrList.map(e => e[1]),
+  reactChart('dd_year', [{ type: 'bar', x: yrList.map(e => String(e[0])), y: yrList.map(e => e[1]),
     marker: { color: yrList.map(e => yearColor(e[0])) }, text: yrList.map(e => e[1].toLocaleString()),
     textposition: 'outside', cliponaxis: false, hovertemplate: '%{x}: %{y} failures<extra></extra>' }],
     ddLayout(36, 24), PLOTLY_CONFIG);
   const fac = topFac.slice().reverse();
-  Plotly.react('dd_fac', [{ type: 'bar', orientation: 'h', x: fac.map(e => e[1]), y: fac.map(e => e[0]),
+  reactChart('dd_fac', [{ type: 'bar', orientation: 'h', x: fac.map(e => e[1]), y: fac.map(e => e[0]),
     marker: { color: '#ea580c' }, text: fac.map(e => e[1].toLocaleString()),
     textposition: 'outside', cliponaxis: false, hovertemplate: '<b>%{y}</b>: %{x} failures<extra></extra>' }],
     ddLayout(150, 24), PLOTLY_CONFIG);
   const cat = topCat.slice().reverse();
-  Plotly.react('dd_cat', [{ type: 'bar', orientation: 'h', x: cat.map(e => e[1]), y: cat.map(e => e[0]),
+  reactChart('dd_cat', [{ type: 'bar', orientation: 'h', x: cat.map(e => e[1]), y: cat.map(e => e[0]),
     marker: { color: '#3b82f6' }, text: cat.map(e => e[1].toLocaleString()),
     textposition: 'outside', cliponaxis: false, hovertemplate: '<b>%{y}</b>: %{x} failures<extra></extra>' }],
     ddLayout(150, 24), PLOTLY_CONFIG);
@@ -2088,7 +2101,7 @@ function renderMap(rows) {
   const ZOOM_K = 720;     // calibrated: 0.5° → zoom 10.5
   const zoom = Math.max(9.5, Math.min(13.5, Math.log2(ZOOM_K / effectiveSpan)));
 
-  Plotly.react('chart_map', traces, {
+  reactChart('chart_map', traces, {
     mapbox: {
       style: _tileStyle(),
       center: { lat: centerLat, lon: centerLon },
@@ -2129,7 +2142,7 @@ function _renderVolumeVsRate(domId, items, labelKey, opts) {
     marker: { size: 9, line: { color: '#fff', width: 1.5 } },
     hovertemplate: '<b>%{x}</b><br>Non-compliance: %{y:.1f}%<extra></extra>',
   });
-  Plotly.react(domId, traces, {
+  reactChart(domId, traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
     barmode: 'stack',
@@ -2199,7 +2212,7 @@ function renderGsoCategory(rows) {
     cliponaxis: false,
     base: top.map(i => i.total),  // anchor label position at end of stacked bar
   });
-  Plotly.react('chart_gso_cat', traces, {
+  reactChart('chart_gso_cat', traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
     barmode: 'stack',
@@ -2241,7 +2254,7 @@ function renderDow(rows) {
     totals[r[COLS.dow]]++;
     if (r[COLS.failure] === 1) inv[r[COLS.dow]]++;
   }
-  Plotly.react('chart_dow', [
+  reactChart('chart_dow', [
     { type: 'bar', x: DOW_LABELS, y: totals, name: 'Total', marker: { color: '#1f2a4a' },
       hovertemplate: '<b>%{x}</b>: %{y} samples<extra></extra>' },
     { type: 'bar', x: DOW_LABELS, y: inv, name: 'Non-compliant', marker: { color: '#ea580c' },
@@ -2277,7 +2290,7 @@ function renderRepeatTable(rows) {
   }
   const top = stats.slice(0, 15).reverse();   // reverse so the worst chain is on top
   const color = s => s.peak >= 10 ? '#dc2626' : s.peak >= 5 ? '#f97316' : '#3b82f6';
-  Plotly.react('repeat_table', [{
+  reactChart('repeat_table', [{
     type: 'bar', orientation: 'h',
     x: top.map(s => s.peak), y: top.map(s => s.chain),
     marker: { color: top.map(color) },
