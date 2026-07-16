@@ -2481,9 +2481,12 @@ def main() -> None:
     if not frames:
         raise SystemExit("no data<YEAR>.parquet files found in cleaned/")
 
-    # Use the intersection of all-year columns so concat stays clean.
-    shared = sorted(set.intersection(*(set(f.columns) for f in frames)))
-    combined = pd.concat([f[shared] for f in frames], ignore_index=True)
+    # Union the columns (2026-07-16): the old intersection dropped 2024-only
+    # columns — notably the native GSO family (gso_category_name_en etc.) — which
+    # forced 2024 into keyword classification. build_data/build_facets read
+    # columns via getattr(..., None), so 2025's absent GSO columns become NaN and
+    # fall through to the sample_type derivation, while 2024 keeps native GSO.
+    combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["sampling_date", "year"], kind="mergesort", na_position="last")
 
     payload = {
