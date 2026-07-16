@@ -1262,6 +1262,9 @@ try {
         String(r[COLS.failed_tests_derived]).split('|').forEach(t => add(t.trim()));
       } else if (r[COLS.is_valid] === 0 && r[COLS.invalid_test]) {
         add(r[COLS.invalid_test]);
+      } else if (r[COLS.is_valid] === 0) {
+        // #10 — invalid but the lab recorded no failing test.
+        add('Unspecified');
       }
     });
     const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 25);
