@@ -1593,60 +1593,32 @@ function renderTopSubtypes(rows) {
   const top = items.slice(0, 10);
   const node = document.getElementById('top-subtypes');
   if (!top.length) {
+    Plotly.purge('top-subtypes');
     node.innerHTML = '<div class="muted" style="padding:20px">No subtypes with ≥' + MIN_SAMPLES + ' samples in current view.</div>';
     return;
   }
-  // Class an organism: pathogen → red pill, indicator → amber pill
-  const PATHOGEN_PILL = 'background:#fee2e2; color:#991b1b; border:1px solid #fecaca';
-  const INDICATOR_PILL= 'background:#fef3c7; color:#92400e; border:1px solid #fde68a';
-  const PATH = new Set(FACETS.test_classes.pathogen);
-  const maxRate = Math.max(1, top[0].rate);
-  const tableRows = top.map((it, i) => {
-    const barW = Math.max(20, 200 * it.rate / maxRate);
-    const cls = it.rate >= 50 ? '#dc2626' : it.rate >= 30 ? '#f97316' : '#facc15';
-    const orgChips = it.organisms.length
-      ? it.organisms.map(([org, n]) => {
-          const pill = PATH.has(org) ? PATHOGEN_PILL : INDICATOR_PILL;
-          return `<span data-org="${escapeHtml(org)}" title="Click to filter the dashboard to this organism" style="${pill}; padding:2px 8px; border-radius:999px; font-size:11px; white-space:nowrap; margin-right:4px; display:inline-block; margin-bottom:2px; cursor:pointer"><span class="ar">${escapeHtml(org)}</span> · ${n}</span>`;
-        }).join('')
-      : '<span class="muted" style="font-size:11px">—</span>';
-    return `<tr style="vertical-align:middle">
-      <td style="text-align:right; color:var(--muted); width:36px; padding:12px 12px">${i+1}</td>
-      <td class="ar" style="font-weight:600; font-size:14px; padding:12px 12px; text-align:start">${escapeHtml(it.name)}</td>
-      <td style="padding:12px 12px"><span style="font-size:11px; color:var(--muted)">${escapeHtml(it.gso)}</span></td>
-      <td style="padding:12px 12px; min-width:220px">${orgChips}</td>
-      <td style="text-align:right; font-variant-numeric:tabular-nums; padding:12px 12px; white-space:nowrap">${it.nc.toLocaleString()} / ${it.total.toLocaleString()}</td>
-      <td style="text-align:right; font-variant-numeric:tabular-nums; font-weight:600; padding:12px 12px; white-space:nowrap">${it.rate.toFixed(1)}%</td>
-      <td style="width:220px; padding:12px 12px"><div style="height:10px; background:#e5e7eb; border-radius:5px; overflow:hidden">
-        <div style="height:100%; width:${barW}px; background:${cls}"></div></div></td>
-    </tr>`;
-  }).join('');
-  node.innerHTML = '<table style="width:100%; font-size:13px; border-collapse:collapse">'
-    + '<thead><tr style="color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:0.5px">'
-    + '<th style="padding:10px 12px"></th>'
-    + '<th style="text-align:start; padding:10px 12px">Subtype (sample_name)</th>'
-    + '<th style="text-align:start; padding:10px 12px">GSO 1016 category</th>'
-    + '<th style="text-align:start; padding:10px 12px">Organisms causing failure (top 3 · count)</th>'
-    + '<th style="text-align:right; padding:10px 12px">Non-comp / total</th>'
-    + '<th style="text-align:right; padding:10px 12px">Rate</th>'
-    + '<th style="padding:10px 12px"></th></tr></thead>'
-    + '<tbody>' + tableRows + '</tbody></table>'
-    + '<div class="muted" style="margin-top:8px; font-size:11px">Red pill = pathogen · amber pill = indicator. Counts are samples in the subtype that failed that organism. A row can list up to 3 organisms; click the chip on the right to filter the whole dashboard to that organism.</div>';
+  const ordered = top.slice().reverse();   // Plotly draws the first entry at the bottom → reverse so #1 is on top
+  const barColor = it => it.rate >= 50 ? '#dc2626' : it.rate >= 30 ? '#f97316' : '#facc15';
+  const orgStr = it => it.organisms.length
+    ? it.organisms.map(([o, cnt]) => o + ' · ' + cnt).join('<br>') : '—';
+  Plotly.react('top-subtypes', [{
+    type: 'bar', orientation: 'h',
+    x: ordered.map(it => it.rate),
+    y: ordered.map(it => it.name),
+    marker: { color: ordered.map(barColor) },
+    text: ordered.map(it => it.rate.toFixed(1) + '%  (' + it.nc + '/' + it.total + ')'),
+    textposition: 'outside', cliponaxis: false,
+    customdata: ordered.map(it => [it.gso, orgStr(it)]),
+    hovertemplate: '<b>%{y}</b><br>%{customdata[0]}<br>%{x:.1f}% non-compliant<br>Organisms:<br>%{customdata[1]}<extra></extra>',
+  }], {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#1c2742', size: 12, family: 'Segoe UI, Tahoma, sans-serif' },
+    margin: { l: 190, r: 90, t: 6, b: 30 },
+    height: 70 + ordered.length * 34,
+    xaxis: { gridcolor: '#e5e7eb', ticksuffix: '%', rangemode: 'tozero' },
+    yaxis: { automargin: true },
+  }, PLOTLY_CONFIG);
 }
-
-// Delegated click on the organism pills in the most-contaminated ranking:
-// toggles that organism in the microbe filter (and keeps the microbe chip UI
-// in sync), fulfilling the "click to filter" affordance. (Muhannad 2026-07-09)
-document.getElementById('top-subtypes').addEventListener('click', e => {
-  const pill = e.target.closest('[data-org]');
-  if (!pill) return;
-  const org = pill.getAttribute('data-org');
-  if (state.microbe.has(org)) state.microbe.delete(org); else state.microbe.add(org);
-  document.querySelectorAll('#f_microbe .chip').forEach(c => {
-    if (c.dataset.value === org) c.classList.toggle('active', state.microbe.has(org));
-  });
-  applyFilters();
-});
 
 // Distinct colour per microbe — picked to stay readable on the light theme
 // and clearly different from each other. Pathogens use warmer reds/oranges;
@@ -2364,22 +2336,47 @@ function renderAnnual() {
     kpi('Total tests', n(b.total_tests), 'test runs (incl. replicates)'),
     kpi('Non-compliant tests', n(b.non_compliant_tests), b.total_tests? (100*b.non_compliant_tests/b.total_tests).toFixed(1)+'% of tests':''),
   ].join('');
-  const per = (b.per_test||[]).map(t=>`<tr>
-     <td class="ar" style="text-align:start; padding:4px 10px">${escapeHtml(t.name_ar)}</td>
-     <td style="text-align:right; padding:4px 10px; font-variant-numeric:tabular-nums">${t.invalid.toLocaleString()} / ${t.total.toLocaleString()}</td>
-     <td style="text-align:right; padding:4px 10px; font-weight:600">${t.rate.toFixed(1)}%</td></tr>`).join('');
-  const sec = (b.sectors||[]).map(s=>`<tr>
-     <td class="ar" style="text-align:start; padding:4px 10px">${escapeHtml(s.name_ar)}</td>
-     <td style="text-align:right; padding:4px 10px">${s.samples.toLocaleString()}</td>
-     <td style="text-align:right; padding:4px 10px">${s.pct.toFixed(1)}%</td></tr>`).join('');
   document.getElementById('annual-body').innerHTML =
     `<div class="kpis" style="margin:12px 0">${kpis}</div>
      <div style="display:flex; gap:24px; flex-wrap:wrap">
-       <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Failure rate by test (ranked)</div>
-         <table style="width:100%; font-size:12px; border-collapse:collapse"><tbody>${per}</tbody></table></div>
-       <div style="flex:1; min-width:240px"><div class="section-note" style="margin-bottom:4px">Samples collected by sector (report basis)</div>
-         <table style="width:100%; font-size:12px; border-collapse:collapse"><tbody>${sec}</tbody></table></div>
+       <div style="flex:1; min-width:320px"><div class="section-note" style="margin-bottom:4px">Failure rate by test (ranked)</div>
+         <div id="annual_pertest" style="height:320px"></div></div>
+       <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Samples collected by sector (report basis)</div>
+         <div id="annual_sector" style="height:320px"></div></div>
      </div>`;
+
+  // Per-test failure rate — horizontal bars for tests with ≥1 failure, ranked.
+  const pt = (b.per_test||[]).filter(t => t.invalid > 0).slice().sort((a,b2)=>a.rate-b2.rate);
+  Plotly.react('annual_pertest', [{
+    type:'bar', orientation:'h',
+    x: pt.map(t=>t.rate), y: pt.map(t=>t.name_ar),
+    marker:{ color: pt.map(t=> t.rate>=20?'#dc2626':t.rate>=10?'#f97316':'#facc15') },
+    text: pt.map(t=>t.rate.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
+    customdata: pt.map(t=>[t.invalid, t.total]),
+    hovertemplate:'<b>%{y}</b><br>%{customdata[0]:,} / %{customdata[1]:,} invalid · %{x:.1f}%<extra></extra>',
+  }], {
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
+    margin:{ l:160, r:50, t:6, b:28 },
+    xaxis:{ gridcolor:'#e5e7eb', ticksuffix:'%', rangemode:'tozero' },
+    yaxis:{ automargin:true },
+  }, PLOTLY_CONFIG);
+
+  // Samples collected by sector — horizontal bars (report basis).
+  const sc = (b.sectors||[]).slice().sort((a,b2)=>a.samples-b2.samples);
+  Plotly.react('annual_sector', [{
+    type:'bar', orientation:'h',
+    x: sc.map(s=>s.samples), y: sc.map(s=>s.name_ar),
+    marker:{ color:'#3b82f6' },
+    text: sc.map(s=>s.samples.toLocaleString()+' · '+s.pct.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
+    hovertemplate:'<b>%{y}</b><br>%{x:,} samples<extra></extra>',
+  }], {
+    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
+    font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
+    margin:{ l:120, r:80, t:6, b:28 },
+    xaxis:{ gridcolor:'#e5e7eb', rangemode:'tozero' },
+    yaxis:{ automargin:true },
+  }, PLOTLY_CONFIG);
 }
 document.getElementById('annual-tabs').addEventListener('click', e => {
   const t = e.target.closest('[data-annual-year]'); if (!t) return;
