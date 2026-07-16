@@ -1474,47 +1474,21 @@ function applyFilters() {
     btn.disabled = false;
   }
 
-  // ─── Spec 2026-06-18 — three-tier filter design ──────────────────────────
-  //
-  // SCOPE filters define which samples are "in view":
-  //   year, date, sector, mun_type, municipality, gso_category, compliance,
-  //   exclude_raw_meat. Every card and chart respects scope.
-  //
-  // SLICE filters narrow a focused subset for organism / severity views:
-  //   severity, microbe, pathogen_only, repeat_only. ONLY 4 components
-  //   respond to slice (severity-month, heatmap, tests panels, drilldown).
-  //
-  // Three row sets emerge:
-  //   rowsScope   = SCOPE only           → KPIs, rate charts, rankings
-  //   rowsSliced  = SCOPE + SLICE        → drilldown table
-  //   rowsActive  = rowsSliced − none    → severity-event charts
-  //
-  const SCOPE_CHIPS = new Set(['years','sector','mun_type','municipality','gso_category','gso_product']);
-  const SLICE_CHIPS = new Set(['severity','sample_type']);
-
-  function isScopePass(r) {
+  // ─── Single filter tier (2026-07-16) ────────────────────────────────────
+  // Every active filter — year, date, compliance, sector, mun_type,
+  // gso_category, severity, microbe, pathogen_only, repeat_only,
+  // exclude_raw_meat — contributes to ONE `rowsFiltered` set that feeds every
+  // chart and KPI. (Replaces the old scope/slice/active split, where severity
+  // and microbe drove only 5 of 15 figures and appeared to do nothing.)
+  function isPass(r) {
     if (r[cD] && (r[cD] < dFrom || r[cD] > dTo)) return false;
     if (complianceActive) {
       const isNc = r[cF] === 1;
       if (wantCompliant && isNc) return false;
       if (wantNoncompliant && !isNc) return false;
     }
-    for (const f of activeChips) {
-      const key = CHIP_FILTERS.find(c => COLS[c.col_key] === f.col).state_key;
-      if (SCOPE_CHIPS.has(key)) {
-        if (!f.set.has(r[f.col])) return false;
-      }
-    }
+    for (const f of activeChips) if (!f.set.has(r[f.col])) return false;
     for (const e of activeExcludes) if (e.test(r)) return false;
-    return true;
-  }
-  function isSlicePass(r) {
-    for (const f of activeChips) {
-      const key = CHIP_FILTERS.find(c => COLS[c.col_key] === f.col).state_key;
-      if (SLICE_CHIPS.has(key)) {
-        if (!f.set.has(r[f.col])) return false;
-      }
-    }
     for (const t of activeShowOnly) if (!t.test(r)) return false;
     if (microActive) {
       let m = false;
@@ -1528,37 +1502,25 @@ function applyFilters() {
     return true;
   }
 
-  const rowsScope  = ROWS.filter(isScopePass);
-  const rowsSliced = rowsScope.filter(isSlicePass);
-  const rowsActive = rowsSliced.filter(r => r[COLS.severity] !== 'none');
+  const rowsFiltered = ROWS.filter(isPass);
 
-  // Slice-banner: show only when a slice filter is active.
-  const sliceActive = (state.severity.size > 0) || (state.microbe.size > 0)
-                    || state.pathogen_only || state.repeat_only;
+  // Filter banner: show whenever any filter is active.
+  const anyActive = activeChips.length > 0 || complianceActive || microActive
+                  || activeShowOnly.length > 0 || activeExcludes.length > 0
+                  || state.date_from !== FACETS.date_min || state.date_to !== FACETS.date_max;
   const banner = document.getElementById('slice-banner');
   if (banner) {
-    if (sliceActive) {
-      const parts = [];
-      if (state.severity.size > 0) parts.push('Severity = ' + Array.from(state.severity).join(', '));
-      if (state.microbe.size > 0) {
-        const m = Array.from(state.microbe).map(v => v === INDICATOR_TOKEN ? 'Any indicator' : v);
-        parts.push('Microbe = ' + m.join(' or '));
-      }
-      if (state.pathogen_only) parts.push('Pathogen-only');
-      if (state.repeat_only)   parts.push('Repeat-offender');
+    if (anyActive) {
       banner.style.display = 'block';
-      banner.innerHTML = '<b>Slice active:</b> ' + parts.join(' · ')
-        + ' &nbsp;·&nbsp; <span style="opacity:0.75">'
-        + rowsSliced.length.toLocaleString() + ' samples in slice (of '
-        + rowsScope.length.toLocaleString() + ' in scope). '
-        + 'The Most-contaminated subtypes ranking plus the Severity-month / Heatmap / Tests / Drilldown views respond to slice filters '
-        + '— the KPIs and rate charts show the full scope view.</span>';
+      banner.innerHTML = '<b>Filter active:</b> '
+        + rowsFiltered.length.toLocaleString() + ' of ' + ROWS.length.toLocaleString()
+        + ' samples match the current filters — every chart and KPI reflects them.';
     } else {
       banner.style.display = 'none';
     }
   }
 
-  renderAll(rowsActive, rowsSliced, rowsScope);
+  renderAll(rowsFiltered);
 }
 
 function groupBy(rows, keyFn) {
@@ -1573,13 +1535,13 @@ function groupBy(rows, keyFn) {
 }
 function pct(num, den) { return den ? 100 * num / den : 0; }
 
-function renderKpis(rows, rowsFull, rowsBase) {
-  // Sample-level KPIs (Total / Compliant / Non-compliant / Compliance rate)
-  // use `rowsBase` (filters except severity) so picking Severity=pathogen
-  // doesn\'t collapse Total = Non-compliant = 100%. The severity filter
-  // narrows the slice for organism rankings only.
-  if (rowsFull === undefined) rowsFull = rows;
-  if (rowsBase === undefined) rowsBase = rowsFull;
+function renderKpis(rowsBase) {
+  // Single filter tier (2026-07-16): `rowsBase` is the one filtered set. Sample-
+  // level KPIs use it directly; when a filter restricts to non-compliant samples
+  // the compliance card shows a "filter mode" badge (allNonCompliant, below).
+  // `rows` = the severity-event subset, used only for organism rankings.
+  const rowsFull = rowsBase;
+  const rows = rowsBase.filter(r => r[COLS.severity] !== 'none');
 
   const total          = rowsBase.length;
   const nonCompliant   = rowsBase.filter(r => r[COLS.failure] === 1).length;
@@ -2669,46 +2631,32 @@ document.getElementById('annual-tabs').addEventListener('click', e => {
   annualYear = Number(t.getAttribute('data-annual-year')); renderAnnual();
 });
 
-function renderAll(rowsActive, rowsSliced, rowsScope) {
-  // 3-tier filter assignment (spec 2026-06-18):
-  //   rowsScope  = SCOPE filters only  → KPIs + every rate / volume chart
-  //   rowsSliced = SCOPE + SLICE       → drilldown table
-  //   rowsActive = rowsSliced − none   → severity-event focused charts
-  if (rowsSliced === undefined) rowsSliced = rowsActive;
-  if (rowsScope  === undefined) rowsScope  = rowsSliced;
+function renderAll(rows) {
+  // Single filter tier (2026-07-16): every figure derives from the one filtered
+  // set. rowsActive (severity events only) is a local derivation used solely by
+  // the two intrinsically severity-event charts (severity-month, heatmap).
+  const rowsActive = rows.filter(r => r[COLS.severity] !== 'none');
 
-  document.getElementById('subtitle').textContent =
-    rowsScope.length.toLocaleString() + ' samples in scope · ' +
-    rowsSliced.length.toLocaleString() + ' in slice · ' +
-    rowsActive.length.toLocaleString() + ' with severity events · ' +
-    state.date_from + ' → ' + state.date_to;
   document.getElementById('meta_rows').textContent = FACETS.row_count.toLocaleString();
   document.getElementById('meta_range').textContent = FACETS.date_min + ' → ' + FACETS.date_max;
+  window.__mapRows = rows;   // map metric/tile toggles re-render on this set
 
-  window.__lastFiltered = rowsActive;
-  // The map is drawn from rowsScope; remember it so the metric/tile toggles
-  // re-render on the SAME dataset instead of the severity-events subset. (2026-07-09)
-  window.__mapRows = rowsScope;
-
-  // ── SCOPE-bound (slice-independent) ──────────────────────────
-  refreshMicrobeChipCounts(rowsScope);
-  renderKpis(rowsActive, rowsScope, rowsScope);
-  renderMap(rowsScope);
-  renderTrend(rowsScope);
-  renderYoY(rowsScope);
-  renderSector(rowsScope);
-  renderGsoCategory(rowsScope);
-  renderMunicipality(rowsScope);
-  renderChains(rowsScope);
-  renderDow(rowsScope);
-  renderRepeatTable(rowsScope);
-
-  // ── SLICE-aware (5 components) ───────────────────────────────
-  renderTopSubtypes(rowsScope, rowsSliced);  // scope denominators, slice numerators (Muhannad 2026-07-09)
-  renderSeverityMonth(rowsActive);   // severity-event subset of slice
-  renderHeatmap(rowsActive);
-  renderTests(rowsActive);
-  renderDrilldown(rowsSliced);       // table view, full slice incl. compliant
+  refreshMicrobeChipCounts(rows);
+  renderKpis(rows);
+  renderMap(rows);
+  renderTrend(rows);
+  renderYoY(rows);
+  renderSector(rows);
+  renderGsoCategory(rows);
+  renderMunicipality(rows);
+  renderChains(rows);
+  renderDow(rows);
+  renderRepeatTable(rows);
+  renderTopSubtypes(rows, rows);     // scope==slice now; Task 6 refines organism tally
+  renderSeverityMonth(rowsActive);   // intrinsically severity-event
+  renderHeatmap(rowsActive);         // intrinsically severity-event
+  renderTests(rows);
+  renderDrilldown(rows);
 }
 
 renderAnnual();
