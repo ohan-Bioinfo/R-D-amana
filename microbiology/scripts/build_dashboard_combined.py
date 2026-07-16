@@ -889,6 +889,14 @@ tbody tr:hover { background: var(--sand-100); }
 <h1>Riyadh Municipality Lab</h1>
 <div class="subtitle" id="subtitle">Loading…</div>
 
+<section id="annual-band" class="card" style="margin:12px 0">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+    <h2 style="margin:0">Official Annual Figures <span class="section-note">source: Annual Report</span></h2>
+    <div id="annual-tabs" style="display:flex; gap:6px"></div>
+  </div>
+  <div id="annual-body"></div>
+</section>
+
 <div class="year-bar" id="year_bar">
   <span class="year-bar-label">Year</span>
   <div class="chips" id="f_year"></div>
@@ -2622,6 +2630,45 @@ function escapeHtml(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+// ── Tier 1: Official Annual Figures (static, sourced from the Annual Report) ──
+let annualYear = null;
+function renderAnnual() {
+  const years = Object.keys(ANNUAL).map(Number).sort((a,b)=>b-a);
+  if (!years.length) { document.getElementById('annual-band').style.display='none'; return; }
+  if (annualYear === null || !years.includes(annualYear)) annualYear = years[0];
+  document.getElementById('annual-tabs').innerHTML = years.map(y =>
+    `<div class="chip${y===annualYear?' active':''}" data-annual-year="${y}">${y}</div>`).join('');
+  const b = ANNUAL[String(annualYear)] || {};
+  const n = v => (v==null?'—':Number(v).toLocaleString());
+  const kpi = (label,val,sub)=>`<div class="kpi"><div class="label">${label}</div><div class="value">${val}</div><div class="sub">${sub||''}</div></div>`;
+  const kpis = [
+    kpi('Total samples', n(b.total_samples), 'MICRO · annual report'),
+    kpi('Compliance rate', b.compliance_rate!=null? b.compliance_rate.toFixed(2)+'%':'—', n(b.compliant)+' compliant'),
+    kpi('Total tests', n(b.total_tests), 'test runs (incl. replicates)'),
+    kpi('Non-compliant tests', n(b.non_compliant_tests), b.total_tests? (100*b.non_compliant_tests/b.total_tests).toFixed(1)+'% of tests':''),
+  ].join('');
+  const per = (b.per_test||[]).map(t=>`<tr>
+     <td class="ar" style="text-align:start; padding:4px 10px">${escapeHtml(t.name_ar)}</td>
+     <td style="text-align:right; padding:4px 10px; font-variant-numeric:tabular-nums">${t.invalid.toLocaleString()} / ${t.total.toLocaleString()}</td>
+     <td style="text-align:right; padding:4px 10px; font-weight:600">${t.rate.toFixed(1)}%</td></tr>`).join('');
+  const sec = (b.sectors||[]).map(s=>`<tr>
+     <td class="ar" style="text-align:start; padding:4px 10px">${escapeHtml(s.name_ar)}</td>
+     <td style="text-align:right; padding:4px 10px">${s.samples.toLocaleString()}</td>
+     <td style="text-align:right; padding:4px 10px">${s.pct.toFixed(1)}%</td></tr>`).join('');
+  document.getElementById('annual-body').innerHTML =
+    `<div class="kpis" style="margin:12px 0">${kpis}</div>
+     <div style="display:flex; gap:24px; flex-wrap:wrap">
+       <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Failure rate by test (ranked)</div>
+         <table style="width:100%; font-size:12px; border-collapse:collapse"><tbody>${per}</tbody></table></div>
+       <div style="flex:1; min-width:240px"><div class="section-note" style="margin-bottom:4px">Samples collected by sector (report basis)</div>
+         <table style="width:100%; font-size:12px; border-collapse:collapse"><tbody>${sec}</tbody></table></div>
+     </div>`;
+}
+document.getElementById('annual-tabs').addEventListener('click', e => {
+  const t = e.target.closest('[data-annual-year]'); if (!t) return;
+  annualYear = Number(t.getAttribute('data-annual-year')); renderAnnual();
+});
+
 function renderAll(rowsActive, rowsSliced, rowsScope) {
   // 3-tier filter assignment (spec 2026-06-18):
   //   rowsScope  = SCOPE filters only  → KPIs + every rate / volume chart
@@ -2664,6 +2711,7 @@ function renderAll(rowsActive, rowsSliced, rowsScope) {
   renderDrilldown(rowsSliced);       // table view, full slice incl. compliant
 }
 
+renderAnnual();
 applyFilters();
 </script>
 </div><!-- /.page-body -->
