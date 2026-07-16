@@ -15,6 +15,8 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from annual_report import load_all_annual_figures
+
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_2025 = ROOT / "schemas" / "lab_data_2025_v1.yaml"
 OUT_HTML = ROOT / "reports" / "microbiology_dashboard.html"
@@ -1084,6 +1086,7 @@ const COLS = {};
 PAYLOAD.data.cols.forEach((c, i) => { COLS[c] = i; });
 const ROWS = PAYLOAD.data.rows;
 const FACETS = PAYLOAD.facets;
+const ANNUAL = PAYLOAD.annual || {};
 
 // Severity = 'none' was dropped at data-load (user direction 2026-06-14).
 // Only the 3 actual severity tiers remain. Colors picked for strong visual
@@ -2701,6 +2704,7 @@ def main() -> None:
     payload = {
         "data": build_data(combined),
         "facets": build_facets(combined),
+        "annual": load_all_annual_figures(ROOT),   # Tier-1 official figures
     }
     from datetime import datetime
     import base64
