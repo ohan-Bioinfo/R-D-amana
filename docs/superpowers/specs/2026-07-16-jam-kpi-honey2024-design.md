@@ -18,17 +18,21 @@ row, so **all** its test cells fall into *compliant* — misrepresenting
 no-validity data as passing.
 
 ### Signal
-A section is display-only iff its parquet has **no `*_limit_value` columns**
-(confirmed: jam has none; honey/food_chem/etc. all have them; after Part B,
-2024 honey will have them too). This is the detection rule.
+Use an **explicit `DISPLAY_ONLY_SECTIONS = {"jam"}`** set. (A tempting
+"no `*_limit_value` columns" heuristic is WRONG — aflatoxins, pesticides, and
+water_analysis also have zero `*_limit_value` columns yet derive real compliance
+from `is_valid`; detecting by columns would zero out their compliant counts. Jam
+is distinguished by having no validity data at all, `is_valid` null for 82/83
+rows. An explicit set is unambiguous and safe.) Add sections to the set if
+future display-only panels appear.
 
 ### Change — Python (`_compute_test_counts`)
 Add a third split component `not_evaluated` everywhere the split is built
 (`split_by_year`, `split_by_section_year`, and the grand `compliance_split`):
 
-- For a **display-only** section (no `*_limit_value` columns): `not_evaluated =
-  n`, `compliant = 0`, `non_compliant = 0`. Its `n` still contributes to
-  `by_year`/`by_section_year` totals (volume unchanged).
+- For a **display-only** section (`section in DISPLAY_ONLY_SECTIONS`, i.e. jam):
+  `not_evaluated = n`, `compliant = 0`, `non_compliant = 0`. Its `n` still
+  contributes to `by_year`/`by_section_year` totals (volume unchanged).
 - For a **normal** section: `not_evaluated = 0`, `compliant = n − nc`,
   `non_compliant = nc` (unchanged).
 
