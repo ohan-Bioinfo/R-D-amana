@@ -1011,11 +1011,6 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="repeat_table"></div>
   </div>
 
-  <div class="card full">
-    <h2>Sample drill-down (filtered rows)</h2>
-    <div class="muted" style="margin-bottom:10px">Showing first 200 rows after filters.</div>
-    <div id="drilldown_table"></div>
-  </div>
 </div>
 
 <footer>Generated from data&lt;YEAR&gt;.parquet (auto-discovered) — <span id="meta_rows">…</span> rows · date range <span id="meta_range">…</span></footer>
@@ -2346,36 +2341,6 @@ function renderRepeatTable(rows) {
   document.getElementById('repeat_table').innerHTML = html;
 }
 
-function renderDrilldown(rows) {
-  const slice = rows.slice(0, 200);
-  let html = '<table><thead><tr>'
-    + '<th>Year</th><th>Date</th><th>GSO product</th><th>Severity</th>'
-    + '<th>Chain / Facility</th><th>Sector</th><th>Municipality</th>'
-    + '<th>Non-compliant tests</th></tr></thead><tbody>';
-  for (const r of slice) {
-    const sev = r[COLS.severity];
-    const yr = r[COLS.year];
-    const facility = r[COLS.chain] || r[COLS.facility];
-    const gsoCode = r[COLS.gso_code];
-    const gsoProd = r[COLS.gso_product];
-    const productCell = gsoProd
-      ? escapeHtml(gsoProd) + (gsoCode ? ` <span class="muted">(${escapeHtml(gsoCode)})</span>` : '')
-      : r[COLS.gso_category];
-    html += '<tr><td><span class="badge ' + yearBadgeClass(yr) + '">' + yr + '</span></td>'
-      + '<td>' + (r[COLS.date] || '—') + '</td>'
-      + '<td>' + productCell + '</td>'
-      + '<td><span class="badge ' + sev + '">' + sev + '</span></td>'
-      + '<td class="ar">' + escapeHtml(facility || '—') + '</td>'
-      + '<td class="ar">' + escapeHtml(r[COLS.sector] || '—') + '</td>'
-      + '<td class="ar">' + escapeHtml(r[COLS.municipality] || '—') + '</td>'
-      + '<td class="ar">' + escapeHtml((r[COLS.failed_tests] || []).join(' · ') || '—') + '</td>'
-      + '</tr>';
-  }
-  html += '</tbody></table>';
-  if (rows.length > 200) html += '<div class="muted" style="margin-top:8px">…+' + (rows.length - 200) + ' more rows</div>';
-  document.getElementById('drilldown_table').innerHTML = html;
-}
-
 function escapeHtml(s) {
   if (s == null) return '';
   return String(s).replace(/[&<>"']/g, c =>
@@ -2445,7 +2410,6 @@ function renderAll(rows) {
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
-  renderDrilldown(rows);
 }
 
 renderAnnual();
