@@ -65,6 +65,7 @@ SECTOR_CENTROIDS: dict[str, tuple[float, float]] = {
     "West":    (24.6300, 46.6033),
     "Central": (24.6740, 46.6950),
     "South":   (24.5470, 46.7800),
+    "Special": (24.6877, 46.7219),   # private samples (العينات الخاصة) — Riyadh centre
 }
 
 
@@ -111,14 +112,17 @@ SECTOR_5_OF_RAW_SECTOR: dict[str, str | None] = {
 
 # Map sector to English label everywhere downstream. Order = canonical
 # taxonomy order used by sector selectors and KPI charts.
-SECTORS_5 = ["East", "North", "West", "Central", "South"]
+SECTORS_5 = ["East", "North", "West", "Central", "South", "Special"]
 
 
 def derive_sector_5(municipality, raw_sector):
-    """Return one of East/West/North/Central/South or None.
-    Priority: sub-municipality (precise) over sector-only label."""
+    """Return one of East/West/North/Central/South/Special or None.
+    Priority: sub-municipality (precise) over sector-only label; private
+    samples (عينة خاصة) form the Special sector."""
     if municipality is not None and not (isinstance(municipality, float) and pd.isna(municipality)):
         s = str(municipality).strip()
+        if s == "عينة خاصة":
+            return "Special"
         if s in SECTOR_5_OF_SUBMUNI:
             return SECTOR_5_OF_SUBMUNI[s]
     if raw_sector is not None and not (isinstance(raw_sector, float) and pd.isna(raw_sector)):
@@ -929,15 +933,11 @@ tbody tr:hover { background: var(--sand-100); }
 </div>
 
 <div class="filter-section">
-  <div class="section-title">Location <span class="section-note">— sector (4 cardinal) on the left, sub-municipalities (بلديات) on the right; selecting a sector narrows the sub-municipality list</span></div>
+  <div class="section-title">Location <span class="section-note">— filter by sector (قطاع): 5 sectors + Special, matching the Annual Report</span></div>
   <div class="filters">
     <div class="filter-group">
       <label>Sector (قطاع)</label>
       <div class="chips ar" id="f_sector"></div>
-    </div>
-    <div class="filter-group">
-      <label>Sub-municipality / بلدية (multi-select)</label>
-      <select id="f_municipality" multiple></select>
     </div>
   </div>
 </div>
@@ -1064,11 +1064,6 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_dow" class="chart"></div>
   </div>
 
-  <div class="card" data-needs-year="2025">
-    <h2>Sub-municipalities — total samples &amp; non-compliance <span class="year-required-badge">2025 source</span></h2>
-    <div id="chart_mun" class="chart"></div>
-  </div>
-
   <div class="card full" data-needs-year="2025">
     <h2>Repeat-offender chains <span class="year-required-badge">2025 source</span></h2>
     <div class="muted" style="margin-bottom:8px; font-size:12px">
@@ -1163,11 +1158,6 @@ function buildChips(parentId, items, stateKey, valueMap) {
       const v = valueMap ? valueMap(it) : it;
       if (state[stateKey].has(v)) state[stateKey].delete(v);
       else state[stateKey].add(v);
-      // Cascade: sector chip change → refresh sub-municipality list so
-      // only the bَلديات that belong to the active sector(s) are offered.
-      if (stateKey === 'sector' && typeof refreshMunicipalityOptions === 'function') {
-        refreshMunicipalityOptions();
-      }
       applyFilters();
     });
     parent.appendChild(el);
@@ -1301,36 +1291,8 @@ function refreshMicrobeChipCounts(rowsScope) {
   parent.appendChild(ind);
 })();
 
-const munSel = document.getElementById('f_municipality');
-// Cascade: only show sub-municipalities that belong to the currently-
-// selected sector(s). When no sector chip is active, all sub-municipalities
-// are shown.
-function refreshMunicipalityOptions() {
-  const activeSectors = state.sector;  // Set of sector names (English)
-  const selected = state.municipality;  // preserve user's current picks where still valid
-  munSel.innerHTML = '';
-  // FACETS.municipalities is the data-derived list (already excludes
-  // canonical sub-munis with 0 rows). Filtering by sector via muni_to_sector
-  // gives us only the bُدلديات that BOTH belong to the active sector AND
-  // have at least one sample.
-  FACETS.municipalities.forEach(m => {
-    const sec = FACETS.muni_to_sector[m];
-    if (activeSectors.size > 0 && (!sec || !activeSectors.has(sec))) return;
-    const o = document.createElement('option');
-    o.value = m; o.textContent = m;
-    if (selected.has(m)) o.selected = true;
-    munSel.appendChild(o);
-  });
-  // Drop any selected municipality that's no longer offered (was filtered
-  // out by the active sector).
-  const visibleValues = new Set(Array.from(munSel.options).map(o => o.value));
-  for (const v of Array.from(selected)) if (!visibleValues.has(v)) selected.delete(v);
-}
-refreshMunicipalityOptions();
-munSel.addEventListener('change', () => {
-  state.municipality = new Set(Array.from(munSel.selectedOptions).map(o => o.value));
-  applyFilters();
-});
+// Sub-municipality filter removed 2026-07-16 — geography is now sector-level
+// (5 sectors + Special), matching the Annual Report.
 
 // GSO product multi-select removed 2026-06-18: 2024-only data made it
 // inconsistent across years. Filter on GSO category (which spans both years)
@@ -1368,9 +1330,7 @@ document.getElementById('btn_reset').addEventListener('click', () => {
   document.getElementById('f_date_to').value = FACETS.date_max;
   document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('.toggle').forEach(t => t.classList.remove('active'));
-  Array.from(munSel.options).forEach(o => o.selected = false);
   Array.from(gsoProdSel.options).forEach(o => o.selected = false);
-  refreshMunicipalityOptions();  // restore full sub-municipality list after sector clear
   applyFilters();
 });
 
@@ -1389,7 +1349,6 @@ const CHIP_FILTERS = [
   { state_key: 'severity',     col_key: 'severity' },
   { state_key: 'sample_type',  col_key: 'sample_type' },
   { state_key: 'gso_category', col_key: 'gso_category' },
-  { state_key: 'municipality', col_key: 'municipality' },
   { state_key: 'gso_product',  col_key: 'gso_code' },
 ];
 
@@ -1608,9 +1567,24 @@ function renderKpis(rowsBase) {
   const mostContamCat = allNonCompliant
     ? (() => { const v = rankByVolume(COLS.sample_type, rows); return {...v, _byVolume: true}; })()
     : rankByRate(COLS.sample_type, 30);   // ≥30 samples for sample-type ranking
-  const highestRiskMun = allNonCompliant
-    ? (() => { const v = rankByVolume(COLS.municipality, rows); return {...v, _byVolume: true}; })()
-    : rankByRate(COLS.municipality, 30);  // ≥30 samples for sub-muni ranking
+  // Highest-risk sector = the sector contributing the MOST non-compliant
+  // samples (matches the Annual Report's framing where Central — the largest
+  // sector — is the top risk). Tie-break by total volume. Min 30 samples.
+  const highestRiskSector = (() => {
+    const tot = new Map(), fail = new Map();
+    for (const r of rowsBase) {
+      const k = r[COLS.sector]; if (!k) continue;
+      tot.set(k, (tot.get(k) || 0) + 1);
+      if (r[COLS.failure] === 1) fail.set(k, (fail.get(k) || 0) + 1);
+    }
+    let best = null, bF = -1, bT = -1;
+    for (const [k, t] of tot) {
+      if (t < 30) continue;
+      const f = fail.get(k) || 0;
+      if (f > bF || (f === bF && t > bT)) { bF = f; bT = t; best = k; }
+    }
+    return best ? { key: best, fail: bF, total: bT, rate: 100 * bF / bT } : { key: null };
+  })();
   const highestRiskChain = rankByVolume(COLS.chain, rows);     // always by volume
   const mostFreqPathogen = rankOrganism(t => PATHOGEN_SET.has(t));
 
@@ -1690,12 +1664,11 @@ function renderKpis(rowsBase) {
     // visually with the "Top 10 most-contaminated subtypes" list below
     // (specific Arabic sample names like تبولة, مسحة ثلاجة). The list is
     // the better single source of truth — same metric, better granularity.
-    { label: 'Highest-risk sub-municipality',
-      value: '<span style="font-size:14px; font-weight:600">' + truncate(highestRiskMun.key, 30) + '</span>',
-      sub: highestRiskMun.key
-        ? (highestRiskMun._byVolume
-            ? fmtNum(highestRiskMun.count) + ' non-compliant samples (filter excludes compliant)'
-            : highestRiskMun.rate.toFixed(1) + '% non-compliant · ' + highestRiskMun.fail + '/' + highestRiskMun.total + ' samples')
+    { label: 'Highest-risk sector',
+      value: '<span style="font-size:14px; font-weight:600">' + truncate(highestRiskSector.key, 30) + '</span>',
+      sub: highestRiskSector.key
+        ? fmtNum(highestRiskSector.fail) + ' non-compliant of ' + fmtNum(highestRiskSector.total)
+          + ' (' + highestRiskSector.rate.toFixed(1) + '%)'
         : 'no data',
       cls: '' },
     { label: 'Highest-risk chain',
@@ -2179,25 +2152,8 @@ function renderTestsDrilldown(organism) {
     </div>`;
 }
 
-function renderMunicipality(rows) {
-  const byMun = groupBy(rows.filter(r => r[COLS.municipality]), r => r[COLS.municipality]);
-  const items = Array.from(byMun.entries()).map(([m, list]) => {
-    const inv = list.filter(r => r[COLS.failure] === 1).length;
-    const byYear = {};
-    for (const r of list) {
-      const y = r[COLS.year];
-      byYear[y] = (byYear[y] || 0) + 1;
-    }
-    return { mun: m, total: list.length, inv, byYear, rate: pct(inv, list.length) };
-  });
-  items.sort((a, b) => b.total - a.total);
-  if (!items.length) {
-    Plotly.purge('chart_mun');
-    document.getElementById('chart_mun').innerHTML = '<div class="muted" style="padding:30px">No municipality data in current view.</div>';
-    return;
-  }
-  _renderVolumeVsRate('chart_mun', items, 'mun', { tickangle: -25, margin: { l: 50, r: 60, t: 10, b: 90 } });
-}
+// renderMunicipality removed 2026-07-16 — the sub-municipality chart is
+// superseded by the sector chart (renderSector).
 
 const MAP_CENTROIDS = FACETS.map_centroids;
 let mapMetric = 'failure_rate';   // 'failure_rate' | 'pathogen_rate' | 'volume'
@@ -2232,39 +2188,24 @@ function _labelColor() {
 }
 
 function renderMap(rows) {
-  // Aggregate by sub-municipality (type=بلدية) and by sector (type=قطاع).
-  // Every canonical sub-municipality is seeded with a zero entry so the full
-  // 16-district / 5-sector geography is always visible, regardless of filters.
-  const subAgg = new Map();
-  for (const name of Object.keys(MAP_CENTROIDS.municipalities)) {
-    subAgg.set(name, { total: 0, inv: 0, path: 0 });
-  }
+  // Sector-level bubbles (2026-07-16): every row is placed on its derived sector
+  // (5 sectors + Special). The 16-sub-municipality layer was removed to match
+  // the Annual Report's geography. Every sector is seeded so the footprint is
+  // constant; only bubble size/colour responds to filters.
   const secAgg = new Map();
+  for (const name of Object.keys(MAP_CENTROIDS.sectors)) {
+    secAgg.set(name, { total: 0, inv: 0, path: 0 });
+  }
   for (const r of rows) {
-    const m = r[COLS.municipality];
-    const mt = r[COLS.mun_type];
     const sec = r[COLS.sector];
-    const isInv = r[COLS.failure] === 1 ? 1 : 0;
-    const isPath = r[COLS.pathogen] === 1 ? 1 : 0;
-    if (mt === 'بلدية' && m && MAP_CENTROIDS.municipalities[m]) {
-      const cur = subAgg.get(m);
-      cur.total++; cur.inv += isInv; cur.path += isPath;
-    } else if (mt === 'قطاع' && sec && MAP_CENTROIDS.sectors[sec]) {
-      const cur = secAgg.get(sec) || { total: 0, inv: 0, path: 0 };
-      cur.total++; cur.inv += isInv; cur.path += isPath;
-      secAgg.set(sec, cur);
-    }
+    if (!sec || !MAP_CENTROIDS.sectors[sec]) continue;
+    const cur = secAgg.get(sec);
+    cur.total++;
+    cur.inv += r[COLS.failure] === 1 ? 1 : 0;
+    cur.path += r[COLS.pathogen] === 1 ? 1 : 0;
   }
 
-  // Bounds always include every canonical sub-municipality + any sector-only
-  // bubbles we created. The geographic footprint is constant — only bubble
-  // size/colour responds to filters.
   const allLats = [], allLons = [], allTotals = [];
-  for (const name of Object.keys(MAP_CENTROIDS.municipalities)) {
-    allLats.push(MAP_CENTROIDS.municipalities[name][0]);
-    allLons.push(MAP_CENTROIDS.municipalities[name][1]);
-    allTotals.push(subAgg.get(name).total);
-  }
   for (const [name, stats] of secAgg) {
     allLats.push(MAP_CENTROIDS.sectors[name][0]);
     allLons.push(MAP_CENTROIDS.sectors[name][1]);
@@ -2330,12 +2271,9 @@ function renderMap(rows) {
     };
   }
 
-  // Bubbles-only (density heatmap removed per user direction 2026-06-14).
-  // Always renders every canonical sub-municipality (zero-data ones shown
-  // faded) so every sector is visually represented.
+  // One bubble per sector (5 + Special); zero-data sectors shown faded.
   const traces = [];
-  traces.push(buildBubbleTrace(subAgg, MAP_CENTROIDS.municipalities, 'sub-municipality (بلدية)'));
-  if (secAgg.size) traces.push(buildBubbleTrace(secAgg, MAP_CENTROIDS.sectors, 'sector-only (قطاع)'));
+  traces.push(buildBubbleTrace(secAgg, MAP_CENTROIDS.sectors, 'sector (قطاع)'));
 
   // Fit ALL visible bubbles with light padding. No weighting / percentile —
   // every bubble must be visible. Constant `ZOOM_K` calibrated empirically so
@@ -2648,7 +2586,6 @@ function renderAll(rows) {
   renderYoY(rows);
   renderSector(rows);
   renderGsoCategory(rows);
-  renderMunicipality(rows);
   renderChains(rows);
   renderDow(rows);
   renderRepeatTable(rows);
