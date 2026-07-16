@@ -29,4 +29,11 @@ check(C.name_group("", C.W_POTABLE, "bot-0007-r01"), "مياه معبأة", "nam
 # #6 — generic suffix/number stripping
 check(C.name_group("حليب سادة 3", C.C_DAIRY, "milk-9"), "حليب سادة", "strip trailing number")
 
+# regression: unlisted fish species must be preserved (not mangled by marker regex)
+check(C.name_group("سمك صافي", C.C_FISH, "f-1"), "سمك صافي", "unlisted fish preserved")
+# marker «م.ك» stripped while «سمك» survives
+check(C.name_group("سمك صافي م.ك", C.C_FISH, "f-2"), "سمك صافي", "marker stripped, سمك kept")
+# «سمك» inside a non-fish category name must survive the generic path
+check(C.name_group("بهارات سمك", C.C_SPICE, "s-1"), "بهارات سمك", "سمك in spice name preserved")
+
 print("ALL PASS")

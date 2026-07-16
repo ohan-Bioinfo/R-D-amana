@@ -336,7 +336,7 @@ def _classify_core(section, raw_category, sample_name, sample_id=None):
 
 # --------------------------------------------------------- name-group tables
 # Re-test / unit markers the lab appends: م.ك / م ك / م-ك / م - ك.
-_MARKER_RE  = re.compile(r"م[\s.\-]*ك\b")
+_MARKER_RE  = re.compile(r"م[\s.\-]+ك\b")
 _DIGIT_RE   = re.compile(r"\d+")
 _PRIVATE_RE = re.compile(r"عين[ةه]\s*خاص[ةه]")
 
