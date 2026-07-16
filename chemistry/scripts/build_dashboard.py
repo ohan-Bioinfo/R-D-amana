@@ -783,20 +783,9 @@ try {
   }
   function totalTestsThisFilter() { return testCountsScope().total; }
 
-  // Apply year + search filter to current section's rows. When the synthetic
-  // "All sections" view is active, rows include a trailing _section element.
-  function filteredRows() {
-    let rows;
-    if (isAllSections()) {
-      rows = getCombinedRows();
-    } else {
-      rows = DATA.sections[currentSection].rows;
-    }
-    if (currentYear !== "all") {
-      const y = parseInt(currentYear, 10);
-      rows = rows.filter(r => r[COLS.year] === y);
-    }
-    // Compliance chip: two-state; if both selected → no filter
+  // Scope filters (compliance / sector / GSO / search) — NOT year, NOT section
+  // selection. Reused so per-section views can filter their own row arrays.
+  function applyScopeFilters(rows) {
     if (activeCompliance.size > 0) {
       const wantC = activeCompliance.has('Compliant');
       const wantN = activeCompliance.has('Non-compliant');
@@ -809,11 +798,9 @@ try {
         });
       }
     }
-    // Sector chip (the dashboard's `municipality` slot holds the sector value)
     if (activeSectors.size > 0) {
       rows = rows.filter(r => r[COLS.municipality] && activeSectors.has(r[COLS.municipality]));
     }
-    // GSO 1016 category chip
     if (activeGso.size > 0) {
       rows = rows.filter(r => r[COLS.gso_category] && activeGso.has(r[COLS.gso_category]));
     }
@@ -829,6 +816,22 @@ try {
       );
     }
     return rows;
+  }
+
+  // Apply year + search filter to current section's rows. When the synthetic
+  // "All sections" view is active, rows include a trailing _section element.
+  function filteredRows() {
+    let rows;
+    if (isAllSections()) {
+      rows = getCombinedRows();
+    } else {
+      rows = DATA.sections[currentSection].rows;
+    }
+    if (currentYear !== "all") {
+      const y = parseInt(currentYear, 10);
+      rows = rows.filter(r => r[COLS.year] === y);
+    }
+    return applyScopeFilters(rows);
   }
   function rowSection(r) {
     // For "All sections" rows we append section key at the end.
@@ -1500,10 +1503,14 @@ try {
       const [y1, y2] = years;
       // First: per-section table (using EVENTS per panel — keeps each panel's
       // pass/fail rate visible) plus an aggregate row for total samples.
+      // #9 — respect active scope filters at the per-section EVENT level.
+      // Combined rows can't be split back per section (a sample may belong to
+      // several), so filter each section's own rows directly.
       const tr = Object.entries(DATA.sections).map(([key, sec]) => {
         if (!sec.years.includes(y1) || !sec.years.includes(y2)) return '';
-        const r1 = sec.rows.filter(r => r[COLS.year] === y1);
-        const r2 = sec.rows.filter(r => r[COLS.year] === y2);
+        const secRows = applyScopeFilters(sec.rows);
+        const r1 = secRows.filter(r => r[COLS.year] === y1);
+        const r2 = secRows.filter(r => r[COLS.year] === y2);
         const i1 = r1.filter(r => r[COLS.is_valid] === 0).length;
         const i2 = r2.filter(r => r[COLS.is_valid] === 0).length;
         const p1 = r1.length ? i1 * 100 / r1.length : 0;
@@ -1524,8 +1531,8 @@ try {
         </tr>`;
       }).join('');
       // Aggregate total-sample row at the bottom.
-      const a1 = getCombinedRows().filter(r => r[COLS.year] === y1);
-      const a2 = getCombinedRows().filter(r => r[COLS.year] === y2);
+      const a1 = filteredRows().filter(r => r[COLS.year] === y1);
+      const a2 = filteredRows().filter(r => r[COLS.year] === y2);
       const ai1 = a1.filter(r => r[COLS.is_valid] === 0).length;
       const ai2 = a2.filter(r => r[COLS.is_valid] === 0).length;
       const ap1 = a1.length ? ai1 * 100 / a1.length : 0;
@@ -1548,9 +1555,10 @@ try {
     const sec = DATA.sections[currentSection];
     if (sec.years.length < 2) { card.style.display = 'none'; return; }
     card.style.display = '';
+    const fr = filteredRows();   // #9 — YoY must reflect compliance/sector/GSO/search
     const stats = {};
     sec.years.forEach(y => {
-      const sub = sec.rows.filter(r => r[COLS.year] === y);
+      const sub = fr.filter(r => r[COLS.year] === y);
       const inv = sub.filter(r => r[COLS.is_valid] === 0).length;
       stats[y] = {total: sub.length, invalid: inv,
                   pct: sub.length ? inv * 100 / sub.length : 0};
