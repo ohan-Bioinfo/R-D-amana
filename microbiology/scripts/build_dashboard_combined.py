@@ -15,8 +15,6 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
-from annual_report import load_all_annual_figures
-
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_2025 = ROOT / "schemas" / "lab_data_2025_v1.yaml"
 OUT_HTML = ROOT / "reports" / "microbiology_dashboard.html"
@@ -481,28 +479,6 @@ def build_facets(df: pd.DataFrame) -> dict:
     pathogen_set = set(canonical_pathogens)
     indicator_set = set(canonical_indicators)
 
-    # Annual Report 2025 total tests per organism (from Annual Report 2025.xlsx,
-    # `Test` sheet). Used to label chips with "N failures / M tests" so a "0"
-    # chip is clearly "0 failed out of 2,241 tested", not "we forgot this
-    # organism". Keys = our canonical Arabic spellings; values = total tests
-    # the lab ran in 2025.
-    AR_TESTS_2025 = {
-        'العدد الكلي للبكتيريا':   6645,
-        'باسيلس سيريس':            1340,
-        'كامبيلوباكتر':             365,
-        'كلوستريديوم بيرفرنجنز':   1356,
-        'كلوستريديوم بوتولينوم':     44,
-        'كوليفورم':                 778,
-        'ايشيريشيا كولاي':         7342,
-        'ايشيريشيا كولاي O157':    1816,
-        'انتيروباكتريسي':          3784,
-        'الليستيريا':              2241,
-        'سيدوموناس':                332,
-        'السالمونيلا':             8305,
-        'استافيلوكوكس اورياس':     7250,
-        'فيبريو':                   150,
-        'الخمائر والاعفان':        4561,
-    }
     # Count failures per organism (pathogen + indicator). DEDUPE per-row
     # using a set, so a row that listed two spelling variants of the same
     # organism (e.g. 'خمائر و اعفان' + 'خمائر واعفان') counts once — matching
@@ -1005,14 +981,6 @@ tbody tr:hover { background: var(--sand-100); }
 
 </div>
 
-<section id="annual-band" class="card" style="margin:16px 0">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
-    <h2 style="margin:0">Official Annual Figures <span class="section-note">(per-year reference · click a year)</span></h2>
-    <div id="annual-tabs" style="display:flex; gap:6px"></div>
-  </div>
-  <div id="annual-body"></div>
-</section>
-
 <footer>Generated from data&lt;YEAR&gt;.parquet (auto-discovered) — <span id="meta_rows">…</span> rows · date range <span id="meta_range">…</span></footer>
 
 <script>
@@ -1021,7 +989,6 @@ const COLS = {};
 PAYLOAD.data.cols.forEach((c, i) => { COLS[c] = i; });
 const ROWS = PAYLOAD.data.rows;
 const FACETS = PAYLOAD.facets;
-const ANNUAL = PAYLOAD.annual || {};
 
 // Severity = 'none' was dropped at data-load (user direction 2026-06-14).
 // Only the 3 actual severity tiers remain. Colors picked for strong visual
@@ -1444,9 +1411,8 @@ function renderKpis(rowsBase) {
   })();
   const highestRiskChain = rankByVolume(COLS.chain, rows);     // always by volume
   // Top failing test across ALL tests (pathogens + indicators), by number of
-  // failing samples — so the top test is العد الكلي (Total Count), matching the
-  // Annual Report, not just the top pathogen. The full rate-ranked list lives in
-  // the Official Annual Figures band.
+  // failing samples — so the top test is العد الكلي (Total Count), not just the
+  // top pathogen.
   const topFailingTest = (() => {
     const fail = new Map();
     for (const r of rowsBase) {
@@ -1499,9 +1465,8 @@ function renderKpis(rowsBase) {
         ? fmtNum(nonCompliant) + ' samples · ' + testsPerNcSample.toFixed(1) + ' failed tests per non-compliant sample'
         : 'no failed tests',
       cls: '' },
-    // Interactive test-count KPI removed 2026-07-16 — exact test counts now live
-    // in the Official Annual Figures band (the estimate could not compete
-    // honestly, and 2025 has no per-test source).
+    // Interactive test-count KPI removed 2026-07-16 — the estimate could not
+    // compete honestly (2025 has no per-test source).
     // ── Rankings (3 cards) ──────────────────────────────────
     // "Most contaminated sample type" KPI removed 2026-06-18: it was a
     // broad GSO-category single pick (e.g. "Dairy Products") that conflicted
@@ -2335,81 +2300,6 @@ function escapeHtml(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// ── Tier 1: Official Annual Figures (static, sourced from the Annual Report) ──
-let annualYear = null;
-function renderAnnual() {
-  const years = Object.keys(ANNUAL).map(Number).sort((a,b)=>b-a);
-  if (!years.length) { document.getElementById('annual-band').style.display='none'; return; }
-  if (annualYear === null || !years.includes(annualYear)) annualYear = years[0];
-  document.getElementById('annual-tabs').innerHTML = years.map(y =>
-    `<div class="chip${y===annualYear?' active':''}" data-annual-year="${y}">${y}</div>`).join('');
-  const b = ANNUAL[String(annualYear)] || {};
-  const n = v => (v==null?'—':Number(v).toLocaleString());
-  const kpi = (label,val,sub)=>`<div class="kpi"><div class="label">${label}</div><div class="value">${val}</div><div class="sub">${sub||''}</div></div>`;
-  const isReport = b.source === 'Annual Report';
-  const kpis = [
-    kpi('Total samples', n(b.total_samples), 'MICRO'),
-    kpi('Compliance rate', b.compliance_rate!=null? b.compliance_rate.toFixed(2)+'%':'—', n(b.compliant)+' compliant'),
-    kpi('Total tests', n(b.total_tests), isReport?'test runs (incl. replicates)':'individual test results'),
-    kpi('Non-compliant tests', n(b.non_compliant_tests), b.total_tests? (100*b.non_compliant_tests/b.total_tests).toFixed(1)+'% of tests':''),
-  ].join('');
-  const srcNote = isReport
-    ? 'source: Annual Report ' + annualYear + ' — official figures'
-    : 'source: our cleaned data — computed from our parquet; does NOT match the official ' + annualYear + ' report';
-  document.getElementById('annual-body').innerHTML =
-    `<div class="section-note" style="margin:2px 0 6px; color:${isReport?'var(--muted)':'#92400e'}">${srcNote}</div>
-     <div class="kpis" style="margin:12px 0">${kpis}</div>
-     <div style="display:flex; gap:24px; flex-wrap:wrap">
-       <div style="flex:1; min-width:320px"><div class="section-note" style="margin-bottom:4px">Failure rate by test (ranked)</div>
-         <div id="annual_pertest" style="height:320px"></div></div>
-       <div style="flex:1; min-width:280px"><div class="section-note" style="margin-bottom:4px">Samples collected by sector (report basis)</div>
-         <div id="annual_sector" style="height:320px"></div></div>
-     </div>`;
-
-  // Per-test failure rate — horizontal bars for tests with ≥1 failure, ranked.
-  const pt = (b.per_test||[]).filter(t => t.invalid > 0).slice().sort((a,b2)=>a.rate-b2.rate);
-  Plotly.react('annual_pertest', [{
-    type:'bar', orientation:'h',
-    x: pt.map(t=>t.rate), y: pt.map(t=>t.name_ar),
-    marker:{ color: pt.map(t=> t.rate>=20?'#dc2626':t.rate>=10?'#f97316':'#facc15') },
-    text: pt.map(t=>t.rate.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
-    customdata: pt.map(t=>[t.invalid, t.total]),
-    hovertemplate:'<b>%{y}</b><br>%{customdata[0]:,} / %{customdata[1]:,} invalid · %{x:.1f}%<extra></extra>',
-  }], {
-    paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
-    font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
-    margin:{ l:160, r:50, t:6, b:28 },
-    xaxis:{ gridcolor:'#e5e7eb', ticksuffix:'%', rangemode:'tozero' },
-    yaxis:{ automargin:true },
-  }, PLOTLY_CONFIG);
-
-  // Samples by sector — horizontal bars (empty for 2024, which has no geography).
-  const sc = (b.sectors||[]).slice().sort((a,b2)=>a.samples-b2.samples);
-  if (!sc.length) {
-    Plotly.purge('annual_sector');
-    document.getElementById('annual_sector').innerHTML =
-      '<div class="muted" style="padding:20px; font-size:12px">No geography in this source — 2024 samples have no sector.</div>';
-  } else {
-    Plotly.react('annual_sector', [{
-      type:'bar', orientation:'h',
-      x: sc.map(s=>s.samples), y: sc.map(s=>s.name_ar),
-      marker:{ color:'#3b82f6' },
-      text: sc.map(s=>s.samples.toLocaleString()+' · '+s.pct.toFixed(1)+'%'), textposition:'outside', cliponaxis:false,
-      hovertemplate:'<b>%{y}</b><br>%{x:,} samples<extra></extra>',
-    }], {
-      paper_bgcolor:'rgba(0,0,0,0)', plot_bgcolor:'rgba(0,0,0,0)',
-      font:{ color:'#1c2742', size:11, family:'Segoe UI, Tahoma, sans-serif' },
-      margin:{ l:120, r:80, t:6, b:28 },
-      xaxis:{ gridcolor:'#e5e7eb', rangemode:'tozero' },
-      yaxis:{ automargin:true },
-    }, PLOTLY_CONFIG);
-  }
-}
-document.getElementById('annual-tabs').addEventListener('click', e => {
-  const t = e.target.closest('[data-annual-year]'); if (!t) return;
-  annualYear = Number(t.getAttribute('data-annual-year')); renderAnnual();
-});
-
 function renderAll(rows) {
   // Single filter tier (2026-07-16): every figure derives from the one filtered
   // set. rowsActive (severity events only) is a local derivation used solely by
@@ -2436,7 +2326,6 @@ function renderAll(rows) {
   renderTests(rows);
 }
 
-renderAnnual();
 applyFilters();
 </script>
 </div><!-- /.page-body -->
@@ -2480,7 +2369,6 @@ def main() -> None:
     payload = {
         "data": build_data(combined),
         "facets": build_facets(combined),
-        "annual": load_all_annual_figures(ROOT),   # Tier-1 official figures
     }
     from datetime import datetime
     import base64
