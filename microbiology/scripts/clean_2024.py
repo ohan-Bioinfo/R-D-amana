@@ -623,6 +623,13 @@ def aggregate_to_wide(long_df: pd.DataFrame) -> pd.DataFrame:
             "year": YEAR,
         })
     wide = pd.DataFrame(out_rows)
+    # De-duplicate cross-file re-exports: the same real barcode appearing in >1
+    # source file (a workbook re-saved under a second name). Keep the first;
+    # never dedup null barcodes — each is a distinct un-barcoded sample. (2026-07-16)
+    _dup = wide["barcode"].notna() & wide["barcode"].duplicated(keep="first")
+    if int(_dup.sum()):
+        print(f"  de-duplicated {int(_dup.sum())} rows with a repeated barcode")
+        wide = wide[~_dup].reset_index(drop=True)
     # Cast types to align with 2025.
     wide["is_valid"] = pd.array(wide["is_valid"].tolist(), dtype="boolean")
     wide["is_failure"] = pd.array(wide["is_failure"].tolist(), dtype="boolean")
