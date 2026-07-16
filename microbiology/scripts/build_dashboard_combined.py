@@ -262,25 +262,24 @@ DATA_COLS = [
     "year_month",    # 2
     "quarter",       # 3
     "dow",           # 4
-    "sample_type",   # 5
-    "chain",         # 6
-    "facility",      # 7
-    "municipality",  # 8
-    "mun_type",      # 9
-    "sector",        # 10
-    "valid",         # 11
-    "failure",       # 12
-    "pathogen",      # 13
-    "severity",      # 14
-    "n_failed",      # 15
-    "ro_count",      # 16
-    "failed_tests",  # 17
-    "gso_category",  # 18  English category name (e.g., 'Dairy Products')
-    "gso_product",   # 19  English product name (e.g., 'Hard and semi–hard cheese')
-    "gso_code",      # 20  canonical code (e.g., 'A-13')
-    "panel_complete",# 21  True/False/null — was the full GSO panel run? (2024-only)
-    "lab_disagree",  # 22  True/False/null — does lab verdict disagree with GSO limit?
-    "sample_name",   # 23  Specific sample name (e.g. تبولة, جبنة فيتا) for subtype rankings
+    "chain",         # 5
+    "facility",      # 6
+    "municipality",  # 7
+    "mun_type",      # 8
+    "sector",        # 9
+    "valid",         # 10
+    "failure",       # 11
+    "pathogen",      # 12
+    "severity",      # 13
+    "n_failed",      # 14
+    "ro_count",      # 15
+    "failed_tests",  # 16
+    "gso_category",  # 17  English category name (e.g., 'Dairy Products') — also the sample vocabulary
+    "gso_product",   # 18  English product name (e.g., 'Hard and semi–hard cheese')
+    "gso_code",      # 19  canonical code (e.g., 'A-13')
+    "panel_complete",# 20  True/False/null — was the full GSO panel run? (2024-only)
+    "lab_disagree",  # 21  True/False/null — does lab verdict disagree with GSO limit?
+    "sample_name",   # 22  Specific sample name (e.g. تبولة, جبنة فيتا) for subtype rankings
 ]
 
 
@@ -373,19 +372,14 @@ def build_data(df: pd.DataFrame) -> dict:
         # via the data_quality_flags column already.
         if gso_cat is None:
             gso_cat = 'Miscellaneous Foods'
-        # Unify sample_type with GSO category (user direction 2026-06-14).
-        # Every year now reports its sample under the GSO 1016 category name,
-        # so the heatmap, filters and sorting share one vocabulary across
-        # 2023 / 2024 / 2025. Rows that have no GSO category fall back to
-        # the raw sample_type code (rare, mostly 2023 rows missing GSO codes).
-        sample_type_val = gso_cat or _val(r.sample_type)
+        # The GSO category IS the sample vocabulary now — one column (was
+        # duplicated as `sample_type`; consolidated 2026-07-16).
         rows.append([
             int(r.year),
             date_str,
             _val(r.year_month),
             int(r.quarter) if pd.notna(r.quarter) else None,
             int(r.day_of_week) if pd.notna(r.day_of_week) else None,
-            sample_type_val or "Miscellaneous Foods",
             _val(r.facility_chain),
             _val(r.facility_name),
             _val(r.municipality),
@@ -440,8 +434,6 @@ def build_facets(df: pd.DataFrame) -> dict:
             if mapped:
                 cat_counts[mapped] = cat_counts.get(mapped, 0) + int(n)
     gso_cats = [c for c, _ in sorted(cat_counts.items(), key=lambda x: -x[1])]
-    # sample_types == gso_cats (same vocabulary, same ordering by volume).
-    sample_types = list(gso_cats)
     # GSO products list, sorted alphabetically, with code in label for clarity.
     gso_products = []
     if "gso_product_name_en" in df.columns and "gso_code_canonical" in df.columns:
@@ -542,7 +534,6 @@ def build_facets(df: pd.DataFrame) -> dict:
     return {
         "years": years,
         "months": months,
-        "sample_types": sample_types,
         "severity": severity,
         "sectors": sectors,
         "test_classes": test_classes,
@@ -1274,7 +1265,7 @@ const SHOW_ONLY_TOGGLES = [
 // `sample_type` now carries the GSO category name, so the check is on that.
 const EXCLUDE_TOGGLES = [
   { state_key: 'exclude_raw_meat',
-    test: r => r[COLS.sample_type] === 'Meat, Poultry and its Products' },
+    test: r => r[COLS.gso_category] === 'Meat, Poultry and its Products' },
 ];
 
 function applyFilters() {
@@ -1779,11 +1770,11 @@ function renderHeatmap(rows) {
       '<div class="muted" style="padding:30px">No samples in current view.</div>';
     return;
   }
-  const allTypes = FACETS.sample_types;
-  const colTotals = allTypes.map(t => rows.filter(r => r[COLS.sample_type] === t).length);
+  const allTypes = FACETS.gso_categories;
+  const colTotals = allTypes.map(t => rows.filter(r => r[COLS.gso_category] === t).length);
   const types = allTypes.filter((_, i) => colTotals[i] > 0);
   const z = SEVERITY_ORDER.map(sev =>
-    types.map(t => rows.filter(r => r[COLS.severity] === sev && r[COLS.sample_type] === t).length)
+    types.map(t => rows.filter(r => r[COLS.severity] === sev && r[COLS.gso_category] === t).length)
   );
   // Short display labels for long GSO category names so the x-axis stays
   // readable. Hover still shows the full name.
@@ -2369,7 +2360,7 @@ function renderDrilldown(rows) {
     const gsoProd = r[COLS.gso_product];
     const productCell = gsoProd
       ? escapeHtml(gsoProd) + (gsoCode ? ` <span class="muted">(${escapeHtml(gsoCode)})</span>` : '')
-      : r[COLS.sample_type];
+      : r[COLS.gso_category];
     html += '<tr><td><span class="badge ' + yearBadgeClass(yr) + '">' + yr + '</span></td>'
       + '<td>' + (r[COLS.date] || '—') + '</td>'
       + '<td>' + productCell + '</td>'
