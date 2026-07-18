@@ -984,8 +984,9 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>Top 10 failed tests (microbes)</h2>
-    <div class="card-sub">Failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. In a 2025-only view each bar also shows the official Annual-Report <b>test</b>-level non-compliant count (test-level &ge; sample-level, since a re-tested sample is counted per test).</div>
+    <div class="card-sub">Failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. In a 2025-only view each bar also shows the official Annual-Report <b>test</b>-level non-compliant / total count (test-level &ge; sample-level, since a re-tested sample is counted per test); the table below gives the full total / compliant / non-compliant breakdown for every organism.</div>
     <div id="top-microbes" style="overflow:auto"></div>
+    <div id="official-test-table" style="margin-top:16px; overflow:auto"></div>
   </div>
 
   <div class="card full">
@@ -1929,14 +1930,16 @@ function renderTopMicrobes(rows) {
     marker: { color: ordered.map(it => MICROBE_COLORS[it.org] || (it.path ? '#dc2626' : '#0891b2')) },
     text: ordered.map(it => {
       const o = offOf(it);
-      return o ? it.n.toLocaleString() + '  · official ' + o.nc.toLocaleString() + ' tests'
+      return o ? it.n.toLocaleString() + '  · official ' + o.nc.toLocaleString() + '/'
+                 + o.total.toLocaleString() + ' tests NC'
                : it.n.toLocaleString() + (it.path ? '  · pathogen' : '  · indicator');
     }),
     textposition: 'outside', cliponaxis: false,
     customdata: ordered.map(it => {
       const o = offOf(it);
-      return [o ? 'Official 2025: ' + o.nc.toLocaleString() + ' non-compliant of '
-                  + o.total.toLocaleString() + ' tests (' + (100 * o.nc / o.total).toFixed(1) + '%)'
+      return [o ? 'Official 2025 (test-level): ' + o.total.toLocaleString() + ' total · '
+                  + (o.total - o.nc).toLocaleString() + ' compliant · '
+                  + o.nc.toLocaleString() + ' non-compliant (' + (100 * o.nc / o.total).toFixed(1) + '% NC)'
                 : (it.path ? 'pathogen' : 'indicator')];
     }),
     hovertemplate: '<b>%{y}</b><br>%{x:,} failing samples<br>%{customdata[0]}<extra></extra>',
@@ -1951,6 +1954,44 @@ function renderTopMicrobes(rows) {
   const _tmNode = document.getElementById('top-microbes');
   _tmNode.removeAllListeners && _tmNode.removeAllListeners('plotly_click');
   _tmNode.on('plotly_click', e => crossFilter('f_microbe', 'microbe', e.points[0].y));
+}
+
+// Official 2025 Annual-Report test-level breakdown — every organism (incl. the
+// zero-non-compliant ones that never appear as failing-sample bars above), with
+// Total / Compliant / Non-compliant / %NC. Shown only in a 2025-only view; the
+// numbers are the official test-level record (not filter-reactive), so a clear
+// note flags that. Compliant = Total − Non-compliant.
+function renderOfficialTestTable() {
+  const node = document.getElementById('official-test-table');
+  if (!node) return;
+  const yrs = Array.from(state.years);
+  const only2025 = yrs.length === 1 && Number(yrs[0]) === 2025;
+  if (!only2025) { node.innerHTML = ''; return; }
+  const entries = Object.values(OFFICIAL_TESTS_2025).slice().sort((a, b) => b.total - a.total);
+  let tot = 0, comp = 0, nc = 0;
+  for (const e of entries) { tot += e.total; comp += (e.total - e.nc); nc += e.nc; }
+  const body = entries.map(e => {
+    const c = e.total - e.nc;
+    const rate = e.total ? (100 * e.nc / e.total).toFixed(1) : '0.0';
+    const zero = e.nc === 0 ? ' style="color:var(--muted)"' : '';
+    return '<tr' + zero + '><td style="text-align:left">' + escapeHtml(e.en) + '</td>'
+         + '<td style="text-align:right">' + e.total.toLocaleString() + '</td>'
+         + '<td style="text-align:right">' + c.toLocaleString() + '</td>'
+         + '<td style="text-align:right">' + e.nc.toLocaleString() + '</td>'
+         + '<td style="text-align:right">' + rate + '%</td></tr>';
+  }).join('');
+  node.innerHTML =
+    '<div class="card-sub" style="margin-bottom:6px">Official 2025 Annual-Report <b>test</b>-level totals — all 15 organisms, including those with zero non-compliant results (greyed, never shown as bars). Compliant = Total − Non-compliant. Reference figures — not affected by the filters above.</div>'
+    + '<table style="width:100%; border-collapse:collapse; font-size:12px">'
+    + '<thead><tr><th style="text-align:left">Test</th><th style="text-align:right">Total</th><th style="text-align:right">Compliant</th><th style="text-align:right">Non-compliant</th><th style="text-align:right">% NC</th></tr></thead>'
+    + '<tbody>' + body + '</tbody>'
+    + '<tfoot><tr style="font-weight:600">'
+    + '<td style="text-align:left">Total</td>'
+    + '<td style="text-align:right">' + tot.toLocaleString() + '</td>'
+    + '<td style="text-align:right">' + comp.toLocaleString() + '</td>'
+    + '<td style="text-align:right">' + nc.toLocaleString() + '</td>'
+    + '<td style="text-align:right">' + (100 * nc / tot).toFixed(1) + '%</td></tr></tfoot>'
+    + '</table>';
 }
 
 // Distinct colour per microbe — picked to stay readable on the light theme
@@ -1969,20 +2010,31 @@ const MICROBE_COLORS = {
 };
 
 // Official 2025 per-test record (Annual Report "Test" sheet), keyed by our
-// canonical organism name → { total tests run, non-compliant tests }. Used as a
-// reference on the failed-microbes chart when the view is 2025-only. Note the
+// canonical organism name → { en label, total tests run, non-compliant tests }.
+// Compliant is derived (total − nc). Used on the failed-microbes chart AND the
+// official test-level breakdown table when the view is 2025-only. Note the
 // official counts are TEST-level (a sample re-tested for the same organism is
 // counted each time); our bars are SAMPLE-level, so ours read a bit lower.
+// All 15 organisms sum to 46,309 total / 42,098 compliant / 4,211 non-compliant.
 const OFFICIAL_TESTS_2025 = {
-  'العدد الكلي للبكتيريا': { total: 6645, nc: 1514 },  // Aerobic plate count
-  'استافيلوكوكس اورياس':  { total: 7250, nc: 862 },   // Staphylococcus aureus
-  'الخمائر والاعفان':      { total: 4561, nc: 736 },   // Yeasts & Molds
-  'انتيروباكتريسي':        { total: 3784, nc: 556 },   // Enterobacteriaceae
-  'ايشيريشيا كولاي':       { total: 7342, nc: 264 },   // E. coli
-  'السالمونيلا':           { total: 8305, nc: 140 },   // Salmonella
-  'كوليفورم':              { total: 778,  nc: 86 },    // Coliforms
-  'باسيلس سيريس':          { total: 1340, nc: 33 },    // Bacillus cereus
-  'سيدوموناس':             { total: 332,  nc: 20 },    // Pseudomonas aeruginosa
+  'العدد الكلي للبكتيريا': { en: 'Aerobic plate count',        total: 6645, nc: 1514 },
+  'استافيلوكوكس اورياس':  { en: 'Staphylococcus aureus',      total: 7250, nc: 862 },
+  'الخمائر والاعفان':      { en: 'Yeasts & Molds',             total: 4561, nc: 736 },
+  'انتيروباكتريسي':        { en: 'Enterobacteriaceae',         total: 3784, nc: 556 },
+  'ايشيريشيا كولاي':       { en: 'E. coli',                    total: 7342, nc: 264 },
+  'السالمونيلا':           { en: 'Salmonella',                 total: 8305, nc: 140 },
+  'كوليفورم':              { en: 'Coliforms',                  total: 778,  nc: 86 },
+  'باسيلس سيريس':          { en: 'Bacillus cereus',            total: 1340, nc: 33 },
+  'سيدوموناس':             { en: 'Pseudomonas aeruginosa',     total: 332,  nc: 20 },
+  // Zero non-compliant in 2025 — in the official table but never appear as
+  // failing-sample bars; surfaced in the breakdown table so their total/
+  // compliant counts are still visible.
+  'الليستيريا':            { en: 'Listeria monocytogenes',     total: 2241, nc: 0 },
+  'ايشيريشيا كولاي O157':  { en: 'E. coli O157',               total: 1816, nc: 0 },
+  'كلوستريديوم بيرفرنجنز': { en: 'Clostridium perfringens',    total: 1356, nc: 0 },
+  'كامبيلوباكتر':          { en: 'Campylobacter jejuni',       total: 365,  nc: 0 },
+  'فيبريو':                { en: 'Vibrio parahaemolyticus',    total: 150,  nc: 0 },
+  'كلوستريديوم بوتولينوم': { en: 'Clostridium botulinum',      total: 44,   nc: 0 },
 };
 
 function renderTrend(rows) {
@@ -2723,6 +2775,7 @@ function renderAll(rows) {
   renderRepeatTable(rows);
   renderTopSubtypes(rows);
   renderTopMicrobes(rows);
+  renderOfficialTestTable();         // 2025-only official test-level breakdown
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
