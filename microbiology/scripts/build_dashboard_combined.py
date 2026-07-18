@@ -892,6 +892,15 @@ tbody tr:hover { background: var(--sand-100); }
   <button class="btn-reset" id="btn_reset" style="margin-left:auto" disabled>Reset all filters</button>
 </div>
 
+<div class="year-bar" id="bookmark_bar" style="gap:8px">
+  <span class="year-bar-label">Views</span>
+  <button class="btn" data-bm="path2025">2025 · pathogens only</button>
+  <button class="btn" data-bm="central">Central sector</button>
+  <button class="btn" data-bm="noncomp">Non-compliant only</button>
+  <button class="btn" data-bm="rte">Ready-to-Eat foods</button>
+  <button class="btn" id="btn_copy_link" style="margin-left:auto">🔗 Copy view link</button>
+</div>
+
 <div class="filter-section">
   <div class="section-title">Time & Compliance</div>
   <div class="filters">
@@ -1192,6 +1201,34 @@ function syncAllChips() {
   const xm = document.getElementById('x_raw_meat'); if (xm) xm.classList.toggle('active', state.exclude_raw_meat);
 }
 
+// One-click preset views. Each clears state, sets its combo, syncs UI, re-renders.
+function applyBookmark(name) {
+  state.years.clear(); state.compliance.clear(); state.sector.clear();
+  state.severity.clear(); state.gso_category.clear(); state.microbe.clear();
+  state.pathogen_only = false; state.repeat_only = false;
+  state.date_from = FACETS.date_min; state.date_to = FACETS.date_max;
+  if (name === 'path2025') { state.years.add(2025); state.pathogen_only = true; }
+  else if (name === 'central') { state.sector.add('Central'); }
+  else if (name === 'noncomp') { state.compliance.add('Non-compliant'); }
+  else if (name === 'rte') { state.gso_category.add('Ready to Eat Foods'); }
+  syncAllChips();
+  applyFilters();
+}
+
+// Copy the current shareable view link (URL + hash) to the clipboard.
+function copyViewLink() {
+  const url = location.href;
+  const done = () => { const b = document.getElementById('btn_copy_link');
+    const t = b.textContent; b.textContent = 'copied ✓'; setTimeout(() => b.textContent = t, 1500); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => window.prompt('Copy this view link:', url));
+  } else {
+    const i = document.createElement('input'); i.value = url; document.body.appendChild(i);
+    i.select(); try { document.execCommand('copy'); done(); } catch (_) { window.prompt('Copy this view link:', url); }
+    document.body.removeChild(i);
+  }
+}
+
 // Restore `state` from a URL-hash body. Unknown tokens are ignored (never throw).
 function deserializeState(hash) {
   if (!hash || hash === '#') return;
@@ -1232,6 +1269,10 @@ buildChips('f_compliance',    COMPLIANCE_OPTIONS,                'compliance');
 buildChips('f_sector',        FACETS.sectors,                    'sector');
 buildChips('f_severity',      FACETS.severity,                   'severity');
 buildChips('f_gso_category',  FACETS.gso_categories || [],       'gso_category');
+
+document.querySelectorAll('#bookmark_bar [data-bm]').forEach(b =>
+  b.addEventListener('click', () => applyBookmark(b.dataset.bm)));
+document.getElementById('btn_copy_link').addEventListener('click', copyViewLink);
 
 // Microbe chips: one per pathogen (frequency-ordered, count in label) + a final
 // 'Indicator' chip representing the whole indicator class. OR semantics — selecting
