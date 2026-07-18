@@ -18,6 +18,7 @@ from build_classification_table import classify, _val
 from build_dashboard_combined import (
     derive_sector_5, normalize_organism, load_test_classification,
 )
+from demo_assets import inline_offline
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "reports" / "micro_demo3_flow.html"
@@ -99,6 +100,7 @@ def build():
     html = TEMPLATE
     html = html.replace("__SANKEY__", json.dumps(SANKEY, ensure_ascii=False))
     html = html.replace("__TOTALNC__", f"{total_nc:,}")
+    html = inline_offline(html)
     OUT.write_text(html, encoding="utf-8")
     print(f"wrote {OUT}")
     print(f"  nodes={len(labels)} (sec {len(sectors)}, cat {len(cats)}, org {len(orgs)}); "
@@ -108,10 +110,8 @@ def build():
 TEMPLATE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Chromatogram — Contamination Flow</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+__FONTS__
+__PLOTLY__
 <style>
 :root{
   --paper:#e7dcc4; --paper-2:#efe7d5; --fiber:#ded1b4;

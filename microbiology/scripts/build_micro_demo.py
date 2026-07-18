@@ -20,6 +20,7 @@ from build_classification_table import classify, _val
 from build_dashboard_combined import (
     derive_sector_5, normalize_organism, load_test_classification,
 )
+from demo_assets import inline_offline
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "reports" / "micro_sunburst_demo.html"
@@ -99,6 +100,7 @@ def build():
     html = html.replace("__STATS__", json.dumps(stats, ensure_ascii=False))
     html = html.replace("__MONTHS__", json.dumps(MONTHS))
     html = html.replace("__TOTAL__", f"{total:,}")
+    html = inline_offline(html)
     OUT.write_text(html, encoding="utf-8")
     root = nodes["ALL"]
     print(f"wrote {OUT}")
@@ -109,10 +111,8 @@ def build():
 TEMPLATE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Culture Plate — Microbiology Sunburst</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+__FONTS__
+__PLOTLY__
 <style>
 :root{
   --enamel:#e7ece6; --enamel-2:#f3f6f1; --panel:#fbfcfa;
