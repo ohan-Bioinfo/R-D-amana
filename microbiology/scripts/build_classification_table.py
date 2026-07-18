@@ -18,7 +18,8 @@ from pathlib import Path
 import pandas as pd
 
 from build_dashboard_combined import (
-    GSO_CORRECTIONS, NAME_CORRECTIONS, SAMPLE_TYPE_TO_GSO, classify_sample_name,
+    GSO_CORRECTIONS, NAME_CORRECTIONS, SAMPLE_TYPE_TO_GSO,
+    classify_sample_name, classify_name_override,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -47,6 +48,9 @@ def classify(row) -> tuple[str, str]:
         cat = NAME_CORRECTIONS.get(str(nm).strip())
         if cat:
             return cat, "name-correction"
+        cat = classify_name_override(nm)
+        if cat:
+            return cat, "name-keyword-override"
     native = _val(row.get("gso_category_name_en"))
     if native is not None:
         return native, "native-2024"
@@ -64,6 +68,7 @@ def classify(row) -> tuple[str, str]:
 SRC_COLOR = {
     "id-correction":          "#7c3aed",
     "name-correction":        "#be185d",
+    "name-keyword-override":  "#db2777",
     "native-2024":            "#0891b2",
     "sample_type-bucket":     "#059669",
     "name-keyword":           "#d97706",

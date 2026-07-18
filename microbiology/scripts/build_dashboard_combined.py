@@ -268,6 +268,41 @@ def _load_name_corrections() -> dict:
 NAME_CORRECTIONS = _load_name_corrections()
 
 
+# Keyword-level GSO overrides (Muhannad 2026-07-18). Applied AFTER the exact
+# NAME_CORRECTIONS (so his explicit per-name rulings still win) but BEFORE the
+# native/sample_type/name-keyword derivation, so a keyword rule beats the
+# automatic bucket. Rules are tried in order — first match wins — so the
+# beverage rule precedes the nut rule (a nut *drink* like عصير لوز stays a
+# beverage). `excl` blocks a rule for surface swabs (مسح) and, for nuts, real
+# oils (زيت) which stay in Fats and Oils.
+NAME_KEYWORD_OVERRIDES = [
+    (["مشروب", "عصير"], "Beverages", ["مسح"]),
+    (["مكسرات", "فستق", "بستاشيو", "بستاشو", "لوز", "كاجو", "بندق", "جوز",
+      "فول سوداني", "بيكان", "عين جمل", "بسبوسة"],
+     "Chocolate, Sweets and their Ingredients", ["مسح", "زيت"]),
+]
+
+
+def classify_name_override(name) -> str | None:
+    """Keyword override: مشروب/عصير → Beverages, nuts/بسبوسة → Sweets."""
+    if name is None:
+        return None
+    try:
+        if pd.isna(name):
+            return None
+    except Exception:
+        pass
+    s = str(name).strip()
+    if not s:
+        return None
+    for kws, cat, excl in NAME_KEYWORD_OVERRIDES:
+        if any(x in s for x in excl):
+            continue
+        if any(k in s for k in kws):
+            return cat
+    return None
+
+
 def load_test_classification() -> dict:
     """Read pathogen/indicator sets from the 2025 schema YAML."""
     with SCHEMA_2025.open("r", encoding="utf-8") as f:
@@ -383,6 +418,8 @@ def build_data(df: pd.DataFrame) -> dict:
             _nm = _val(getattr(r, "sample_name", None))
             if _nm is not None:
                 gso_cat = NAME_CORRECTIONS.get(str(_nm).strip())
+        if gso_cat is None:
+            gso_cat = classify_name_override(_val(getattr(r, "sample_name", None)))
         if gso_cat is None:
             gso_cat = _val(getattr(r, "gso_category_name_en", None))
         if gso_cat is None:
