@@ -1205,7 +1205,7 @@ function syncAllChips() {
 function applyBookmark(name) {
   state.years.clear(); state.compliance.clear(); state.sector.clear();
   state.severity.clear(); state.gso_category.clear(); state.microbe.clear();
-  state.pathogen_only = false; state.repeat_only = false;
+  state.pathogen_only = false; state.repeat_only = false; state.exclude_raw_meat = false;
   state.date_from = FACETS.date_min; state.date_to = FACETS.date_max;
   if (name === 'path2025') { state.years.add(2025); state.pathogen_only = true; }
   else if (name === 'central') { state.sector.add('Central'); }
