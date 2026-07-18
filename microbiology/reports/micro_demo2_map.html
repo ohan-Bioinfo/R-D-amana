@@ -1,0 +1,162 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surveillance — Riyadh Micro Time-lapse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+:root{
+  --blue-900:#08213d; --blue-800:#0c2c50; --blue-700:#123a66; --line:#2f5c8a;
+  --cyan:#8fd3e8; --ink:#dbe9f5; --muted:#7fa2c4; --gold:#d7b45a;
+  --alert:#ff5a4d; --amber:#ffb03a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--blue-900);color:var(--ink);
+  font-family:'IBM Plex Mono','Space Grotesk',monospace;font-size:14px;
+  -webkit-font-smoothing:antialiased}
+body{min-height:100vh;background-image:
+  linear-gradient(rgba(47,92,138,.16) 1px,transparent 1px),
+  linear-gradient(90deg,rgba(47,92,138,.16) 1px,transparent 1px),
+  radial-gradient(120% 90% at 50% -10%, #0d2c52 0%, var(--blue-900) 60%);
+  background-size:34px 34px,34px 34px,100% 100%;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 26px 44px}
+
+header.mast{display:flex;align-items:baseline;gap:16px;padding:22px 2px 12px;
+  border-bottom:1px solid var(--line)}
+.mast .glyph{color:var(--gold);font-size:19px}
+.mast h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;
+  letter-spacing:3px;text-transform:uppercase;margin:0;color:var(--ink)}
+.mast .tag{font-size:11px;color:var(--muted);letter-spacing:1.5px}
+.mast .ar{font-family:'Tajawal',sans-serif;color:var(--cyan);font-size:14px;
+  direction:rtl;margin-inline-start:auto}
+.lede{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:500;
+  line-height:1.4;max-width:60ch;margin:20px 2px 4px;color:var(--ink)}
+.lede b{color:var(--amber)}
+.sub{color:var(--muted);font-size:12px;margin:0 2px 16px;max-width:64ch;letter-spacing:.3px}
+
+.board{position:relative;border:1px solid var(--line);border-radius:6px;
+  background:linear-gradient(180deg,var(--blue-800),var(--blue-900));
+  box-shadow:inset 0 0 60px rgba(0,0,0,.35)}
+.board .corner{position:absolute;width:12px;height:12px;border:1px solid var(--cyan);opacity:.5}
+.corner.tl{top:8px;left:8px;border-right:0;border-bottom:0}
+.corner.tr{top:8px;right:8px;border-left:0;border-bottom:0}
+.corner.bl{bottom:8px;left:8px;border-right:0;border-top:0}
+.corner.br{bottom:8px;right:8px;border-left:0;border-top:0}
+#map{width:100%;height:520px}
+
+.hud{display:flex;align-items:center;gap:16px;margin-top:14px;flex-wrap:wrap}
+.clock{font-family:'IBM Plex Mono',monospace;font-size:26px;font-weight:600;
+  letter-spacing:1px;color:var(--ink);min-width:150px}
+.clock .yr{color:var(--gold)}
+.stat{font-size:12px;color:var(--muted)}
+.stat b{color:var(--ink);font-weight:600;font-size:15px;font-family:'IBM Plex Mono'}
+.stat.hot b{color:var(--alert)}
+.legend{margin-inline-start:auto;display:flex;gap:16px;align-items:center;font-size:11px;color:var(--muted)}
+.grad{width:120px;height:8px;border-radius:5px;
+  background:linear-gradient(90deg,var(--cyan),var(--amber),var(--alert))}
+footer{margin-top:20px;color:var(--muted);font-size:11px;letter-spacing:.5px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style></head>
+<body><div class="wrap">
+<header class="mast">
+  <span class="glyph">۞</span>
+  <h1>Surveillance</h1>
+  <span class="tag">RIYADH MICRO · SECTOR TIME-LAPSE · 2024–2025</span>
+  <span class="ar">الرصد الميكروبي · حسب القطاع</span>
+</header>
+
+<div class="lede">Two years of the city, one month at a time — <b>20,880</b> samples pulsing across six sectors as contamination rises and falls.</div>
+<div class="sub">Each station sits at its sector's real coordinates. Bubble size = samples that month · colour = % contaminated. Press play, or drag the timeline. Click a station for its reading.</div>
+
+<div class="board">
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+  <div id="map"></div>
+</div>
+
+<div class="hud">
+  <div class="clock" id="clock">—</div>
+  <div class="stat">samples <b id="s_n">—</b></div>
+  <div class="stat hot">non-compliant <b id="s_nc">—</b></div>
+  <div class="stat">contamination <b id="s_rate">—</b></div>
+  <div class="legend"><span>clean</span><span class="grad"></span><span>contaminated</span></div>
+</div>
+<footer id="reading">◦ click a station to inspect a single sector · press ▶ to run the two-year sweep</footer>
+</div>
+<script>
+const MONTHLY={"2024-01": {"Special": {"n": 816, "nc": 260, "np": 66}}, "2024-02": {"Special": {"n": 520, "nc": 213, "np": 76}}, "2024-03": {"Special": {"n": 497, "nc": 147, "np": 60}}, "2024-04": {"Special": {"n": 477, "nc": 196, "np": 89}}, "2024-05": {"Special": {"n": 517, "nc": 129, "np": 48}}, "2024-06": {"Special": {"n": 562, "nc": 207, "np": 108}}, "2024-07": {"Special": {"n": 1415, "nc": 455, "np": 161}}, "2024-08": {"Special": {"n": 1333, "nc": 349, "np": 132}}, "2024-09": {"Special": {"n": 608, "nc": 151, "np": 60}}, "2024-10": {"Special": {"n": 966, "nc": 270, "np": 88}}, "2024-11": {"Special": {"n": 780, "nc": 231, "np": 86}}, "2024-12": {"Special": {"n": 825, "nc": 205, "np": 75}}, "2025-01": {"West": {"n": 186, "nc": 48, "np": 18}, "East": {"n": 467, "nc": 152, "np": 60}, "Central": {"n": 164, "nc": 45, "np": 9}, "North": {"n": 127, "nc": 38, "np": 12}}, "2025-02": {"East": {"n": 28, "nc": 11, "np": 5}, "Central": {"n": 621, "nc": 189, "np": 61}, "Special": {"n": 1, "nc": 1, "np": 1}, "North": {"n": 305, "nc": 81, "np": 19}, "South": {"n": 12, "nc": 1, "np": 1}}, "2025-03": {"Central": {"n": 772, "nc": 148, "np": 46}, "East": {"n": 136, "nc": 39, "np": 19}, "North": {"n": 4, "nc": 0, "np": 0}, "South": {"n": 1, "nc": 0, "np": 0}}, "2025-04": {"West": {"n": 11, "nc": 4, "np": 3}, "Central": {"n": 246, "nc": 73, "np": 33}, "North": {"n": 166, "nc": 50, "np": 18}, "South": {"n": 23, "nc": 10, "np": 3}, "East": {"n": 1007, "nc": 305, "np": 104}, "Special": {"n": 1, "nc": 1, "np": 1}}, "2025-05": {"East": {"n": 789, "nc": 245, "np": 85}, "North": {"n": 31, "nc": 9, "np": 2}, "South": {"n": 7, "nc": 3, "np": 3}, "Central": {"n": 147, "nc": 49, "np": 13}}, "2025-06": {"Central": {"n": 152, "nc": 37, "np": 14}, "North": {"n": 196, "nc": 77, "np": 38}, "Special": {"n": 19, "nc": 7, "np": 0}, "East": {"n": 604, "nc": 128, "np": 44}}, "2025-07": {"Central": {"n": 150, "nc": 37, "np": 12}, "North": {"n": 60, "nc": 13, "np": 3}, "East": {"n": 540, "nc": 144, "np": 43}, "South": {"n": 44, "nc": 2, "np": 2}, "West": {"n": 33, "nc": 7, "np": 7}}, "2025-08": {"Central": {"n": 585, "nc": 173, "np": 67}, "East": {"n": 73, "nc": 18, "np": 9}, "South": {"n": 1, "nc": 0, "np": 0}, "North": {"n": 8, "nc": 0, "np": 0}, "Special": {"n": 1, "nc": 1, "np": 0}}, "2025-09": {"Central": {"n": 389, "nc": 90, "np": 34}, "East": {"n": 76, "nc": 13, "np": 6}, "North": {"n": 120, "nc": 29, "np": 6}, "West": {"n": 59, "nc": 24, "np": 4}, "Special": {"n": 3, "nc": 0, "np": 0}}, "2025-10": {"Central": {"n": 347, "nc": 87, "np": 29}, "North": {"n": 431, "nc": 85, "np": 26}, "East": {"n": 61, "nc": 16, "np": 4}, "South": {"n": 8, "nc": 2, "np": 2}, "Special": {"n": 44, "nc": 1, "np": 1}, "West": {"n": 17, "nc": 4, "np": 4}}, "2025-11": {"North": {"n": 222, "nc": 64, "np": 16}, "Central": {"n": 792, "nc": 186, "np": 23}, "East": {"n": 163, "nc": 58, "np": 20}, "South": {"n": 4, "nc": 0, "np": 0}}, "2025-12": {"North": {"n": 540, "nc": 117, "np": 18}, "Central": {"n": 338, "nc": 60, "np": 11}, "East": {"n": 173, "nc": 45, "np": 18}, "South": {"n": 58, "nc": 12, "np": 11}}}, CENTROIDS={"East": [24.7275, 46.784], "North": [24.84, 46.69], "West": [24.63, 46.6033], "Central": [24.674, 46.695], "South": [24.547, 46.78], "Special": [24.6877, 46.7219]}, MONTHS=["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"];
+const SECTORS=Object.keys(CENTROIDS);
+const LON=SECTORS.map(s=>CENTROIDS[s][1]), LAT=SECTORS.map(s=>CENTROIDS[s][0]);
+const SCALE=[[0,'#8fd3e8'],[0.3,'#bfe0c0'],[0.55,'#ffb03a'],[0.78,'#ff7a3a'],[1,'#ff5a4d']];
+let MAXN=1; MONTHS.forEach(m=>SECTORS.forEach(s=>{const v=(MONTHLY[m]||{})[s]; if(v)MAXN=Math.max(MAXN,v.n);}));
+
+function frameFor(m){
+  const size=[],color=[],cust=[];
+  SECTORS.forEach(s=>{const v=(MONTHLY[m]||{})[s]||{n:0,nc:0,np:0};
+    size.push(v.n?12+50*Math.sqrt(v.n/MAXN):7);
+    color.push(v.n?100*v.nc/v.n:0);
+    cust.push([v.n,v.nc,v.n?100*v.nc/v.n:0,v.np]);});
+  return {size,color,cust};
+}
+const monLabel=m=>{const [y,mm]=m.split('-');
+  return ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mm]+" '"+y.slice(2);};
+const fmt=n=>(+n).toLocaleString();
+
+function totals(m){let n=0,nc=0; SECTORS.forEach(s=>{const v=(MONTHLY[m]||{})[s]; if(v){n+=v.n;nc+=v.nc;}}); return {n,nc};}
+function setHud(m){
+  const t=totals(m),[y,mm]=m.split('-');
+  document.getElementById('clock').innerHTML=monLabel(m).replace(/'(\d\d)/,"<span class='yr'>'$1</span>");
+  document.getElementById('s_n').textContent=fmt(t.n);
+  document.getElementById('s_nc').textContent=fmt(t.nc);
+  document.getElementById('s_rate').textContent=t.n?(100*t.nc/t.n).toFixed(1)+'%':'—';
+}
+
+const f0=frameFor(MONTHS[0]);
+const trace={type:'scatter',mode:'markers+text',x:LON,y:LAT,text:SECTORS,
+  textposition:'top center',textfont:{family:"'IBM Plex Mono',monospace",size:11,color:'#dbe9f5'},
+  marker:{size:f0.size,color:f0.color,colorscale:SCALE,cmin:0,cmax:60,
+    line:{color:'#0c2c50',width:1.5},opacity:.92,
+    sizemode:'diameter',
+    colorbar:{thickness:0,len:0,showticklabels:false}},
+  customdata:f0.cust,
+  hovertemplate:'<b>%{text}</b><br>%{customdata[0]:,} samples · %{customdata[1]:,} non-compliant<br>%{customdata[2]:.1f}% contaminated<extra></extra>',
+  hoverlabel:{bgcolor:'#0c2c50',bordercolor:'#2f5c8a',font:{family:"'IBM Plex Mono',monospace",color:'#dbe9f5'}},
+  cliponaxis:false};
+const pad=0.06;
+const layout={margin:{l:10,r:10,t:10,b:10},paper_bgcolor:'rgba(0,0,0,0)',plot_bgcolor:'rgba(0,0,0,0)',
+  xaxis:{visible:false,range:[Math.min(...LON)-pad,Math.max(...LON)+pad],fixedrange:true},
+  yaxis:{visible:false,range:[Math.min(...LAT)-pad,Math.max(...LAT)+pad],fixedrange:true,
+    scaleanchor:'x',scaleratio:1.15},
+  showlegend:false,
+  updatemenus:[{type:'buttons',showactive:false,x:0.01,y:0.02,xanchor:'left',yanchor:'bottom',
+    bgcolor:'#123a66',bordercolor:'#2f5c8a',font:{color:'#dbe9f5',family:"'IBM Plex Mono'",size:12},
+    buttons:[
+      {label:'▶  play',method:'animate',args:[null,{fromcurrent:true,frame:{duration:520,redraw:true},transition:{duration:280}}]},
+      {label:'❙❙',method:'animate',args:[[null],{mode:'immediate',frame:{duration:0,redraw:false}}]}]}],
+  sliders:[{active:0,x:0.12,y:0.02,len:0.85,xanchor:'left',yanchor:'bottom',
+    pad:{b:6},currentvalue:{visible:false},
+    bgcolor:'#123a66',bordercolor:'#2f5c8a',tickcolor:'#2f5c8a',
+    font:{color:'#7fa2c4',family:"'IBM Plex Mono'",size:9},
+    steps:MONTHS.map(m=>({label:m.slice(5)==='01'?"'"+m.slice(2,4):'',method:'animate',
+      args:[[m],{mode:'immediate',frame:{duration:280,redraw:true},transition:{duration:220}}]}))}]};
+const config={displayModeBar:false,responsive:true};
+
+const frames=MONTHS.map(m=>{const f=frameFor(m);
+  return {name:m,data:[{marker:{size:f.size,color:f.color},customdata:f.cust}]};});
+
+const gd=document.getElementById('map');
+Plotly.newPlot('map',[trace],layout,config).then(()=>{
+  Plotly.addFrames('map',frames);
+  setHud(MONTHS[0]);
+  gd.on('plotly_animatingframe',e=>{if(e&&e.name)setHud(e.name);});
+  gd.on('plotly_sliderchange',e=>{if(e&&e.step&&e.step.label!==undefined){} });
+});
+// keep the HUD synced when the slider is dragged
+gd.on('plotly_sliderchange',e=>{const m=MONTHS[e.slider.active]; if(m)setHud(m);});
+gd.on('plotly_click',e=>{const i=e.points[0].pointNumber,s=SECTORS[i],c=e.points[0].customdata;
+  document.getElementById('reading').innerHTML=
+    `◦ <b style="color:#dbe9f5">${s}</b> — ${fmt(c[0])} samples · ${fmt(c[1])} non-compliant · `+
+    `${(+c[2]).toFixed(1)}% contaminated · ${fmt(c[3])} pathogen failures &nbsp;<span style="color:#7fa2c4">(this month)</span>`;});
+</script>
+</body></html>
