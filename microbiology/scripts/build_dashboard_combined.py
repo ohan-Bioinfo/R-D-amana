@@ -959,7 +959,7 @@ tbody tr:hover { background: var(--sand-100); }
      Total Count, Staph, Yeasts & Moulds) by how many samples they failed,
      the test-level companion to the sample-level subtype list above. -->
 <div class="card full" style="margin-bottom:14px">
-  <h2>Top 10 failed tests (microbes) <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— failing-sample count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters.</span></h2>
+  <h2>Top 10 failed tests (microbes) <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. When the view is 2025-only, each bar also shows the official Annual-Report <b>test</b>-level non-compliant count (test-level ≥ sample-level, since a re-tested sample is counted per test).</span></h2>
   <div id="top-microbes" style="overflow:auto"></div>
 </div>
 
@@ -1773,18 +1773,33 @@ function renderTopMicrobes(rows) {
     return;
   }
   const ordered = items.slice().reverse();   // #1 on top
+  // Show the official 2025 test-level record as a reference only when the view
+  // is exactly 2025 (the official numbers are 2025-only and test-level).
+  const _yrs = Array.from(state.years);
+  const only2025 = _yrs.length === 1 && Number(_yrs[0]) === 2025;
+  const offOf = it => (only2025 ? OFFICIAL_TESTS_2025[it.org] : null);
   reactChart('top-microbes', [{
     type: 'bar', orientation: 'h',
     x: ordered.map(it => it.n),
     y: ordered.map(it => it.org),
     marker: { color: ordered.map(it => MICROBE_COLORS[it.org] || (it.path ? '#dc2626' : '#0891b2')) },
-    text: ordered.map(it => it.n.toLocaleString() + (it.path ? '  · pathogen' : '  · indicator')),
+    text: ordered.map(it => {
+      const o = offOf(it);
+      return o ? it.n.toLocaleString() + '  · official ' + o.nc.toLocaleString() + ' tests'
+               : it.n.toLocaleString() + (it.path ? '  · pathogen' : '  · indicator');
+    }),
     textposition: 'outside', cliponaxis: false,
-    hovertemplate: '<b>%{y}</b><br>%{x:,} failing samples<extra></extra>',
+    customdata: ordered.map(it => {
+      const o = offOf(it);
+      return [o ? 'Official 2025: ' + o.nc.toLocaleString() + ' non-compliant of '
+                  + o.total.toLocaleString() + ' tests (' + (100 * o.nc / o.total).toFixed(1) + '%)'
+                : (it.path ? 'pathogen' : 'indicator')];
+    }),
+    hovertemplate: '<b>%{y}</b><br>%{x:,} failing samples<br>%{customdata[0]}<extra></extra>',
   }], {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#1c2742', size: 12, family: 'Segoe UI, Tahoma, sans-serif' },
-    margin: { l: 190, r: 110, t: 6, b: 30 },
+    margin: { l: 190, r: only2025 ? 170 : 110, t: 6, b: 30 },
     height: 70 + ordered.length * 34,
     xaxis: { gridcolor: '#e5e7eb', rangemode: 'tozero' },
     yaxis: { automargin: true },
@@ -1804,6 +1819,23 @@ const MICROBE_COLORS = {
   'كوليفورم':               '#7c3aed',  // Coliform — indicator, purple
   'الخمائر والاعفان':       '#059669',  // Yeasts & moulds — indicator, green
   'سيدوموناس':              '#65a30d',  // Pseudomonas — indicator, lime
+};
+
+// Official 2025 per-test record (Annual Report "Test" sheet), keyed by our
+// canonical organism name → { total tests run, non-compliant tests }. Used as a
+// reference on the failed-microbes chart when the view is 2025-only. Note the
+// official counts are TEST-level (a sample re-tested for the same organism is
+// counted each time); our bars are SAMPLE-level, so ours read a bit lower.
+const OFFICIAL_TESTS_2025 = {
+  'العدد الكلي للبكتيريا': { total: 6645, nc: 1514 },  // Aerobic plate count
+  'استافيلوكوكس اورياس':  { total: 7250, nc: 862 },   // Staphylococcus aureus
+  'الخمائر والاعفان':      { total: 4561, nc: 736 },   // Yeasts & Molds
+  'انتيروباكتريسي':        { total: 3784, nc: 556 },   // Enterobacteriaceae
+  'ايشيريشيا كولاي':       { total: 7342, nc: 264 },   // E. coli
+  'السالمونيلا':           { total: 8305, nc: 140 },   // Salmonella
+  'كوليفورم':              { total: 778,  nc: 86 },    // Coliforms
+  'باسيلس سيريس':          { total: 1340, nc: 33 },    // Bacillus cereus
+  'سيدوموناس':             { total: 332,  nc: 20 },    // Pseudomonas aeruginosa
 };
 
 function renderTrend(rows) {
