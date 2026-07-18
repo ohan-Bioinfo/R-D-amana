@@ -6,7 +6,7 @@
 - **Files processed:** 183
 - **Files skipped:** 0
 - **Long rows out:** 36461
-- **Wide rows out (samples):** 9317
+- **Wide rows out (samples):** 9316
 
 ## Skipped files
 
@@ -47,9 +47,9 @@ _none_
 
 ## Wide-output validity summary
 
-- Samples: **9317**
+- Samples: **9316**
 - Valid: **6420** (68.9%)
-- Invalid: **2814** (30.2%)
+- Invalid: **2813** (30.2%)
 - Unknown: **83**
 
 ## Per-file audit (all files)

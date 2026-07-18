@@ -630,6 +630,20 @@ def aggregate_to_wide(long_df: pd.DataFrame) -> pd.DataFrame:
     if int(_dup.sum()):
         print(f"  de-duplicated {int(_dup.sum())} rows with a repeated barcode")
         wide = wide[~_dup].reset_index(drop=True)
+    # De-duplicate BARCODE-LESS rows that are identical *including the verdict*
+    # (same file/date/name/sample_id/is_valid/is_failure/invalid_tests). Barcode
+    # dedup can't catch these (no barcode), yet a row repeated with the same
+    # pass/fail result is a true double-count (e.g. موية فلتر N-1, a report read
+    # twice). Rows that share an id/position but DIFFER in verdict are kept — they
+    # are distinct samples (e.g. فلافل P-6/1: one compliant, one not). (2026-07-18)
+    _idcols = ["source_file", "sampling_date", "sample_name", "sample_id",
+               "is_valid", "is_failure", "invalid_tests_raw"]
+    _nobar = wide["barcode"].isna()
+    _bdup = pd.Series(False, index=wide.index)
+    _bdup.loc[_nobar] = wide.loc[_nobar, _idcols].astype("string").duplicated(keep="first")
+    if int(_bdup.sum()):
+        print(f"  de-duplicated {int(_bdup.sum())} barcode-less rows identical incl. verdict")
+        wide = wide[~_bdup].reset_index(drop=True)
     # Cast types to align with 2025.
     wide["is_valid"] = pd.array(wide["is_valid"].tolist(), dtype="boolean")
     wide["is_failure"] = pd.array(wide["is_failure"].tolist(), dtype="boolean")
