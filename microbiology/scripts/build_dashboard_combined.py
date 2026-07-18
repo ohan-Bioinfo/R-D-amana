@@ -1964,9 +1964,9 @@ function renderTopMicrobes(rows) {
 function renderOfficialTestTable() {
   const node = document.getElementById('official-test-table');
   if (!node) return;
-  const yrs = Array.from(state.years);
-  const only2025 = yrs.length === 1 && Number(yrs[0]) === 2025;
-  if (!only2025) { node.innerHTML = ''; return; }
+  // Always shown: this is the official 2025 Annual-Report record (Total /
+  // Compliant / Non-compliant per organism), the figures our per-sample data
+  // can't provide. It's a fixed reference, so it does not react to the filters.
   const entries = Object.values(OFFICIAL_TESTS_2025).slice().sort((a, b) => b.total - a.total);
   let tot = 0, comp = 0, nc = 0;
   for (const e of entries) { tot += e.total; comp += (e.total - e.nc); nc += e.nc; }
