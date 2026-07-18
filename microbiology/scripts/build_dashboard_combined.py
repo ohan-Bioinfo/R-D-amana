@@ -1159,6 +1159,65 @@ function crossFilter(parentId, stateKey, value) {
   applyFilters();
 }
 
+// Encode the non-default parts of `state` into a compact URL-hash body.
+function serializeState() {
+  const p = [];
+  const setParam = (k, s) => { if (s && s.size) p.push(k + '=' + Array.from(s).map(encodeURIComponent).join(',')); };
+  setParam('y', state.years); setParam('comp', state.compliance); setParam('sec', state.sector);
+  setParam('sev', state.severity); setParam('gso', state.gso_category); setParam('mic', state.microbe);
+  if (state.pathogen_only) p.push('path=1');
+  if (state.repeat_only) p.push('rep=1');
+  if (state.exclude_raw_meat) p.push('xmeat=1');
+  if (state.date_from && state.date_from !== FACETS.date_min) p.push('df=' + encodeURIComponent(state.date_from));
+  if (state.date_to && state.date_to !== FACETS.date_max) p.push('dt=' + encodeURIComponent(state.date_to));
+  return p.join('&');
+}
+
+// Push `state` INTO the DOM controls (inverse of the click handlers). Used after
+// deserializeState and after a bookmark sets state programmatically.
+function syncAllChips() {
+  const map = { f_year:'years', f_compliance:'compliance', f_sector:'sector',
+                f_severity:'severity', f_gso_category:'gso_category', f_microbe:'microbe' };
+  Object.entries(map).forEach(([pid, key]) => {
+    const parent = document.getElementById(pid); if (!parent) return;
+    parent.querySelectorAll('.chip').forEach(el => {
+      const v = (key === 'years') ? parseInt(el.dataset.value, 10) : el.dataset.value;
+      el.classList.toggle('active', state[key].has(v));
+    });
+  });
+  document.getElementById('f_date_from').value = state.date_from;
+  document.getElementById('f_date_to').value = state.date_to;
+  const pt = document.getElementById('t_pathogen'); if (pt) pt.classList.toggle('active', state.pathogen_only);
+  const rp = document.getElementById('t_repeat'); if (rp) rp.classList.toggle('active', state.repeat_only);
+  const xm = document.getElementById('x_raw_meat'); if (xm) xm.classList.toggle('active', state.exclude_raw_meat);
+}
+
+// Restore `state` from a URL-hash body. Unknown tokens are ignored (never throw).
+function deserializeState(hash) {
+  if (!hash || hash === '#') return;
+  const params = new URLSearchParams(hash.replace(/^#/, ''));
+  const load = (key, sk, valid, cast) => {
+    const raw = params.get(key); if (!raw) return;
+    raw.split(',').forEach(v0 => { const v = decodeURIComponent(v0);
+      if (valid && !valid.has(cast ? cast(v) : v)) return;
+      state[sk].add(cast ? cast(v) : v); });
+  };
+  load('y', 'years', new Set((FACETS.years || []).map(Number)), v => parseInt(v, 10));
+  load('comp', 'compliance', new Set(COMPLIANCE_OPTIONS));
+  load('sec', 'sector', new Set(FACETS.sectors || []));
+  load('sev', 'severity', new Set(FACETS.severity || []));
+  load('gso', 'gso_category', new Set(FACETS.gso_categories || []));
+  const mic = params.get('mic');
+  if (mic) mic.split(',').forEach(v0 => { const v = decodeURIComponent(v0);
+    if (v === INDICATOR_TOKEN || PATHOGEN_SET.has(v) || INDICATOR_SET.has(v)) state.microbe.add(v); });
+  if (params.get('path') === '1') state.pathogen_only = true;
+  if (params.get('rep') === '1') state.repeat_only = true;
+  if (params.get('xmeat') === '1') state.exclude_raw_meat = true;
+  const df = params.get('df'); if (df) state.date_from = decodeURIComponent(df);
+  const dt = params.get('dt'); if (dt) state.date_to = decodeURIComponent(dt);
+  syncAllChips();
+}
+
 document.getElementById('f_date_from').value = FACETS.date_min;
 document.getElementById('f_date_to').value = FACETS.date_max;
 document.getElementById('f_date_from').addEventListener('change', e => {
@@ -1442,6 +1501,8 @@ function applyFilters() {
   }
 
   renderAll(rowsFiltered);
+  const _hash = serializeState();
+  history.replaceState(null, '', _hash ? '#' + _hash : location.pathname + location.search);
 }
 
 function groupBy(rows, keyFn) {
@@ -2626,6 +2687,7 @@ function renderAll(rows) {
   renderTests(rows);
 }
 
+deserializeState(location.hash);
 applyFilters();
 </script>
 </div><!-- /.page-body -->
