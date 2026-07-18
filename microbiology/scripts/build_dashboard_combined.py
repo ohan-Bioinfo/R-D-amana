@@ -682,11 +682,23 @@ body { padding: 0 0 60px;
 
 h1 { font-family: 'Tajawal', sans-serif; font-size: 22px; margin: 0 0 6px;
   font-weight: 700; letter-spacing: 0.3px; display: none; }
-h2 { font-family: 'Tajawal', sans-serif; font-size: 12px; margin: 0 0 12px;
-  font-weight: 600; color: var(--gold-700); text-transform: uppercase;
-  letter-spacing: 2.2px; }
+h2 { font-family: 'Tajawal', sans-serif; font-size: 13px; margin: 0 0 12px;
+  font-weight: 700; color: var(--gold-700); text-transform: uppercase;
+  letter-spacing: 1.8px; }
 h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   font-size: 14px; opacity: 0.6; }
+/* Narrative section dividers — Overview → What's failing → Where → When → Who */
+.group-head { grid-column: 1 / -1; margin: 24px 0 2px; font-family: 'Tajawal', sans-serif;
+  font-size: 12px; font-weight: 700; color: var(--green-700); text-transform: uppercase;
+  letter-spacing: 3px; display: flex; align-items: center; gap: 14px; }
+.group-head:first-child { margin-top: 4px; }
+.group-head::before { content: "۞"; color: var(--gold-500); font-size: 13px; opacity: 0.7; }
+.group-head::after { content: ""; flex: 1; height: 1px;
+  background: linear-gradient(90deg, var(--gold-500) 0%, var(--sand-300) 45%, transparent 100%); }
+/* Card sub-line — the explanatory blurb that used to be crammed into the <h2> */
+.card-sub { color: var(--ink-500); font-size: 11.5px; line-height: 1.55; margin: -6px 0 12px;
+  font-family: 'IBM Plex Sans Arabic', sans-serif; max-width: 95ch; }
+.card-sub code { background: var(--sand-100); padding: 0 4px; border-radius: 3px; font-size: 11px; }
 .subtitle { color: var(--ink-500); font-size: 13px; margin: 0 0 18px;
   font-family: 'Cormorant Garamond', serif; font-style: italic; }
 .year-bar { display: flex; align-items: center; gap: 14px; padding: 12px 18px;
@@ -946,24 +958,53 @@ tbody tr:hover { background: var(--sand-100); }
 
 <div class="kpis" id="kpis"></div>
 
-<!-- Top-contaminated subtypes list — replaces the single-pick "most
-     contaminated" card with a ranked list at the specific sample-name
-     level (e.g. Tabouleh, Feta cheese, refrigerator swab), so the GSO
-     category isn\'t the only granularity. -->
-<div class="card full" style="margin-bottom:14px">
-  <h2>Top 10 most-contaminated subtypes <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active). 🧫 = environmental surface swab, not a food product.</span></h2>
-  <div id="top-subtypes" style="overflow:auto"></div>
-</div>
-
-<!-- Top failed tests as microbes — ranks the failing TESTS/organisms (e.g.
-     Total Count, Staph, Yeasts & Moulds) by how many samples they failed,
-     the test-level companion to the sample-level subtype list above. -->
-<div class="card full" style="margin-bottom:14px">
-  <h2>Top 10 failed tests (microbes) <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. When the view is 2025-only, each bar also shows the official Annual-Report <b>test</b>-level non-compliant count (test-level ≥ sample-level, since a re-tested sample is counted per test).</span></h2>
-  <div id="top-microbes" style="overflow:auto"></div>
-</div>
+<!-- Slice-active banner — appears only when severity / microbe / pathogen-only /
+     repeat-offender filter is active. Kept at the top so it's seen immediately. -->
+<div id="slice-banner" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:4px; padding:10px 14px; font-size:12px; color:#92400e; margin-bottom:14px"></div>
 
 <div class="grid">
+
+  <div class="group-head">What's failing</div>
+
+  <div class="card full">
+    <h2>Top 10 most-contaminated subtypes</h2>
+    <div class="card-sub">Grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active). 🧫 = environmental surface swab, not a food product.</div>
+    <div id="top-subtypes" style="overflow:auto"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Top 10 failed tests (microbes)</h2>
+    <div class="card-sub">Failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. In a 2025-only view each bar also shows the official Annual-Report <b>test</b>-level non-compliant count (test-level &ge; sample-level, since a re-tested sample is counted per test).</div>
+    <div id="top-microbes" style="overflow:auto"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Non-compliant tests · pathogens vs indicators <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
+      <div>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
+        <div id="chart_tests_pathogen" class="chart"></div>
+      </div>
+      <div>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Indicators</div>
+        <div id="chart_tests_indicator" class="chart"></div>
+      </div>
+    </div>
+    <div id="tests_drilldown" style="margin-top:14px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>GSO 1016 categories — total samples &amp; non-compliance</h2>
+    <div id="chart_gso_cat" class="chart" style="min-height:480px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Severity tier × GSO 1016 category</h2>
+    <div id="chart_heatmap" class="chart"></div>
+  </div>
+
+  <div class="group-head">Where</div>
+
   <div class="card full">
     <h2>Riyadh map — bubble size = total samples · colour = metric</h2>
     <div class="toggle-row" style="margin-bottom:10px; flex-wrap:wrap; align-items:center">
@@ -980,8 +1021,15 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_map" class="chart" style="min-height:560px"></div>
   </div>
 
+  <div class="card full" data-needs-year="2025">
+    <h2>Sectors — total samples &amp; non-compliance <span class="year-required-badge">2025 source</span></h2>
+    <div id="chart_sector" class="chart"></div>
+  </div>
+
+  <div class="group-head">When</div>
+
   <div class="card full">
-    <h2>Non-compliance rate &amp; per-microbe rate over time (click legend to toggle organisms)</h2>
+    <h2>Non-compliance rate &amp; per-microbe rate over time <span class="section-note" style="font-size:11px">(click legend to toggle organisms)</span></h2>
     <div id="chart_trend" class="chart"></div>
   </div>
 
@@ -990,59 +1038,26 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_yoy" class="chart"></div>
   </div>
 
-  <!-- Slice-active banner — appears only when severity / microbe / pathogen-only /
-       repeat-offender filter is active. Tells the user which downstream charts
-       are narrowed by their slice, and that KPIs above are scope-wide. -->
-  <div id="slice-banner" style="display:none; grid-column:1/-1; background:#fef3c7; border:1px solid #fbbf24; border-radius:10px; padding:10px 14px; font-size:12px; color:#92400e; margin-bottom:6px"></div>
-
   <div class="card">
     <h2>Severity breakdown by month</h2>
     <div id="chart_severity_month" class="chart"></div>
   </div>
 
-  <div class="card tall" data-needs-year="2025">
-    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2025 source</span></h2>
-    <div id="chart_chains" class="chart tall"></div>
-  </div>
-
   <div class="card full">
-    <h2>Non-compliant tests · pathogens vs indicators   <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
-        <div id="chart_tests_pathogen" class="chart"></div>
-      </div>
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Indicators</div>
-        <div id="chart_tests_indicator" class="chart"></div>
-      </div>
-    </div>
-    <div id="tests_drilldown" style="margin-top:14px"></div>
-  </div>
-
-  <div class="card" data-needs-year="2025">
-    <h2>Sectors — total samples &amp; non-compliance <span class="year-required-badge">2025 source</span></h2>
-    <div id="chart_sector" class="chart"></div>
-  </div>
-
-  <div class="card full">
-    <h2>GSO 1016 categories — total samples &amp; non-compliance</h2>
-    <div id="chart_gso_cat" class="chart" style="min-height:480px"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Severity tier × GSO 1016 category</h2>
-    <div id="chart_heatmap" class="chart"></div>
-  </div>
-
-  <div class="card">
     <h2>Sampling cadence by day-of-week</h2>
     <div id="chart_dow" class="chart"></div>
   </div>
 
+  <div class="group-head">Who</div>
+
+  <div class="card full tall" data-needs-year="2025">
+    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2025 source</span></h2>
+    <div id="chart_chains" class="chart tall"></div>
+  </div>
+
   <div class="card full" data-needs-year="2025">
     <h2>Repeat-offender chains <span class="year-required-badge">2025 source</span></h2>
-    <div class="muted" style="margin-bottom:8px; font-size:12px">
+    <div class="card-sub">
       "Max non-compliance streak (90d)" = the highest count of non-compliant samples this chain ever
       accumulated in any rolling 90-day window. A chain that hit 8 means it had 8 non-compliant samples
       within a single 90-day stretch — a sustained problem, not just a one-off bad sample.
@@ -1428,9 +1443,20 @@ function pct(num, den) { return den ? 100 * num / den : 0; }
 // Render a Plotly chart, first clearing any empty-state message ("No … data")
 // left in the mount from a previous render, so it can't sit under the bars.
 // (2026-07-16 — fixes the overlap on the chains chart and any similar transition.)
+// Shared figure typography — the page's Arabic font, so chart tick/label text
+// (much of it Arabic) matches the rest of the page instead of falling back to
+// Segoe UI. Applied centrally here so every chart is consistent.
+const CHART_FONT = "'IBM Plex Sans Arabic', 'Tajawal', 'Segoe UI', Tahoma, sans-serif";
 function reactChart(id, traces, layout, config) {
   const el = document.getElementById(id);
   if (el && !el.classList.contains('js-plotly-plot')) el.innerHTML = '';
+  layout = layout || {};
+  layout.font = layout.font || {};
+  if (!layout.font.family || /Segoe/.test(layout.font.family)) layout.font.family = CHART_FONT;
+  if (!layout.font.color) layout.font.color = '#3d4256';
+  layout.hoverlabel = Object.assign(
+    { font: { family: CHART_FONT, size: 12 }, bgcolor: '#fffdf8', bordercolor: '#e8dcc4' },
+    layout.hoverlabel || {});
   Plotly.react(id, traces, layout, config);
 }
 
