@@ -1524,7 +1524,7 @@ function renderKpis(rowsBase) {
   const mostContam = (() => {
     const stat = new Map();
     for (const r of rowsBase) {
-      const nm = r[COLS.sample_name]; if (!nm) continue;
+      const nm = normSubtypeName(r[COLS.sample_name]); if (!nm) continue;
       let s = stat.get(nm);
       if (!s) { s = { t: 0, nc: 0, gso: r[COLS.gso_category] }; stat.set(nm, s); }
       s.t++; if (r[COLS.failure] === 1) s.nc++;
@@ -1611,10 +1611,18 @@ function renderKpis(rowsBase) {
 // Collapse subtype-name variants so one product doesn't split across rows in
 // the most-contaminated ranking — e.g. "قطع بقدونس" (parsley pieces) groups
 // with "بقدونس". (Muhannad 2026-07-09)
+// Explicit subtype merges — distinct spellings Muhannad confirmed are the same
+// product, so they don't split across rows in the contaminant rankings. Keyed by
+// the whitespace-normalised name. (سلطة حمراء حارة = سلطة حارة, both spicy salad;
+// سلطة خضراء / green salad stays separate.) (2026-07-18)
+const SUBTYPE_ALIASES = {
+  'سلطة حمراء حارة': 'سلطة حارة',
+};
 function normSubtypeName(n) {
   if (!n) return n;
   let s = String(n).trim().replace(/\s+/g, ' ');
   s = s.replace(/^قطع\s+/, '');   // "pieces of X" → "X"
+  if (SUBTYPE_ALIASES[s]) s = SUBTYPE_ALIASES[s];
   return s;
 }
 function renderTopSubtypes(rows) {
