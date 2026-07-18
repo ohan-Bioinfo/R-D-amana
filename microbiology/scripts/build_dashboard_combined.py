@@ -918,6 +918,14 @@ tbody tr:hover { background: var(--sand-100); }
   <div id="top-subtypes" style="overflow:auto"></div>
 </div>
 
+<!-- Top failed tests as microbes — ranks the failing TESTS/organisms (e.g.
+     Total Count, Staph, Yeasts & Moulds) by how many samples they failed,
+     the test-level companion to the sample-level subtype list above. -->
+<div class="card full" style="margin-bottom:14px">
+  <h2>Top 10 failed tests (microbes) <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— failing-sample count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters.</span></h2>
+  <div id="top-microbes" style="overflow:auto"></div>
+</div>
+
 <div class="grid">
   <div class="card full">
     <h2>Riyadh map — bubble size = total samples · colour = metric</h2>
@@ -1487,6 +1495,56 @@ function renderKpis(rowsBase) {
         sub: fmtNum(compliantN) + ' / ' + fmtNum(total) + ' samples compliant' + officialRef,
         cls: complianceRate >= 95 ? 'good' : complianceRate >= 80 ? 'warn' : 'bad' };
 
+  // ── Total tests done (year-aware annual throughput) ──────────────────────
+  // 2024 = the REAL per-test count from our data (36,461 test records). 2025 has
+  // NO per-test source in the raw (Data 2025.xlsx records only the failed test
+  // per sample), so the 2025 total is taken from the official Annual Report
+  // "Test" sheet. This is an annual figure — not sub-filtered by chart filters.
+  const OUR_TESTS_DONE = { 2024: 36461 };              // real, our per-test data
+  const OFFICIAL_TESTS = { 2024: 36596, 2025: 46309 }; // official Annual Report
+  const _tYears = state.years.size ? Array.from(state.years) : [2024, 2025];
+  let _tOur = 0, _tOff = 0, _tFromOfficial = false;
+  for (const y of _tYears) {
+    _tOff += OFFICIAL_TESTS[y] || 0;
+    if (OUR_TESTS_DONE[y] != null) _tOur += OUR_TESTS_DONE[y];
+    else { _tOur += OFFICIAL_TESTS[y] || 0; _tFromOfficial = true; }  // 2025 → official
+  }
+  const _tDelta = _tOur - _tOff;
+  const testsCard = {
+    label: 'Total tests done',
+    value: fmtNum(_tOur),
+    sub: _tFromOfficial
+      ? 'annual · 2024 our data, 2025 official report (no per-test source in raw)'
+      : 'our data · official ' + fmtNum(_tOff) + ' (' + (_tDelta >= 0 ? '+' : '') + _tDelta + ')',
+    cls: '' };
+
+  // ── Most-contaminated sample (single top pick, filter- & year-aware) ──────
+  // The #1 of the subtype ranking, surfaced as a KPI. Ranked by non-compliant
+  // COUNT (tie-break by volume) with a 5-sample floor so a 1/1 fluke can't win.
+  const mostContam = (() => {
+    const stat = new Map();
+    for (const r of rowsBase) {
+      const nm = r[COLS.sample_name]; if (!nm) continue;
+      let s = stat.get(nm);
+      if (!s) { s = { t: 0, nc: 0, gso: r[COLS.gso_category] }; stat.set(nm, s); }
+      s.t++; if (r[COLS.failure] === 1) s.nc++;
+    }
+    let best = null, bn = -1, bt = 0, bg = null;
+    for (const [nm, s] of stat) {
+      if (s.t < 5) continue;
+      if (s.nc > bn || (s.nc === bn && s.t > bt)) { bn = s.nc; bt = s.t; best = nm; bg = s.gso; }
+    }
+    return best ? { name: best, nc: bn, total: bt, gso: bg, rate: 100 * bn / bt } : { name: null };
+  })();
+  const mostContamCard = {
+    label: 'Most-contaminated sample',
+    value: '<span style="font-size:14px; font-weight:600" class="ar">' + truncate(mostContam.name, 26) + '</span>',
+    sub: mostContam.name
+      ? fmtNum(mostContam.nc) + ' non-compliant of ' + fmtNum(mostContam.total)
+        + ' (' + mostContam.rate.toFixed(1) + '%) · ' + (mostContam.gso || '—')
+      : 'no sample with ≥5 in view',
+    cls: mostContam.nc > 0 ? 'bad' : '' };
+
   const cards = [
     // ── Sample-level overview (4 cards) ─────────────────────
     { label: 'Total samples', value: fmtNum(total),
@@ -1506,6 +1564,7 @@ function renderKpis(rowsBase) {
     { label: 'Indicator failures', value: fmtNum(indicatorFails),
       sub: total > 0 ? pct(indicatorFails, total).toFixed(2) + '% of ' + fmtNum(total) + ' total' : 'no data',
       cls: indicatorFails > 0 ? 'warn' : 'good' },
+    testsCard,
     { label: 'Total failed test results',
       value: fmtNum(totalFailedTests),
       sub: nonCompliant > 0
@@ -1537,6 +1596,7 @@ function renderKpis(rowsBase) {
         ? fmtNum(topFailingTest.count) + ' failing samples · full rate ranking in the Official band'
         : 'no failing tests',
       cls: topFailingTest.count > 0 ? 'crit' : '' },
+    mostContamCard,
   ];
   document.getElementById('kpis').innerHTML = cards.map(c =>
     '<div class="kpi ' + c.cls + '"><div class="label">' + c.label + '</div><div class="value">' + c.value + '</div><div class="sub">' + c.sub + '</div></div>'
@@ -1628,6 +1688,55 @@ function renderTopSubtypes(rows) {
     margin: { l: 190, r: 90, t: 6, b: 30 },
     height: 70 + ordered.length * 34,
     xaxis: { gridcolor: '#e5e7eb', ticksuffix: '%', rangemode: 'tozero' },
+    yaxis: { automargin: true },
+  }, PLOTLY_CONFIG);
+}
+
+// Top failed tests as microbes — the test-level companion to the subtype list.
+// Counts, per organism/test, the number of NON-COMPLIANT samples that failed it
+// (a sample failing 2 organisms counts once for each). Honours the active
+// pathogen-only / microbe filter exactly like the subtype organism chips, so a
+// pathogen filter shows only pathogens. Filter- and year-aware (uses `rows`).
+function renderTopMicrobes(rows) {
+  const microFilter = state.microbe && state.microbe.size ? state.microbe : null;
+  const pathOnly = !!state.pathogen_only;
+  const counts = new Map();   // organism → failing-sample count
+  for (const r of rows) {
+    if (r[COLS.failure] !== 1) continue;
+    const seen = new Set();
+    for (const t of (r[COLS.failed_tests] || [])) {
+      if (pathOnly && !PATHOGEN_SET.has(t)) continue;
+      if (microFilter && !microFilter.has(t)
+          && !(microFilter.has(INDICATOR_TOKEN) && INDICATOR_SET.has(t))) continue;
+      if (seen.has(t)) continue;
+      seen.add(t);
+      counts.set(t, (counts.get(t) || 0) + 1);
+    }
+  }
+  const items = Array.from(counts.entries())
+    .map(([org, n]) => ({ org, n, path: PATHOGEN_SET.has(org) }))
+    .sort((a, b) => b.n - a.n).slice(0, 10);
+  const node = document.getElementById('top-microbes');
+  if (!items.length) {
+    Plotly.purge('top-microbes');
+    node.innerHTML = '<div class="muted" style="padding:20px">No failed tests in current view.</div>';
+    return;
+  }
+  const ordered = items.slice().reverse();   // #1 on top
+  reactChart('top-microbes', [{
+    type: 'bar', orientation: 'h',
+    x: ordered.map(it => it.n),
+    y: ordered.map(it => it.org),
+    marker: { color: ordered.map(it => MICROBE_COLORS[it.org] || (it.path ? '#dc2626' : '#0891b2')) },
+    text: ordered.map(it => it.n.toLocaleString() + (it.path ? '  · pathogen' : '  · indicator')),
+    textposition: 'outside', cliponaxis: false,
+    hovertemplate: '<b>%{y}</b><br>%{x:,} failing samples<extra></extra>',
+  }], {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#1c2742', size: 12, family: 'Segoe UI, Tahoma, sans-serif' },
+    margin: { l: 190, r: 110, t: 6, b: 30 },
+    height: 70 + ordered.length * 34,
+    xaxis: { gridcolor: '#e5e7eb', rangemode: 'tozero' },
     yaxis: { automargin: true },
   }, PLOTLY_CONFIG);
 }
@@ -2368,6 +2477,7 @@ function renderAll(rows) {
   renderDow(rows);
   renderRepeatTable(rows);
   renderTopSubtypes(rows);
+  renderTopMicrobes(rows);
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
