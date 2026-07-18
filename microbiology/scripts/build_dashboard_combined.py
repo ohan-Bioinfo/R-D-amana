@@ -914,7 +914,7 @@ tbody tr:hover { background: var(--sand-100); }
      level (e.g. Tabouleh, Feta cheese, refrigerator swab), so the GSO
      category isn\'t the only granularity. -->
 <div class="card full" style="margin-bottom:14px">
-  <h2>Top 10 most-contaminated subtypes <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active).</span></h2>
+  <h2>Top 10 most-contaminated subtypes <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--muted); font-size:11px">— grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active). 🧫 = environmental surface swab, not a food product.</span></h2>
   <div id="top-subtypes" style="overflow:auto"></div>
 </div>
 
@@ -1536,12 +1536,14 @@ function renderKpis(rowsBase) {
     }
     return best ? { name: best, nc: bn, total: bt, gso: bg, rate: 100 * bn / bt } : { name: null };
   })();
+  const _mcSwab = mostContam.gso === 'Environmental Swabs';
   const mostContamCard = {
     label: 'Most-contaminated sample',
-    value: '<span style="font-size:14px; font-weight:600" class="ar">' + truncate(mostContam.name, 26) + '</span>',
+    value: (_mcSwab ? '🧫 ' : '') + '<span style="font-size:14px; font-weight:600" class="ar">' + truncate(mostContam.name, 26) + '</span>',
     sub: mostContam.name
       ? fmtNum(mostContam.nc) + ' non-compliant of ' + fmtNum(mostContam.total)
-        + ' (' + mostContam.rate.toFixed(1) + '%) · ' + (mostContam.gso || '—')
+        + ' (' + mostContam.rate.toFixed(1) + '%) · '
+        + (_mcSwab ? 'environmental surface swab (not a food product)' : (mostContam.gso || '—'))
       : 'no sample with ≥5 in view',
     cls: mostContam.nc > 0 ? 'bad' : '' };
 
@@ -1681,14 +1683,17 @@ function renderTopSubtypes(rows) {
   const barColor = it => it.rate >= 50 ? '#dc2626' : it.rate >= 30 ? '#f97316' : '#facc15';
   const orgStr = it => it.organisms.length
     ? it.organisms.map(([o, cnt]) => o + ' · ' + cnt).join('<br>') : '—';
+  // Environmental swabs are surfaces (fridge, cutting table, hands) — not food
+  // products. Tag them 🧫 so they read as surfaces where they sit next to foods.
+  const isSwab = it => it.gso === 'Environmental Swabs';
   reactChart('top-subtypes', [{
     type: 'bar', orientation: 'h',
     x: ordered.map(it => it.rate),
-    y: ordered.map(it => it.name),
+    y: ordered.map(it => (isSwab(it) ? '🧫 ' : '') + it.name),
     marker: { color: ordered.map(barColor) },
     text: ordered.map(it => it.rate.toFixed(1) + '%  (' + it.nc + '/' + it.total + ')'),
     textposition: 'outside', cliponaxis: false,
-    customdata: ordered.map(it => [it.gso, orgStr(it)]),
+    customdata: ordered.map(it => [isSwab(it) ? 'Environmental surface swab (not a food product)' : it.gso, orgStr(it)]),
     hovertemplate: '<b>%{y}</b><br>%{customdata[0]}<br>%{x:.1f}% non-compliant<br>Organisms:<br>%{customdata[1]}<extra></extra>',
   }], {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
