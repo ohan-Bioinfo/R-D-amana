@@ -2351,6 +2351,7 @@ function renderMap(rows) {
         opacity: opacities,
       },
       name: label,
+      customdata: names,
     };
   }
 
@@ -2387,7 +2388,7 @@ function renderMap(rows) {
   }, { displayModeBar: true, modeBarButtonsToRemove: ['lasso2d', 'select2d'], responsive: true });
   const _mpNode = document.getElementById('chart_map');
   _mpNode.removeAllListeners && _mpNode.removeAllListeners('plotly_click');
-  _mpNode.on('plotly_click', e => { const s = e.points[0].data && e.points[0].data.name;
+  _mpNode.on('plotly_click', e => { const s = e.points[0].customdata;
     if (s) crossFilter('f_sector', 'sector', s); });
 }
 
