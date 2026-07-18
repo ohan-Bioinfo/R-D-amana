@@ -246,6 +246,28 @@ def _load_gso_corrections() -> dict:
 GSO_CORRECTIONS = _load_gso_corrections()
 
 
+# Per-sample_NAME GSO-category overrides — Muhannad's full-review sheet
+# (2026-07-18). He reviewed every distinct sample_name and re-assigned the
+# mis-classified ones. Applied AFTER the per-sample_id override but BEFORE the
+# native/sample_type/name-keyword derivation, so an explicit name ruling wins
+# over the automatic guess for every sample of that name, across both years.
+# Keyed by the stripped sample_name string.
+def _load_name_corrections() -> dict:
+    import csv
+    p = ROOT / "scripts" / "name_gso_corrections.csv"
+    out = {}
+    if p.exists():
+        with p.open(encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                nm = (row.get("sample_name") or "").strip()
+                cat = (row.get("gso_category") or "").strip()
+                if nm and cat:
+                    out[nm] = cat
+    return out
+
+NAME_CORRECTIONS = _load_name_corrections()
+
+
 def load_test_classification() -> dict:
     """Read pathogen/indicator sets from the 2025 schema YAML."""
     with SCHEMA_2025.open("r", encoding="utf-8") as f:
@@ -357,6 +379,10 @@ def build_data(df: pd.DataFrame) -> dict:
         # 0. Per-sample_id override (Muhannad's targets) — wins over everything.
         _sid = _val(getattr(r, "sample_id", None))
         gso_cat = GSO_CORRECTIONS.get(str(_sid).strip().lower()) if _sid is not None else None
+        if gso_cat is None:
+            _nm = _val(getattr(r, "sample_name", None))
+            if _nm is not None:
+                gso_cat = NAME_CORRECTIONS.get(str(_nm).strip())
         if gso_cat is None:
             gso_cat = _val(getattr(r, "gso_category_name_en", None))
         if gso_cat is None:

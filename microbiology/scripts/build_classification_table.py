@@ -18,7 +18,7 @@ from pathlib import Path
 import pandas as pd
 
 from build_dashboard_combined import (
-    GSO_CORRECTIONS, SAMPLE_TYPE_TO_GSO, classify_sample_name,
+    GSO_CORRECTIONS, NAME_CORRECTIONS, SAMPLE_TYPE_TO_GSO, classify_sample_name,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -42,6 +42,11 @@ def classify(row) -> tuple[str, str]:
         cat = GSO_CORRECTIONS.get(str(sid).strip().lower())
         if cat:
             return cat, "id-correction"
+    nm = _val(row.get("sample_name"))
+    if nm is not None:
+        cat = NAME_CORRECTIONS.get(str(nm).strip())
+        if cat:
+            return cat, "name-correction"
     native = _val(row.get("gso_category_name_en"))
     if native is not None:
         return native, "native-2024"
@@ -58,6 +63,7 @@ def classify(row) -> tuple[str, str]:
 
 SRC_COLOR = {
     "id-correction":          "#7c3aed",
+    "name-correction":        "#be185d",
     "native-2024":            "#0891b2",
     "sample_type-bucket":     "#059669",
     "name-keyword":           "#d97706",
