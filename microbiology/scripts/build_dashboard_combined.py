@@ -888,6 +888,7 @@ tbody tr:hover { background: var(--sand-100); }
   <span class="year-bar-label">Year</span>
   <div class="chips" id="f_year"></div>
   <span class="filter-pill" id="filter_status">All filters cleared</span>
+  <span class="filter-pill" style="background:var(--sand-100)">💡 click any chart to filter</span>
   <button class="btn-reset" id="btn_reset" style="margin-left:auto" disabled>Reset all filters</button>
 </div>
 
@@ -1141,6 +1142,21 @@ function buildChips(parentId, items, stateKey, valueMap) {
     });
     parent.appendChild(el);
   });
+}
+
+// Cross-filter: a chart click toggles the SAME state Set the manual chips use,
+// then re-syncs that dimension's chip so the UI matches, then re-renders.
+function crossFilter(parentId, stateKey, value) {
+  if (value == null || value === '') return;
+  const set = state[stateKey];
+  const v = (stateKey === 'years') ? parseInt(value, 10) : value;
+  if (set.has(v)) set.delete(v); else set.add(v);
+  const parent = document.getElementById(parentId);
+  if (parent) parent.querySelectorAll('.chip').forEach(el => {
+    const cv = (stateKey === 'years') ? parseInt(el.dataset.value, 10) : el.dataset.value;
+    if (cv === v) el.classList.toggle('active', set.has(v));
+  });
+  applyFilters();
 }
 
 document.getElementById('f_date_from').value = FACETS.date_min;
@@ -1830,6 +1846,9 @@ function renderTopMicrobes(rows) {
     xaxis: { gridcolor: '#e5e7eb', rangemode: 'tozero' },
     yaxis: { automargin: true },
   }, PLOTLY_CONFIG);
+  const _tmNode = document.getElementById('top-microbes');
+  _tmNode.removeAllListeners && _tmNode.removeAllListeners('plotly_click');
+  _tmNode.on('plotly_click', e => crossFilter('f_microbe', 'microbe', e.points[0].y));
 }
 
 // Distinct colour per microbe — picked to stay readable on the light theme
@@ -2046,6 +2065,9 @@ function renderSeverityMonth(rows) {
     margin: { l: 50, r: 18, t: 10, b: 50 },
     xaxis: { gridcolor: '#e5e7eb' }, yaxis: { gridcolor: '#e5e7eb' },
   }, PLOTLY_CONFIG);
+  const _smNode = document.getElementById('chart_severity_month');
+  _smNode.removeAllListeners && _smNode.removeAllListeners('plotly_click');
+  _smNode.on('plotly_click', e => crossFilter('f_severity', 'severity', e.points[0].data.name));
 }
 
 function renderChains(rows) {
@@ -2363,6 +2385,10 @@ function renderMap(rows) {
     margin: { l: 0, r: 0, t: 0, b: 0 },
     showlegend: false,
   }, { displayModeBar: true, modeBarButtonsToRemove: ['lasso2d', 'select2d'], responsive: true });
+  const _mpNode = document.getElementById('chart_map');
+  _mpNode.removeAllListeners && _mpNode.removeAllListeners('plotly_click');
+  _mpNode.on('plotly_click', e => { const s = e.points[0].data && e.points[0].data.name;
+    if (s) crossFilter('f_sector', 'sector', s); });
 }
 
 // Shared helper: stacked-by-year volume bars + single non-compliance % line
@@ -2407,6 +2433,11 @@ function _renderVolumeVsRate(domId, items, labelKey, opts) {
     hovermode: 'x unified',
     bargap: 0.20,
   }, PLOTLY_CONFIG);
+  if (labelKey === 'sector') {
+    const _svNode = document.getElementById(domId);
+    _svNode.removeAllListeners && _svNode.removeAllListeners('plotly_click');
+    _svNode.on('plotly_click', e => crossFilter('f_sector', 'sector', e.points[0].x));
+  }
 }
 
 function renderGsoCategory(rows) {
@@ -2474,6 +2505,9 @@ function renderGsoCategory(rows) {
     legend: { orientation: 'h', y: -0.10, font: { size: 11 } },
     bargap: 0.30,
   }, PLOTLY_CONFIG);
+  const _gcNode = document.getElementById('chart_gso_cat');
+  _gcNode.removeAllListeners && _gcNode.removeAllListeners('plotly_click');
+  _gcNode.on('plotly_click', e => crossFilter('f_gso_category', 'gso_category', e.points[0].y));
 }
 
 function renderSector(rows) {
