@@ -274,7 +274,7 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .plate-card{position:relative;padding:14px;border-radius:18px;
   border:1px solid var(--hair);
   background:radial-gradient(circle at 50% 46%, #fbfdfb 0%, #eef2ec 62%, #e2e8e0 100%);}
-.dish{position:relative;aspect-ratio:1/1;max-width:568px;margin:0 auto;border-radius:999px;
+.dish{position:relative;aspect-ratio:1/1;max-width:660px;margin:0 auto;border-radius:999px;
   box-shadow:inset 0 0 0 1px var(--green-line), inset 0 0 44px rgba(0,72,48,.10),
              0 18px 40px -22px rgba(0,60,40,.42);
   background:
@@ -283,8 +283,9 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
   overflow:hidden}
 #plate{width:100%;height:100%}
 .nucleus{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3}
-.nucleus .card{text-align:center;transform:translateY(-1px);max-width:150px}
-.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:26px;
+.nucleus .card{text-align:center;transform:translateY(-1px);max-width:172px;padding:12px 16px;
+  border-radius:999px;background:radial-gradient(closest-side,rgba(251,252,250,.92),rgba(251,252,250,.5) 62%,transparent)}
+.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:23px;
   letter-spacing:-1px;color:var(--green-2);line-height:1;text-shadow:0 1px 3px rgba(255,255,255,.9)}
 .nucleus .lab{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
   margin-top:3px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
@@ -443,6 +444,7 @@ function colorVals(){
 }
 const layout={margin:{l:6,r:6,t:6,b:6},paper_bgcolor:'rgba(0,0,0,0)',
   font:{family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif",color:'#1b2320',size:11},
+  uniformtext:{minsize:11,mode:'hide'},
   sunburstcolorway:['#1f9d63'],extendsunburstcolorway:true};
 const config={displayModeBar:false,responsive:true};
 
