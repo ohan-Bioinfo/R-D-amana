@@ -1868,9 +1868,12 @@ try {
 
 
 def _logo_data_uri() -> str:
-    """Embed the Riyadh Municipality logo as a base64 data URI."""
+    """Embed the Riyadh Municipality logo as a base64 data URI (in-tree asset,
+    with a fallback to the legacy absolute path)."""
     import base64
-    p = Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/amana.jpg")
+    p = ROOT / "assets" / "riyadh_emblem.jpg"
+    if not p.exists():
+        p = Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/amana.jpg")
     if not p.exists():
         return ""
     return "data:image/jpeg;base64," + base64.b64encode(p.read_bytes()).decode("ascii")

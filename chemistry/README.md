@@ -2,16 +2,26 @@
 
 Fresh start (2026-06-04) on the chemistry pipeline using the lab's "updated"
 xlsx files. The previous pipeline was discarded per user request; v2 covers
-**2024 + 2025** across 7 analytical sections, with **Honey** as a 2025-only
-new section.
+**2024 + 2025** across 8 analytical sections (aflatoxins, food_chemistry,
+heavy_metals, honey, hormones_antibiotics, jam, pesticides, water_analysis).
+
+> Audited & rebuilt 2026-08-07. Full session log: `CHEM_NOTES_2026-08-07.md`.
 
 ## Status
 
-- **16,069 rows total** across 7 sections × 2 years = 12 parquets
-  (Honey + Hormones are 2025-only)
-- 99–100% sample_id coverage
-- **Row-for-row verified** against raw xlsx
-- Dashboard: `reports/chemistry_dashboard.html` (3.7 MB, with year filter)
+- **15,876 cleaned rows** across 8 sections × 2 years = 14 parquets
+  (honey now 2024+2025; jam split out for 2024; hormones 2025-only).
+- Build is **deterministic** — `clean_chemistry.py --section all` regenerates all
+  14 parquets byte-identical (verified 2026-08-07).
+- **Row-for-row verified** against raw xlsx.
+- **Runs on the microbiology venv** — `../microbiology/.venv/bin/python` (there is
+  no chemistry-local venv).
+- Deliverables in `reports/`:
+  - **`chemistry_dashboard.html`** — interactive decision dashboard (year/section filters, Riyadh map).
+  - **`chemistry_sunburst.html`** — the "Assay Plate" zoomable sunburst
+    (Year → Section → Category → failing analyte), Riyadh-emblem branded, bilingual,
+    with a shareable deep-link. Counts **unique samples** (pesticides collapsed from
+    per-pesticide rows → 15,297 samples; overall 5.8% non-compliant).
 
 ### Per-section row counts
 
@@ -44,32 +54,33 @@ changes, (b) better detection, or (c) real contamination spike.
 
 ```
 chemistry/
-├── raw/                  7 xlsx source files (6 from 'updated chemistry data' + water from prior set)
-├── schemas/              chem_<section>.yaml × 7
-├── scripts/
-│   ├── _common.py        shared utilities (text normalisation, sample-ID, sheet iteration)
-│   ├── clean_chemistry.py  generic schema-driven cleaner
-│   └── build_dashboard.py
-├── cleaned/              chem_<section>_2025.parquet × 7
-└── reports/
-    ├── chem_<section>_2025.md  per-section audit summary
-    └── chemistry_dashboard.html
+├── raw/{2024,2025}/      source xlsx files
+├── schemas/              chem_<section>.yaml × 8
+├── assets/riyadh_emblem.jpg   logo (dashboard + sunburst)
+├── vendor/               offline-inlined Plotly + fonts (for the sunburst)
+├── scripts/              5 active: _common, categories, sectors (libs) +
+│                         clean_chemistry, build_dashboard, build_chem_sunburst
+│                         + category_corrections.csv (input) + tests/
+├── cleaned/              chem_<section>_<year>.parquet × 14
+├── reports/              2 deliverables + chem_<section>_<year>.md audit summaries
+└── archive/              retired one-off audit tools + validation workbooks (single tree)
 ```
 
 ## Pipeline
 
+Run with the microbiology venv (`PY=../microbiology/.venv/bin/python`):
+
 ```bash
-# Clean every section
-.venv/bin/python scripts/clean_chemistry.py --section all
-
+# Clean every section (deterministic; ~30s)
+$PY scripts/clean_chemistry.py --section all
 # Clean one section (debugging)
-.venv/bin/python scripts/clean_chemistry.py --section heavy_metals
-
-# Rebuild dashboard
-.venv/bin/python scripts/build_dashboard.py
+$PY scripts/clean_chemistry.py --section heavy_metals
+# Rebuild the two deliverables
+$PY scripts/build_dashboard.py         # → reports/chemistry_dashboard.html
+$PY scripts/build_chem_sunburst.py     # → reports/chemistry_sunburst.html
 ```
 
-The venv is shared with the microbiology workstream at `food_analysis/Iter-2/.venv/`.
+The venv is shared with the microbiology workstream at `../microbiology/.venv/`.
 
 ## Duplicates and header-leak guards
 
