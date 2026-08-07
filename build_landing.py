@@ -194,7 +194,12 @@ footer{border-top:1px solid var(--hair)}
         </a>
         <a class="entry" href="microbiology/reports/microbiology_sunburst.html">
           <span class="ico">◎</span>
-          <span class="txt"><span class="lb">Interactive</span><span class="sub">zoomable culture plate</span></span>
+          <span class="txt"><span class="lb">Interactive</span><span class="sub">Plotly · zoomable culture plate</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="microbiology/reports/microbiology_sunburst2.html">
+          <span class="ico">◐</span>
+          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
           <span class="arrow">→</span>
         </a>
       </div>
@@ -223,7 +228,12 @@ footer{border-top:1px solid var(--hair)}
         </a>
         <a class="entry" href="chemistry/reports/chemistry_sunburst.html">
           <span class="ico">◎</span>
-          <span class="txt"><span class="lb">Interactive</span><span class="sub">zoomable assay plate</span></span>
+          <span class="txt"><span class="lb">Interactive</span><span class="sub">Plotly · zoomable assay plate</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="chemistry/reports/chemistry_sunburst2.html">
+          <span class="ico">◐</span>
+          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
           <span class="arrow">→</span>
         </a>
       </div>
