@@ -274,7 +274,7 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .plate-card{position:relative;padding:14px;border-radius:18px;
   border:1px solid var(--hair);
   background:radial-gradient(circle at 50% 46%, #fbfdfb 0%, #eef2ec 62%, #e2e8e0 100%);}
-.dish{position:relative;aspect-ratio:1/1;max-width:660px;margin:0 auto;border-radius:999px;
+.dish{position:relative;aspect-ratio:1/1;max-width:760px;margin:0 auto;border-radius:999px;
   box-shadow:inset 0 0 0 1px var(--green-line), inset 0 0 44px rgba(0,72,48,.10),
              0 18px 40px -22px rgba(0,60,40,.42);
   background:
@@ -444,7 +444,6 @@ function colorVals(){
 }
 const layout={margin:{l:6,r:6,t:6,b:6},paper_bgcolor:'rgba(0,0,0,0)',
   font:{family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif",color:'#1b2320',size:11},
-  uniformtext:{minsize:11,mode:'hide'},
   sunburstcolorway:['#1f9d63'],extendsunburstcolorway:true};
 const config={displayModeBar:false,responsive:true};
 
@@ -458,8 +457,8 @@ function draw(){
     marker:{colors:vals,colorscale:c.scale,cmin:0,cmax:c.cmax,line:{color:'#f2f6f0',width:1}},
     leaf:{opacity:0.96},
     text:NODES.text,
-    texttemplate:'%{text}',
-    textfont:{size:12.5,family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif"},
+    texttemplate:'<b>%{text}</b>',
+    textfont:{size:14,family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif"},
     insidetextorientation:'auto',
     hovertemplate:(metric==='vol')
       ? '<b>%{label}</b><br>%{value:,} samples<extra></extra>'
