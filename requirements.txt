@@ -1,0 +1,2 @@
+# R&D hub server uses the Python standard library only — no dependencies.
+# This file signals Railway/Nixpacks to use the Python builder.
