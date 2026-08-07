@@ -1,152 +1,93 @@
-# Riyadh Food-Safety Lab Data — Iter-2
+# Riyadh Municipality — Microbiology Lab Data
 
-Cleans and analyses Riyadh municipality food-safety lab inspection data
-(microbiological tests vs. **GSO 1016** standards). Stacks **2023 + 2024 +
-2025** into a single self-contained interactive HTML dashboard.
+Cleans and analyses Riyadh Municipality (أمانة منطقة الرياض) food-safety
+**microbiology** lab data (tests vs. **GSO 1016** standards) into two
+self-contained, shareable HTML deliverables.
+
+> Rebuilt & audited 2026-08-07. Full session log: `MICRO_NOTES_2026-08-07.md`.
 
 ## Status
 
-| Year | Source format | Samples (wide) | Per-test rows (long) | GSO-decodable | Notes |
-|---:|---|---:|---:|---:|---|
-| 2023 | 80 monthly xlsx files (Aug–Dec only) | **2,938** | 10,310 | 33% | Aug–Oct forms have no GSO code; no facility data |
-| 2024 | 183 monthly xlsx files (Jan–Dec) | **8,094** | 31,583 | 85% | Header row varies (6 in Jan, 12 Feb–Dec); no facility data |
-| 2025 | Single consolidated xlsx | **11,564** | – (already wide) | 0% (no codes at source) | Has full facility + sector + sample-type metadata |
-| **Combined** | — | **22,596** | — | — | Stacked on 43 shared columns |
+| Year | Source | Samples | Notes |
+|---:|---|---:|---|
+| 2024 | monthly xlsx (`2024-original/2024/`) | **9,316** | GSO code native |
+| 2025 | single xlsx (`2025-original/Data 2025.xlsx`) | **11,564** | GSO derived (no source code); full facility + 5-sector metadata |
+| **Combined** | — | **20,880** | overall non-compliance **28.0%** |
 
-## File layout
+*(2023 was dropped from this workstream. Any 22,596 / 19,658 / `data_combined_dashboard.html`
+references in old docs are stale — the canonical figure is 20,880.)*
 
-```
-food_analysis/Iter-2/
-├── README.md                              ← this file
-│
-├── 2023/                                  ← source xlsx files (5 monthly folders)
-├── 2024-original/2024/                    ← source xlsx files (12 monthly folders)
-├── 2025-original/Data 2025.xlsx           ← single source xlsx
-│   2025-original/Annual Report 2025.xlsx
-│
-├── schemas/
-│   ├── lab_data_2024_v2.yaml              ← shared by 2023 + 2024 cleaning
-│   ├── lab_data_2025_v1.yaml              ← 2025-specific + pathogen/indicator + sector taxonomy
-│   └── gso_1016_reference.yaml            ← parsed from Classification.html
-│
-├── scripts/                               ← active pipeline (see below)
-│
-├── cleaned/                               ← output parquets (zstd-compressed)
-│   ├── data2023.parquet         (wide, per-sample)
-│   ├── data2023_long.parquet    (long, per-sample-test)
-│   ├── data2024.parquet
-│   ├── data2024_long.parquet
-│   └── data2025.parquet         (wide only; source is already per-sample)
-│
-├── reports/
-│   ├── data_combined_dashboard.html       ← MAIN OUTPUT — open in any browser
-│   ├── data<YEAR>_clean_report.md         ← per-file audit per year
-│   ├── data2025_diff.md / _review.md      ← 2025-specific cleaning audit
-│   └── data2025_vs_annual_report.{md,csv} ← 2025 vs published annual report comparison
-│
-└── archive/                               ← deprecated v1 scripts, schemas, dashboards
-```
+## Deliverables (in `reports/`)
 
-## Active pipeline
+- **`microbiology_dashboard.html`** — the interactive decision dashboard
+  (filters, cross-filtering, URL-hash views + bookmarks, Riyadh map).
+- **`microbiology_sunburst.html`** — the "Culture Plate" zoomable sunburst view
+  (Year → Sector → GSO Category → Organism), Riyadh-emblem branded, bilingual,
+  with a shareable deep-link.
 
-End-to-end build from sources, **in this order**:
+Both are one self-contained file each (Plotly + fonts inlined from `vendor/`);
+share the file, open in any browser, no server.
+
+## Rebuild
 
 ```bash
-# 1. Parse the GSO 1016 standards table (only re-run if Classification.html changes)
-.venv/bin/python scripts/parse_gso_reference.py
-
-# 2. Clean each year. The 2024 cleaner is year-parameterised and handles 2023 too.
-.venv/bin/python scripts/clean_2024.py --year 2023
-.venv/bin/python scripts/clean_2024.py --year 2024
-.venv/bin/python scripts/clean_2025.py 2025-original/'Data 2025.xlsx' \
-    cleaned/data2025.parquet reports/data2025_diff.md
-
-# 3. Enrich each year's wide parquet (pathogen/indicator/severity/repeat-offender + sector=null for pre-2025)
-.venv/bin/python scripts/enrich_2024.py --year 2023
-.venv/bin/python scripts/enrich_2024.py --year 2024
-
-# 4. Apply the GSO reference (product names, categories, limits, panel-completeness audit)
-.venv/bin/python scripts/enrich_gso.py
-
-# 5. Build the combined dashboard (auto-discovers every cleaned/data<YEAR>.parquet)
-.venv/bin/python scripts/build_dashboard_combined.py
+cd microbiology
+./scripts/refresh.sh                              # full: re-clean 2024+2025 → enrich → dashboard (~3 min)
+.venv/bin/python scripts/build_micro_sunburst.py      # rebuild the sunburst view
 ```
+`refresh.sh` regenerates the parquets **deterministically** (byte-identical) and
+rebuilds `microbiology_dashboard.html`. The demo is a separate command.
 
-After step 5, open `reports/data_combined_dashboard.html` in a browser.
+> **Env:** `.venv` was repaired 2026-08-07 after the project moved to
+> `/home/lab/storage/...` (the interpreter symlinks were dangling). `.venv/bin/python`
+> works normally now.
 
-## Active scripts (in `scripts/`)
+## Active scripts (`scripts/` — 10 files)
 
+**Core build**
 | Script | Purpose |
 |---|---|
-| `clean_2024.py` | Year-parameterised cleaner for the 2023+2024 form shape. CLI: `--year <YYYY>`. |
-| `clean_2025.py` | 2025-specific cleaner (single flat xlsx, different schema). |
-| `enrich_2024.py` | Adds pathogen/indicator/severity/repeat-offender columns. CLI: `--year <YYYY>`. |
-| `enrich_gso.py` | Auto-iterates every `data<YEAR>.parquet`; adds GSO product info, panel-completeness flag, lab-vs-GSO-limit cross-check. |
-| `parse_gso_reference.py` | Parses `Classification.html` → `schemas/gso_1016_reference.yaml`. |
-| `build_dashboard_combined.py` | Builds the single self-contained dashboard from all years. |
-| `audit_filters.py` | Sanity-check script: simulates every dashboard filter against the parquets and reports counts. |
-| **Auxiliary tools** | |
-| `compare_against_annual_report.py` | Compares 2025 cleaned data to the published Annual Report. |
-| `build_summary_pack.py` | Generates summary CSVs + figures (one-off). |
-| `export_by_keyword.py` | Exports samples matching free-text keywords. |
-| `export_csv_2025.py` | One-off 2025 CSV export. |
-| `explore.py` | Original exploratory script (kept for reference). |
+| `clean_2024.py` | Year-parameterised cleaner for the 2024 monthly forms. `--year 2024`. |
+| `clean_2025.py` | 2025 cleaner (single flat xlsx). Args: `<src.xlsx> <out.parquet> <diff.md>`. |
+| `enrich_2024.py` | Adds pathogen/indicator/severity/repeat-offender columns. `--year 2024`. |
+| `enrich_gso.py` | Applies GSO product info, panel-completeness, lab-vs-GSO cross-check. |
+| `parse_gso_reference.py` | One-time parse of the GSO 1016 table → `schemas/gso_1016_reference.yaml` (only re-run if the source table changes). |
+| `build_dashboard_combined.py` | Builds `microbiology_dashboard.html` from all `cleaned/data<YEAR>.parquet`. |
 
-## Dashboard features (`data_combined_dashboard.html`)
+**Demo**
+| `build_micro_sunburst.py` | Builds the sunburst view (`microbiology_sunburst.html`). |
+| `demo_assets.py` | Inlines vendored Plotly + fonts into demos (offline). |
+| `vendor_assets.py` | Populates `vendor/` with Plotly + fonts (run once). |
 
-**Filters** (grouped into 6 sections):
-- **Year** — 2023 / 2024 / 2025 chips (top bar)
-- **Time & Compliance** — date range, compliance (pass/fail), severity tier
-- **Location (2025 only)** — sector, municipality type, municipality multi-select
-- **Sample product** — sample type (2025), GSO category (2024), GSO product multi-select (2024)
-- **Microbe** — per-organism chips (Salmonella, S. aureus, E.coli, Listeria, etc.) + "Indicator" meta-chip
-- **GSO 1016 audit (2024-only)** — show only panel-incomplete, show only lab-vs-GSO disagreement, pathogen-only, repeat offender
-- **Quick excludes** — raw meat & poultry, total bacterial count, yeasts & moulds, animal feed, indicator-only samples
+**Shared library**
+| `build_classification_table.py` | `classify()` / severity sets, reused by the demo and dashboard. |
 
-**Visualisations:**
-- Riyadh map with 16 canonical sub-municipality bubbles (3 metrics × 3 view modes × 3 tile styles)
-- Trend over time (non-compliance %, pathogen %, volume)
-- Year-on-year severity comparison
-- Sector breakdown
-- GSO category breakdown
-- Top chains by non-compliance (2025)
-- Failed-test bar (pathogen vs indicator coloured)
-- Municipality failure rate
-- Day-of-week cadence
-- Repeat-offender table
-- Sample drill-down (200-row table)
+**Build inputs (not scripts):** `scripts/gso_category_corrections.csv`,
+`scripts/name_gso_corrections.csv` (per-sample GSO overrides, read by the dashboard builder).
 
-## Schema notes
+## Layout
 
-### `lab_data_2024_v2.yaml`
-Used for both 2023 and 2024. Detects header row dynamically (row 6 in Jan-2024 + all of 2023; row 12 in Feb–Dec 2024) by scanning for `M.S.No`. Column mapping is **name-based** rather than position-based, so monthly format drift (extra `104` column, `الاختبارات التأكيدية` block, missing `Restaurant name` / `GSO code` etc.) is handled gracefully — required vs optional columns are explicit in the schema.
+```
+microbiology/
+├── 2024-original/2024/            raw source xlsx (12 monthly folders)
+├── 2025-original/                 Data 2025.xlsx, Annual Report 2025.xlsx, Data_2025.csv
+├── schemas/                       lab_data_2024_v2.yaml, lab_data_2025_v1.yaml, gso_1016_reference.yaml
+├── assets/riyadh_emblem.jpg       Riyadh Municipality logo (used by dashboard + demo)
+├── vendor/                        offline-inlined Plotly 2.35.2 + fonts
+├── scripts/                       10 active scripts + refresh.sh + correction CSVs
+├── cleaned/                       data2024.parquet, data2025.parquet, data2024_long.parquet
+├── reports/                       the 2 deliverables + 3 pipeline audit reports
+└── archive/                       everything retired (single tree — see below)
+```
 
-Canonical test names (Arabic-first) include 2024-introduced pathogens: Listeria, Clostridium perfringens/botulinum, Campylobacter, Vibrio, Aeromonas, E.coli O157.
+## Archive (`archive/`)
 
-### `lab_data_2025_v1.yaml`
-2025-specific shape. Includes:
-- Pathogen / indicator classification (used by both years' enrichment)
-- Sector taxonomy (5 sectors × 16 sub-municipalities — authoritative from user)
-- Sample-type bucket keywords
-- Repeat-offender rules (90-day window, threshold ≥ 2)
-
-### `gso_1016_reference.yaml`
-Parsed from `Classification.html` (the user-supplied GSO 1016 standards table). **15 product categories, 130 GSO codes, 485 test-requirement rows**. Each code has English/Arabic names, sub-products, required tests, and numeric limits.
-
-## Known caveats per year
-
-**2023:** Only Aug–Dec covered. No facility/sector/municipality data. Aug–Oct forms have no GSO code. The Sep-2023 file `Result 05092023.xlsx` could not be parsed (sheet date unparseable).
-
-**2024:** No facility/sector/municipality data anywhere — the source forms simply didn't capture it. 20 empty xlsx files were skipped. **30% of samples** ran the full GSO panel; **70 samples** show lab marking valid but result exceeds GSO limit (worth flagging upstream).
-
-**2025:** No GSO code field at source — product cannot be decoded into the GSO 1016 taxonomy. Has rich facility data (chain/branch split), municipality, and the 5 canonical sectors.
-
-## Adding a new year
-
-1. Drop the source xlsx files under e.g. `2026/` (with monthly subfolders, similar to 2023/).
-2. Add a `YEAR_CONFIG` entry in `scripts/clean_2024.py` pointing to the new source dir.
-3. If filenames use a new pattern, extend `FILENAME_PATTERNS` in `clean_2024.py`.
-4. Run steps 2–5 of the active pipeline above (substituting `--year 2026`).
-5. The dashboard builder will auto-discover the new parquet.
-
-If the new year follows the 2025 single-flat-xlsx shape instead, copy `clean_2025.py` as a starting point.
+Single tree for everything retired. Notable subfolders:
+- `validation-tools-2026-07/` — one-off review/audit workbook generators + `audit_filters.py`
+  (from completed 2026-07 validation rounds; import from `scripts/`, so run with
+  `scripts/` on `PYTHONPATH` if ever needed again).
+- `reports-validation-2026-07/` — their `*_to_fill.xlsx` outputs + old audit `.md`/`.html`.
+- `demos-2026-07/` — the two retired demos (time-lapse map, chromatogram Sankey) + NOTE.md.
+- `legacy-charts-v0/` — the original numbered chart scripts + PNGs (superseded by the dashboard).
+- `source-zips/`, `cleaned/`, `reports/`, `schemas/`, `scripts/`, `old-output/` — earlier iterations.
+```

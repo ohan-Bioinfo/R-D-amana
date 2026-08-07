@@ -16,7 +16,13 @@ import pandas as pd
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
-CLASS_HTML = Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/Classification.html")
+# Source table lives outside the pipeline; re-run only when it changes. Look for
+# it in-tree first, then fall back to the legacy absolute path.
+CLASS_HTML = next((p for p in (
+    ROOT / "schemas" / "Classification.html",
+    ROOT.parent / "Docoment-organisation" / "Classification.html",
+    Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/Classification.html"),
+) if p.exists()), ROOT / "schemas" / "Classification.html")
 OUT_YAML = ROOT / "schemas" / "gso_1016_reference.yaml"
 
 SECTION_HEADER_RE = re.compile(r"^(\d+)\s*\.\s*(.+?)(?:\s*\(([A-Z])\))?\s*$")

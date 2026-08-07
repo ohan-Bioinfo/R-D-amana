@@ -2830,8 +2830,11 @@ def main() -> None:
     import base64
     payload_json = json.dumps(payload, ensure_ascii=False, default=str)
     html = TEMPLATE.replace("__PAYLOAD__", payload_json)
-    # Embed the Riyadh Municipality (Amana) logo as a base64 data URI
-    logo_p = Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/amana.jpg")
+    # Embed the Riyadh Municipality (Amana) logo as a base64 data URI.
+    # In-tree asset first; fall back to the legacy absolute path if present.
+    logo_p = ROOT / "assets" / "riyadh_emblem.jpg"
+    if not logo_p.exists():
+        logo_p = Path("/home/bioinfo/Documents/Data-Analysis-Muhannad/amana.jpg")
     logo_uri = ("data:image/jpeg;base64," + base64.b64encode(logo_p.read_bytes()).decode("ascii")
                 if logo_p.exists() else "")
     html = html.replace("__LOGO_DATA_URI__", logo_uri)

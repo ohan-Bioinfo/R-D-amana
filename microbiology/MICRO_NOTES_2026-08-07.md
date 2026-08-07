@@ -1,0 +1,116 @@
+# Microbiology — session notes & folder audit (2026-08-07)
+
+Working **microbiology only** this session. Data cleaning/classification and the
+main dashboard were already done (July); this pass finished the demo, fixed a
+branding bug, repaired the toolchain, and tidied the folder ahead of moving to
+chemistry.
+
+---
+
+## What we did
+
+1. **Kept & enhanced the zoomable sunburst view** (`scripts/build_micro_sunburst.py`
+   → `reports/microbiology_sunburst.html`). Rebranded to the **Riyadh Municipality
+   emblem** (`assets/riyadh_emblem.jpg`) and its palette — green `#006040`,
+   periwinkle `#8e9fc7`, white — Arabic-forward/bilingual chrome. Added:
+   - **clickable breadcrumb** (jump back to any level),
+   - **volume** colour metric (contamination / pathogen / volume),
+   - **centre "nucleus" readout** (headline stat for the focused segment),
+   - **ring legend** (Year · Sector · Category · Organism),
+   - a **live colorbar** and zoom-aware **label thinning**,
+   - a **shareable deep-link** — the current zoom is written to the URL hash
+     (`#f=<node id>`) and restored on load.
+   Self-contained (vendored Plotly + fonts), reconciles to **20,880** samples
+   (2024 = 9,316 · 2025 = 11,564), overall non-compliance **28.0%**.
+   Verified: `node --check` passes; headless render + a deep-linked zoom (2025 →
+   Central, 4,703 samples, 25.0%) both check out.
+
+2. **Retired the other two demos.** The time-lapse map and the chromatogram
+   Sankey were moved to `archive/demos-2026-07/` with a `NOTE.md` explaining all
+   three and why the sunburst won.
+
+3. **Fixed a dashboard branding bug (QA).** `build_dashboard_combined.py`
+   hard-coded the emblem at the old `/home/bioinfo/...` path, so the last
+   dashboard build shipped **with no logo**. Repointed to the in-tree
+   `assets/riyadh_emblem.jpg` (legacy path kept as fallback) and rebuilt — logo
+   now renders; dashboard reconciles to **20,880**, JS clean, build stamp
+   07 Aug 2026. Demo and dashboard now agree on totals.
+
+4. **Repaired the venv.** The project moved from `/home/bioinfo/Documents/...`
+   to `/home/lab/storage/...`, which broke `.venv/bin/python`. Recreated the
+   interpreter symlinks → `/usr/bin/python3.12`; pandas 3.0.2 / pyarrow 24 intact.
+   Rebuild with `.venv/bin/python scripts/build_micro_sunburst.py` (or the dashboard).
+
+5. **Sorted the folder** (see inventory below): consolidated the two archive
+   trees into one, and de-duped a source zip.
+
+6. **Verified the build is reproducible (hardening).** Ran `./scripts/refresh.sh`
+   end-to-end from source (~3 min): regenerated all three parquets
+   **byte-identical** (md5 match) → 20,880 rows. The pipeline is deterministic.
+   Fixed the last stale absolute path (`parse_gso_reference.py` →
+   `Classification.html`, now in-tree-first with fallback).
+
+7. **De-cluttered the accumulated fix-round files.** Iterative validation had
+   left ~23 scripts + ~22 reports. Archived everything not part of the build:
+   - **11 one-off scripts** → `archive/validation-tools-2026-07/` (+ NOTE.md):
+     the review/audit workbook generators, `explore.py`, `export_*`, and
+     `audit_filters.py` (stale vs the current dashboard facets).
+   - **~15 outputs** → `archive/reports-validation-2026-07/`: the `*_to_fill.xlsx`,
+     validation xlsx, and old June audit `.md`/`.html`.
+   Result: `scripts/` 23 → **10 active** (build + demo + shared lib only);
+   `reports/` ~22 → **5** (2 deliverables + 3 pipeline audit reports).
+   Both deliverables re-verified to build after the moves. README fully rewritten.
+
+> **Correction to `docs/change-notes-2026-07.md`:** that doc lists micro as
+> 19,658 rows (2024 = 8,094). Stale — the parquets were re-cleaned 2026-07-18.
+> The current, canonical count is **20,880 (2024 = 9,316 · 2025 = 11,564)**.
+
+---
+
+## Folder inventory / audit
+
+### Active (do not archive)
+| Path | Role |
+|---|---|
+| `2024-original/2024/`, `2025-original/*.xlsx,*.csv` | raw source data |
+| `cleaned/data2024.parquet`, `data2025.parquet`, `data2024_long.parquet` | cleaned working data (canonical; edit source here) |
+| `schemas/` | `lab_data_2024_v2.yaml`, `lab_data_2025_v1.yaml`, `gso_1016_reference.yaml` |
+| `assets/riyadh_emblem.jpg` | **new** — in-tree Riyadh Municipality logo used by dashboard + demo |
+| `vendor/` | offline-inlined Plotly 2.35.2 + fonts (keeps HTML self-contained) |
+| `scripts/` | pipeline + generators — key entrypoints below |
+| `reports/microbiology_dashboard.html` | **the deliverable dashboard** |
+| `reports/microbiology_sunburst.html` | **the deliverable sunburst** |
+| `scripts/refresh.sh`, `README_refresh.md` | one-command rebuild |
+
+Key script entrypoints: `clean_2024.py`, `clean_2025.py`, `enrich_2024.py`,
+`enrich_gso.py`, `build_classification_table.py`, `build_dashboard_combined.py`,
+`build_micro_sunburst.py`, `vendor_assets.py`, `demo_assets.py`.
+
+### Generated outputs / one-off review workbooks in `reports/`
+Regenerated by scripts or produced for a specific sign-off; keep for the record
+but they are not inputs: `*_to_fill.xlsx` (audit/classification/reconciliation/
+fruit-swab review), `annual_verification_check.xlsx`,
+`category_location_validation_2026-07-04.xlsx`, `classification_review.html`,
+the `data20xx_*.md` reports, and older `microbiology_2025_*.md` / `*_audit.md`.
+
+### Archive (single tree, `archive/`)
+- `demos-2026-07/` — retired map + Sankey demos (+ NOTE.md)
+- `legacy-charts-v0/` — **moved here this session** from the old top-level
+  `microbiology_archive/`: the v0 numbered chart scripts + PNGs, superseded by
+  the dashboard
+- `source-zips/` — original zips incl. `2024.zip` (**moved here**, de-duped from
+  `2024-original/`)
+- `cleaned/`, `reports/`, `schemas/`, `scripts/`, `old-output/` — earlier iterations
+
+---
+
+## How to rebuild
+```bash
+cd microbiology
+.venv/bin/python scripts/build_dashboard_combined.py   # → reports/microbiology_dashboard.html
+.venv/bin/python scripts/build_micro_sunburst.py           # → reports/microbiology_sunburst.html
+# or the full data refresh:  ./scripts/refresh.sh
+```
+
+## Status
+Microbiology QA'd and reconciled (20,880). Next workstream: **chemistry**.
