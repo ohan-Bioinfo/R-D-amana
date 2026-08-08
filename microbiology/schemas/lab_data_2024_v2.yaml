@@ -160,6 +160,7 @@ mappings:
       - كامبيلوباكتر
       - فيبريو
       - Aeromonas
+      - Faecal Coliforms
     aliases:                              # raw -> canonical, after NFKC+whitespace collapse
       # Coliform variants
       "كولي فورم": كوليفورم
@@ -218,6 +219,10 @@ mappings:
       "C.butulinum": كلوستريديوم بوتولينوم
       "C.Butulinum": كلوستريديوم بوتولينوم
       "كلستريدوم بوتولينوم": كلوستريديوم بوتولينوم
+      # C. botulinum typo seen in source (user-approved fix 2026-08-08)
+      "كلوستريديوم بوتيلونيوم": كلوستريديوم بوتولينوم
+      # Faecal coliforms — US spelling seen once in source (2026-08-08)
+      "Fecal Coliforms": Faecal Coliforms
       # Campylobacter
       "CAMPYLOPACTER": كامبيلوباكتر
       "Campylopacter": كامبيلوباكتر

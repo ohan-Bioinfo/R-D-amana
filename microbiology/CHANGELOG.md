@@ -471,3 +471,67 @@ python3 microbiology/scripts/build_dashboard_combined.py
 - L-8 honey: sulphite-reducing anaerobes / C. botulinum never run.
 - Whether any of these should be marked `optional: true` in
   `schemas/gso_1016_reference.yaml` (needs lab sign-off).
+
+---
+
+## 2026-08-08 (3) — Data-quality flags: ISO reclassify, H-code mapping, >10 ambiguity, spelling fixes
+
+### Background
+The dashboard's data-quality summary surfaced
+`result_numeric_comparison_prefix:>` (6,599 samples),
+`limit_numeric_comparison_prefix:<` (1,347) and
+`gso_code_was_iso_placeholder` (1,327) as top flags. Investigation showed most
+were not data errors. Four user-approved actions:
+
+### What changed
+1. **ISO placeholder reclassified** (`clean_2024.py`): all 1,328 "ISO"-coded
+   samples are environmental swabs/equipment surfaces, tested under ISO
+   methods — correctly outside GSO 1016 scope. Flag renamed from
+   `gso_code_was_iso_placeholder` to informational `iso_method_outside_gso1016`.
+2. **'H'-code mapping** (`clean_2024.py`): 'H' is not a GSO 1016 letter; the
+   lab used it internally. Mapped by product name: cheddar (جبنة شيدر) →
+   **A-13** (25 samples), ketchup (صوص كاتشب) → **G-2** (2), other sauces
+   (صوص مايونيز/رانش…) → **G-3** (9). Traceable via new flag
+   `gso_code_h_mapped_by_name`. These 36 samples now join the GSO audit.
+3. **'>10' ambiguity handling** (`enrich_gso.py`): 14,120 result rows carry a
+   `>10`/`<10` comparison prefix and 99.4% are lab-valid — the convention is
+   unconfirmed (possible RTL flip of `<10`). Disagreements that hinge on a
+   prefixed result are now recorded as `ambiguous_prefixed_result` instead of
+   true disagreements. New wide column `gso_lab_vs_gso_ambiguous`; dashboard
+   GSO-audit card shows "↳ ambiguous (>10 convention)" separately.
+4. **Test-name spelling fixes** (`schemas/lab_data_2024_v2.yaml`):
+   `كلوستريديوم بوتيلونيوم` → `كلوستريديوم بوتولينوم` (C. botulinum typo,
+   22 rows); `Fecal Coliforms` → `Faecal Coliforms` (1 row; added to
+   canonical list). `test_value_unrecognised` is now **0**.
+
+### Results (2024, after full re-clean + re-enrich)
+- Row counts reproduced exactly: long 36,461; wide 9,317; dashboard 20,881.
+- Lab-vs-GSO: **80 disagreements → 51 true + 29 ambiguous** (row level:
+  89 → 59 true + 30 ambiguous).
+- GSO-coded samples: 7,846 → **7,882** (+36 H-mapped); incomplete panels
+  4,090 → 4,126 (the 36 new coded samples mostly run incomplete panels).
+- `gso_code_pattern_violation`: 119 → 83 long rows (H rows resolved).
+
+### Files touched
+- `microbiology/scripts/clean_2024.py`
+- `microbiology/scripts/enrich_gso.py`
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/schemas/lab_data_2024_v2.yaml`
+- `microbiology/cleaned/data2024.parquet`, `data2024_long.parquet`, `data2025.parquet`
+- `microbiology/reports/microbiology_dashboard.html`, `data2024_clean_report.md`
+
+### How to regenerate
+```bash
+python3 microbiology/scripts/clean_2024.py --year 2024
+python3 microbiology/scripts/enrich_gso.py
+python3 microbiology/scripts/build_dashboard_combined.py
+```
+
+### Verification
+- Row counts unchanged; `node --check` passes on dashboard app JS.
+- All audit numbers independently recomputed from the wide parquet.
+
+### Open question for the lab
+- What does a `>10` result mean in the 2024 sheets (literal "above 10", or an
+  RTL-flipped `<10` "below 10 = satisfactory")? The 29 ambiguous samples
+  resolve to agree/disagree once confirmed.

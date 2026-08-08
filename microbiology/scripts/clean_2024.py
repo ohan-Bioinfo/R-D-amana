@@ -434,10 +434,27 @@ def clean_one_file(path: Path, schema: dict) -> tuple[pd.DataFrame | None, dict]
                 if nv != v:
                     audit["changes_count"] += 1
                 raw[k] = nv
-        # GSO ISO placeholder.
+        # GSO ISO placeholder. "ISO" means the sample was tested under an ISO
+        # method (all such samples are environmental swabs / equipment
+        # surfaces) — correctly outside GSO 1016 scope, so this is an
+        # informational tag, not an error (reclassified 2026-08-08).
         if raw.get("gso_code") == "ISO":
             raw["gso_code"] = None
-            flags_per_row[r].append("gso_code_was_iso_placeholder")
+            flags_per_row[r].append("iso_method_outside_gso1016")
+            audit["changes_count"] += 1
+        # 'H' is not a GSO 1016 category letter — the lab used it as an
+        # internal code. Map by product name (user-approved 2026-08-08):
+        # cheddar → A-13 (hard/semi-hard cheese), ketchup → G-2 (tomato
+        # products), all other sauces → G-3 (mayonnaise/sauces).
+        if isinstance(raw.get("gso_code"), str) and raw["gso_code"].strip() == "H":
+            nm = str(raw.get("sample_name") or "")
+            if "شيدر" in nm:
+                raw["gso_code"] = "A-13"
+            elif "كاتشب" in nm:
+                raw["gso_code"] = "G-2"
+            else:
+                raw["gso_code"] = "G-3"
+            flags_per_row[r].append("gso_code_h_mapped_by_name")
             audit["changes_count"] += 1
         # GSO pattern violation.
         gso = raw.get("gso_code")

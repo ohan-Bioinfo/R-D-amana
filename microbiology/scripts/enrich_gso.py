@@ -376,9 +376,15 @@ def enrich_long(path: Path, codes_map: dict[str, dict],
 
     # Validity-vs-GSO-limit cross-check. We compare result_numeric to gso_limit_numeric.
     # Zero-tolerance means: any positive detection should fail.
+    # Results written with a comparison prefix ('>10', '<10') are parsed to
+    # their numeric part only, and the lab marks 99%+ of '>10' as valid — so a
+    # disagreement that hinges on a prefixed result is recorded as
+    # 'ambiguous_prefixed_result' (not a true disagreement) until the lab
+    # confirms the convention (user decision 2026-08-08).
     decisions: list[str | None] = []
-    for r_num, lim_num, zt, validity_bool in zip(
-        df["result_numeric"], df["gso_limit_numeric"], df["gso_zero_tolerance"], df["validity"]
+    for r_num, lim_num, zt, validity_bool, r_raw in zip(
+        df["result_numeric"], df["gso_limit_numeric"], df["gso_zero_tolerance"],
+        df["validity"], df["result_raw"],
     ):
         # Determine what the GSO standard would decide for this row.
         if lim_num is None or pd.isna(lim_num):
@@ -404,6 +410,13 @@ def enrich_long(path: Path, codes_map: dict[str, dict],
             decisions.append("lab_says_pass_should_fail")
         else:
             decisions.append("lab_says_fail_should_pass")
+    # Downgrade prefix-hinged disagreements to 'ambiguous_prefixed_result'.
+    COMPARISON_PREFIXES = (">", "<", "≥", "≤")
+    for i, (dec, r_raw) in enumerate(zip(decisions, df["result_raw"])):
+        if dec in ("lab_says_pass_should_fail", "lab_says_fail_should_pass") and (
+            isinstance(r_raw, str) and r_raw.strip().startswith(COMPARISON_PREFIXES)
+        ):
+            decisions[i] = "ambiguous_prefixed_result"
     df["validity_vs_gso_limit"] = pd.array(decisions, dtype="string")
 
     # Sample-level panel completeness: group by (source_file, m_s_no).
@@ -451,6 +464,8 @@ def stub_audit_on_2025_wide() -> None:
         wide["gso_panel_complete"] = pd.array([None] * n, dtype="boolean")
     if "gso_lab_vs_gso_disagree" not in wide.columns:
         wide["gso_lab_vs_gso_disagree"] = pd.array([None] * n, dtype="boolean")
+    if "gso_lab_vs_gso_ambiguous" not in wide.columns:
+        wide["gso_lab_vs_gso_ambiguous"] = pd.array([None] * n, dtype="boolean")
     if "gso_tests_missing" not in wide.columns:
         wide["gso_tests_missing"] = pd.array([None] * n, dtype="string")
     wide.to_parquet(P25_WIDE, compression="zstd", index=False)
@@ -471,12 +486,15 @@ def propagate_audit_to_wide_for(year: int) -> None:
     def _has_disagree(s):
         return any(v in DISAGREE_VALUES for v in s if v is not None)
     disagree = grp["validity_vs_gso_limit"].apply(_has_disagree)
+    ambiguous = grp["validity_vs_gso_limit"].apply(
+        lambda s: any(v == "ambiguous_prefixed_result" for v in s if isinstance(v, str)))
     missing = grp["gso_tests_missing"].apply(lambda s: next((v for v in s if v is not None), None))
     audit_df = pd.DataFrame({
         "source_file": [k[0] for k in panel.index],
         "m_s_no": [k[1] for k in panel.index],
         "gso_panel_complete": panel.values,
         "gso_lab_vs_gso_disagree": disagree.values,
+        "gso_lab_vs_gso_ambiguous": ambiguous.values,
         "gso_tests_missing": missing.values,
     })
     wide_keyed = wide[["source_file", "m_s_no"]].copy()
@@ -485,12 +503,14 @@ def propagate_audit_to_wide_for(year: int) -> None:
     merged = wide_keyed.merge(audit_df, on=["source_file", "m_s_no"], how="left")
     wide["gso_panel_complete"] = pd.array(merged["gso_panel_complete"].tolist(), dtype="boolean")
     wide["gso_lab_vs_gso_disagree"] = pd.array(merged["gso_lab_vs_gso_disagree"].tolist(), dtype="boolean")
+    wide["gso_lab_vs_gso_ambiguous"] = pd.array(merged["gso_lab_vs_gso_ambiguous"].tolist(), dtype="boolean")
     wide["gso_tests_missing"] = pd.array(merged["gso_tests_missing"].tolist(), dtype="string")
     wide.to_parquet(wide_path, compression="zstd", index=False)
     n_incomplete = int((wide["gso_panel_complete"] == False).sum())
     n_disagree = int((wide["gso_lab_vs_gso_disagree"] == True).sum())
+    n_ambiguous = int((wide["gso_lab_vs_gso_ambiguous"] == True).sum())
     print(f"  {year} wide: panel_complete=False on {n_incomplete} samples; "
-          f"lab_vs_gso disagree on {n_disagree} samples")
+          f"lab_vs_gso disagree on {n_disagree} samples; ambiguous (prefixed result) on {n_ambiguous}")
 
 
 def main() -> int:

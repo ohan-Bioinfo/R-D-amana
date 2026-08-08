@@ -260,3 +260,31 @@ C. perfringens in mayonnaise (G-3), E. coli O157 + Listeria in precut produce
 sandwiches (P-2), sulphite-reducing anaerobes in honey (L-8).
 
 Details and regeneration steps in `microbiology/CHANGELOG.md` (2026-08-08 (2)).
+
+---
+
+## 8. Top data-quality flags resolved (2026-08-08, third change)
+
+The dashboard's top flags (`>10` prefix 6,599 · limit `<` prefix 1,347 · ISO
+placeholder 1,327) were investigated — most were presentation artifacts, not
+data errors. User approved four fixes:
+
+- **ISO placeholder (1,328 samples)** — all are swabs/equipment surfaces
+  tested under ISO methods, correctly outside GSO 1016. Flag renamed to
+  informational `iso_method_outside_gso1016`.
+- **'H'-code samples (36)** — mapped by product name: cheddar → A-13 (25),
+  ketchup → G-2 (2), other sauces → G-3 (9). They now join the GSO audit
+  (coded samples 7,846 → 7,882).
+- **'>10' results (14,120 rows, 99.4% valid)** — convention unconfirmed
+  (possible RTL flip of `<10`). Prefix-hinged disagreements now classed as
+  `ambiguous_prefixed_result`: lab-vs-GSO went from 80 disagreements to
+  **51 true + 29 ambiguous**, shown as a separate dashboard card.
+- **Spelling fixes** — C. botulinum typo (`بوتيلونيوم`→`بوتولينوم`, 22 rows)
+  and `Fecal Coliforms`→`Faecal Coliforms` (1 row); `test_value_unrecognised`
+  is now 0.
+
+Full re-clean reproduced row counts exactly (9,317 wide / 36,461 long /
+20,881 dashboard); `node --check` passes. Details: CHANGELOG 2026-08-08 (3).
+
+**Open for the lab:** confirm what `>10` means — the 29 ambiguous samples
+resolve to agree/disagree once known.
