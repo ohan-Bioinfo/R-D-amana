@@ -126,6 +126,10 @@ header.hero{padding:44px 4px 26px;position:relative}
   transition:background .16s,padding .16s;cursor:pointer}
 .entry:hover,.entry:focus-visible{background:var(--tint);outline:none;padding-inline-start:16px}
 .entry:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.entry.disabled{opacity:.6;cursor:not-allowed;pointer-events:none}
+.entry.disabled .arrow{opacity:.35}
+.lab.chem .entries{position:relative}
+.lab.chem .entries::before{content:"Audit in progress";position:absolute;top:-28px;right:0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--gold);background:#fff8e7;border:1px solid #f0e0b8;border-radius:999px;padding:2px 10px}
 .entry .ico{width:34px;height:34px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;
   background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
 .entry .txt{flex:1;min-width:0}
@@ -184,7 +188,7 @@ footer{border-top:1px solid var(--hair)}
           <div class="ar">الأحياء الدقيقة</div>
         </div>
       </div>
-      <div class="stat"><span class="n">20,880</span><span class="u">samples · 5 sectors · 2024–2025</span></div>
+      <div class="stat"><span class="n">20,881</span><span class="u">samples · 5 sectors · 2024–2025</span></div>
       <div class="desc">Pathogen &amp; indicator screening across Riyadh's sectors — compliance, severity, and the organism behind each failure.</div>
       <div class="entries">
         <a class="entry" href="microbiology/reports/microbiology_dashboard.html">
@@ -221,21 +225,21 @@ footer{border-top:1px solid var(--hair)}
       <div class="stat"><span class="n">15,876</span><span class="u">records · 8 sections · 2024–2025</span></div>
       <div class="desc">Heavy metals, pesticides, aflatoxins, water &amp; more — limit exceedances and the analyte that failed each assay.</div>
       <div class="entries">
-        <a class="entry" href="chemistry/reports/chemistry_dashboard.html">
+        <div class="entry disabled" title="Chemistry audit is in progress — check back soon">
           <span class="ico">▦</span>
-          <span class="txt"><span class="lb">Dashboard</span><span class="sub">filters · Riyadh map · KPIs</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="chemistry/reports/chemistry_sunburst.html">
+          <span class="txt"><span class="lb">Dashboard</span><span class="sub">under construction · قيد الإنشاء</span></span>
+          <span class="arrow">🚧</span>
+        </div>
+        <div class="entry disabled" title="Chemistry audit is in progress — check back soon">
           <span class="ico">◎</span>
-          <span class="txt"><span class="lb">Interactive</span><span class="sub">Plotly · zoomable assay plate</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="chemistry/reports/chemistry_sunburst2.html">
+          <span class="txt"><span class="lb">Interactive</span><span class="sub">under construction · قيد الإنشاء</span></span>
+          <span class="arrow">🚧</span>
+        </div>
+        <div class="entry disabled" title="Chemistry audit is in progress — check back soon">
           <span class="ico">◐</span>
-          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
-          <span class="arrow">→</span>
-        </a>
+          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">under construction · قيد الإنشاء</span></span>
+          <span class="arrow">🚧</span>
+        </div>
       </div>
     </section>
   </main>

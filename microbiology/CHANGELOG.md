@@ -1,5 +1,31 @@
 # Microbiology Changelog
 
+## 2026-08-08 — landing page: chemistry under construction, microbiology count corrected
+
+### Problems addressed
+- The root `index.html` landing page linked to chemistry dashboards/sunbursts that have not yet been audited/rebuilt, so users could open stale or inconsistent reports.
+- The microbiology sample count on the landing page still showed **20,880** instead of the current **20,881**.
+
+### Changes
+- Updated `build_landing.py`:
+  - Replaced the three chemistry `<a class="entry">` links with `<div class="entry disabled">` elements.
+  - Added `under construction · قيد الإنشاء` labels and 🚧 arrows.
+  - Added `.entry.disabled` CSS (reduced opacity, `not-allowed` cursor, no pointer events) and an "Audit in progress" badge above the chemistry entries.
+  - Updated the microbiology sample count from **20,880 → 20,881**.
+- Rebuilt `index.html` from the template.
+
+### Files touched
+- `build_landing.py`
+- `index.html`
+
+### How to regenerate
+```bash
+python3 build_landing.py
+```
+
+### Push note
+- Committed and pushed to `origin/main` with message `Landing page: chemistry under construction, micro count corrected (kimi push)`.
+
 ## 2026-08-08 — sunburst dashboards rebuilt with correct non-compliance denominator
 
 ### Problems addressed
