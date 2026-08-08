@@ -3051,7 +3051,7 @@ def main() -> None:
                 if logo_p.exists() else "")
     html = html.replace("__LOGO_DATA_URI__", logo_uri)
     # Stamp build time into the masthead
-    stamp = datetime.now().strftime("%d %b %Y")
+    stamp = datetime.now().strftime("%d %b %Y · %H:%M")
     html = html.replace('<span class="val" id="build-stamp">—</span>',
                         f'<span class="val" id="build-stamp">{stamp}</span>')
     OUT_HTML.parent.mkdir(parents=True, exist_ok=True)

@@ -19,6 +19,7 @@ from __future__ import annotations
 import base64
 import json
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 import pandas as pd
 
@@ -135,6 +136,7 @@ def build():
     html = html.replace("__VOLMAX__", str(int(volmax)))
     html = html.replace("__TOTAL__", f"{total:,}")
     html = html.replace("__LOGO__", logo_uri)
+    html = html.replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M"))
     html = inline_offline(html)
     OUT.write_text(html, encoding="utf-8")
     root = nodes["ALL"]
@@ -361,7 +363,7 @@ footer{margin-top:24px;display:flex;gap:16px;align-items:center;color:var(--mute
 <footer>
   <span>angle = sample volume · الزاوية = الحجم</span>
   <span>click to zoom · center or breadcrumb to reset</span>
-  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · official view · self-contained</span>
+  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · updated __STAMP__</span>
 </footer>
 </div>
 <script>

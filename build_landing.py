@@ -23,7 +23,7 @@ def build():
     html = (TEMPLATE
             .replace("__FONTS__", f"<style>{fonts}</style>")
             .replace("__LOGO__", logo)
-            .replace("__STAMP__", datetime.now().strftime("%d %b %Y")))
+            .replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M")))
     OUT.write_text(html, encoding="utf-8")
     print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB; logo={'yes' if logo else 'MISSING'})")
 

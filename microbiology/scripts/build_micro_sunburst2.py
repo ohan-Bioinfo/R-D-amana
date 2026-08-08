@@ -15,6 +15,7 @@ from __future__ import annotations
 import base64
 import json
 from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 import pandas as pd
 
@@ -126,7 +127,8 @@ def build():
             .replace("__TOTAL__", f"{total:,}")
             .replace("__FONTS__", f"<style>{fonts}</style>")
             .replace("__LIB__", f"<script>{lib}</script>")
-            .replace("__LOGO__", logo))
+            .replace("__LOGO__", logo)
+            .replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M")))
     OUT.write_text(html, encoding="utf-8")
     root = nodes["ALL"]
     known = root['n'] - root['nu']
@@ -289,7 +291,7 @@ footer a{color:var(--peri-2)}
 
 <footer>
   <span>angle = sample volume · colour = selected metric</span>
-  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · package: <a href="https://github.com/vasturiano/sunburst-chart">sunburst-chart</a> (D3) · self-contained</span>
+  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · updated __STAMP__</span>
 </footer>
 </div>
 <script>

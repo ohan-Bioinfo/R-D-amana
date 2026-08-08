@@ -1,5 +1,37 @@
 # Microbiology Changelog
 
+## 2026-08-08 — added build timestamp (date + time) to dashboards and landing page
+
+### Changes
+- `microbiology/scripts/build_dashboard_combined.py`: changed the masthead "Last build" stamp from date-only to `dd Mmm YYYY · HH:MM`.
+- `microbiology/scripts/build_micro_sunburst.py` and `build_micro_sunburst2.py`:
+  - Imported `datetime`.
+  - Added an `updated __STAMP__` line to the footer.
+  - Stamp format: `dd Mmm YYYY · HH:MM`.
+- `build_landing.py`: updated the footer `build __STAMP__` to include time as well.
+- Rebuilt all three microbiology dashboards and `index.html`.
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/scripts/build_micro_sunburst.py`
+- `microbiology/scripts/build_micro_sunburst2.py`
+- `build_landing.py`
+- `microbiology/reports/microbiology_dashboard.html`
+- `microbiology/reports/microbiology_sunburst.html`
+- `microbiology/reports/microbiology_sunburst2.html`
+- `index.html`
+
+### How to regenerate
+```bash
+python3 microbiology/scripts/build_dashboard_combined.py
+python3 microbiology/scripts/build_micro_sunburst.py
+python3 microbiology/scripts/build_micro_sunburst2.py
+python3 build_landing.py
+```
+
+### Push note
+- Committed and pushed to `origin/main` with message `Add build date+time stamp to dashboards and landing page (kimi push)`.
+
 ## 2026-08-08 — landing page: chemistry under construction, microbiology count corrected
 
 ### Problems addressed
