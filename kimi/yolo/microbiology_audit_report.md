@@ -234,3 +234,29 @@ Both microbiology sunburst pages (`microbiology_sunburst.html` Plotly and
 Post-build checks: totals unchanged (`root n=20881`, `unknown=83`, NC 28.1%),
 no leftover template placeholders, app JS passes `node --check` on both pages.
 Details in `microbiology/CHANGELOG.md` (2026-08-08 entry).
+
+---
+
+## 7. GSO panel-completeness fix (2026-08-08, second change)
+
+The "Incomplete GSO panel 5,100 (65.0%)" card was investigated. Root cause of
+most flags: the same test spelled differently in the GSO reference vs the lab
+sheets, so run tests counted as missing.
+
+**Applied (all user-approved):**
+- 7 test-name aliases in `enrich_gso.py` (Listeria ×2 spellings, yeasts,
+  Campylobacter, B. cereus, Aeromonas, P. aeruginosa↔سيدومومناس for water).
+- Dashboard "GSO 1016 audit" card now splits incomplete panels into
+  **systematic** (lab skips the test for ≥90% of samples under the same code)
+  vs **sporadic** (test normally run, missing for that sample).
+
+**Result:** incomplete 5,100 → **4,090** (52.1% of 7,846 coded 2024 samples);
+full panel 3,756 (47.9%). Split: 1,756 systematic / 2,334 sporadic.
+
+**Remaining genuine practice gaps** (kept flagged per user direction; need
+lab/Muhannad decision on whether to mark tests optional in the reference):
+C. perfringens in mayonnaise (G-3), E. coli O157 + Listeria in precut produce
+(J-1), Listeria in cakes (I-9) and Arabic sweets (L-9), total plate count in
+sandwiches (P-2), sulphite-reducing anaerobes in honey (L-8).
+
+Details and regeneration steps in `microbiology/CHANGELOG.md` (2026-08-08 (2)).

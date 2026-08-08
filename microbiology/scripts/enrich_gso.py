@@ -169,6 +169,16 @@ TEST_ALIAS_TO_CANONICAL = {
     "Cronobacter sakazakii": "Cronobacter sakazakii",
     "Sulphite-reducing anaerobes": "Sulphite-reducing anaerobes",
     "Lipolytic bacteria": "Lipolytic bacteria",
+    # 2026-08-08 panel-completeness aliases (user-approved): same organism /
+    # test, different spelling between the GSO reference and the lab sheets.
+    # These cleared ~1,011 false "incomplete panel" flags.
+    "لستيريا": "الليستيريا",            # Listeria — reference short form
+    "L.monocytogenes": "الليستيريا",    # Listeria — reference Latin form
+    "خمائر": "الخمائر والاعفان",         # yeasts — lab runs combined yeasts&molds
+    "CAMPYLOPACTER": "كامبيلوباكتر",     # Campylobacter — reference caps typo
+    "باسلس سيرس": "باصلص سيرز",          # Bacillus cereus — yet another variant
+    "Aeromonas spp": "Aeromonas",
+    "P.aeruginosa": "سيدومومناس",        # bottled water: lab records Pseudomonas genus
 }
 
 

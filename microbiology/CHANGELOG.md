@@ -405,3 +405,69 @@ cd microbiology
 python3 microbiology/scripts/build_micro_sunburst.py
 python3 microbiology/scripts/build_micro_sunburst2.py
 ```
+
+---
+
+## 2026-08-08 (2) — GSO panel-completeness: spelling aliases + systematic/sporadic split
+
+### Background
+The dashboard's "Incomplete GSO panel" card read 5,100 (65.0% of coded 2024
+samples). Breakdown showed much of it was false: the GSO reference and the lab
+sheets spell the same test differently, so a test that *was* run counted as
+missing. User reviewed the full breakdown and approved three actions.
+
+### What changed
+1. **Test-name aliases** (`microbiology/scripts/enrich_gso.py`,
+   `TEST_ALIAS_TO_CANONICAL`) — 7 additions, all user-approved:
+   - `لستيريا` → `الليستيريا` (Listeria)
+   - `L.monocytogenes` → `الليستيريا`
+   - `خمائر` → `الخمائر والاعفان` (lab runs the combined yeasts & molds test)
+   - `CAMPYLOPACTER` → `كامبيلوباكتر` (Campylobacter)
+   - `باسلس سيرس` → `باصلص سيرز` (Bacillus cereus)
+   - `Aeromonas spp` → `Aeromonas`
+   - `P.aeruginosa` → `سيدومومناس` (bottled water: user confirmed the lab's
+     Pseudomonas-genus test is the P. aeruginosa test)
+2. **Systematic/sporadic split** (`microbiology/scripts/build_dashboard_combined.py`):
+   new payload column `panel_gap_kind` (index 25). A missing test is
+   *systematic* when the lab skips it for ≥90% of samples under the same GSO
+   code (standing practice gap), else the sample's gap is *sporadic*. The
+   "GSO 1016 audit" card now shows both counts under the incomplete total,
+   with an updated explainer line.
+
+### Results (2024, after re-running `enrich_gso.py`)
+- Incomplete panels: **5,100 → 4,090** (−1,010 false flags cleared).
+- Full panel run: 3,756 of 7,846 coded samples (47.9%, was 35.0%).
+- Split: **1,756 systematic** (22.4% of coded) vs **2,334 sporadic** (29.7%).
+- Biggest remaining systematic gaps: Listeria in cakes/bakery (I-9, 503) and
+  Arabic sweets (L-9, 368); E. coli O157 + B. cereus + C. perfringens +
+  Campylobacter in frozen poultry (C-9, 425); Listeria in cheese (A-13, 202).
+- Dashboard totals unchanged: 20,881 rows (2024 = 9,317; 2025 = 11,564).
+
+### Files touched
+- `microbiology/scripts/enrich_gso.py`
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/cleaned/data2024.parquet` (audit columns re-propagated)
+- `microbiology/cleaned/data2024_long.parquet`
+- `microbiology/cleaned/data2025.parquet` (stub columns re-written)
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)
+
+### How to regenerate
+```bash
+python3 microbiology/scripts/enrich_gso.py
+python3 microbiology/scripts/build_dashboard_combined.py
+```
+
+### Verification
+- `enrich_gso.py` prints panel completeness 3,766/9,328 long-sample groups
+  (wide merge: 4,090 incomplete of 7,846 coded).
+- Dashboard app JS passes `node --check`; split counts reproduced
+  independently from the wide parquet (systematic 1,756 + sporadic 2,334 = 4,090).
+
+### Open decisions for Muhannad / the lab (not in this change)
+- G-3 mayonnaise/sauces: C. perfringens run for only 271/1,185 samples
+  (77% — classified sporadic, borderline systematic). Lab scope?
+- J-1 precut produce: E. coli O157 run for 326/1,074, Listeria 637/1,074.
+- P-2 sandwiches: total plate count never run (150).
+- L-8 honey: sulphite-reducing anaerobes / C. botulinum never run.
+- Whether any of these should be marked `optional: true` in
+  `schemas/gso_1016_reference.yaml` (needs lab sign-off).

@@ -13,7 +13,7 @@
 | `ملحمة سماء القاهرة` in `other` | Forced to `swab` (environmental swab from the shop). |
 | 2024 `sample_id` derived from `gso_code` | Now uses `m_s_no` scoped by `source_file`. |
 | Hardcoded 2024 official numbers | Set to `null`; footnote now says "pending reconciliation". |
-| GSO panel completeness / disagreements hidden | New dashboard card shows panel completeness and lab-vs-GSO agreement/disagreement. |
+| GSO panel completeness / disagreements hidden | New dashboard card shows panel completeness and lab-vs-GSO agreement/disagreement. **Update 2026-08-08:** spelling aliases cleared 1,010 false flags (incomplete 5,100 → 4,090); card now splits systematic vs sporadic gaps. Remaining gaps are genuine lab-practice questions for Muhannad — see CHANGELOG 2026-08-08 (2). |
 | Facility-chain spelling variants fragmenting rankings | `clean_2025.py` applies `FACILITY_SUBSTRING_REPLACEMENTS` (e.g. `صب وأي` → `صب واي`). |
 | Arabic-only categories missing English labels | `clean_2025.py` adds `CATEGORY_EN_FALLBACK`; missing `category_en` dropped from 383 → 129. |
 | Data-quality flags only visible in logs | Dashboard now has a **Data-quality summary** KPI card. |

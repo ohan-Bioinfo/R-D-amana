@@ -337,6 +337,7 @@ DATA_COLS = [
     "sample_name",   # 22  Specific sample name (e.g. تبولة, جبنة فيتا) for subtype rankings
     "sample_type",   # 23  Decision-making bucket (produce, dairy, swab, etc.)
     "dq_flags",      # 24  Pipe-separated data_quality_flags from the cleaner
+    "panel_gap_kind",# 25  'systematic'/'sporadic'/null — why the GSO panel is incomplete (2024-only)
 ]
 
 
@@ -359,6 +360,32 @@ def build_data(df: pd.DataFrame) -> dict:
     # no failed_tests list exists on the row.
     tc = load_test_classification()
     pathogen_set = {normalize_organism(t) for t in tc["pathogen"]}
+
+    # GSO panel-gap split (2024 coded rows): a missing test counts as
+    # "systematic" when the lab skips it for >=90% of the samples sharing the
+    # same GSO code — a standing practice gap, not a one-off. A sample's gap
+    # kind is 'systematic' if any of its missing tests is systematic, else
+    # 'sporadic'. Keyed by (code, missing-string) which fully determines it.
+    from collections import Counter as _GapCounter
+    gap_kind_by_key: dict = {}
+    if "gso_tests_missing" in df.columns and "gso_code_canonical" in df.columns:
+        _coded = df["gso_code_canonical"].notna()
+        _code_tot = df.loc[_coded, "gso_code_canonical"].value_counts()
+        _pair = _GapCounter()
+        for _c, _m in zip(df.loc[_coded, "gso_code_canonical"],
+                          df.loc[_coded, "gso_tests_missing"]):
+            if isinstance(_m, str):
+                for _t in _m.split("|"):
+                    _pair[(_c, _t)] += 1
+        for _c, _m in zip(df["gso_code_canonical"], df["gso_tests_missing"]):
+            if pd.isna(_c) or not isinstance(_m, str):
+                continue
+            gap_kind_by_key[(_c, _m)] = (
+                "systematic"
+                if any(_pair[(_c, _t)] / _code_tot[_c] >= 0.9
+                       for _t in _m.split("|"))
+                else "sporadic"
+            )
 
     def _derive_severity(failed_list):
         if not failed_list:
@@ -465,6 +492,10 @@ def build_data(df: pd.DataFrame) -> dict:
             _val(getattr(r, "sample_name", None)),  # specific subtype name
             _val(getattr(r, "sample_type", None)),
             _val(getattr(r, "data_quality_flags", None)),
+            gap_kind_by_key.get((
+                _val(getattr(r, "gso_code_canonical", None)),
+                _val(getattr(r, "gso_tests_missing", None)),
+            )),
         ])
     return {"cols": DATA_COLS, "rows": rows}
 
@@ -980,7 +1011,7 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">These metrics rely on the GSO 1016 reference mapping, which is only available for 2024. 2025 samples do not carry GSO codes in the source file.</div>
+    <div class="card-sub">These metrics rely on the GSO 1016 reference mapping, which is only available for 2024. 2025 samples do not carry GSO codes in the source file. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08).</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
@@ -2836,6 +2867,13 @@ function renderGsoAudit(rows) {
   const incomplete = totalPanel - complete;
   const pctComplete = totalPanel ? (100 * complete / totalPanel).toFixed(1) : 0;
   const pctIncomplete = totalPanel ? (100 * incomplete / totalPanel).toFixed(1) : 0;
+  // Split the incomplete panels: systematic = the lab skips this test for
+  // >=90% of samples under the same GSO code (standing practice gap);
+  // sporadic = the test is normally run but was missing for this sample.
+  const systematic = rows24panel.filter(r => r[COLS.panel_gap_kind] === 'systematic').length;
+  const sporadic = rows24panel.filter(r => r[COLS.panel_gap_kind] === 'sporadic').length;
+  const pctSystematic = totalPanel ? (100 * systematic / totalPanel).toFixed(1) : 0;
+  const pctSporadic = totalPanel ? (100 * sporadic / totalPanel).toFixed(1) : 0;
 
   const rows24audit = rows.filter(r => r[COLS.year] === 2024 && r[COLS.lab_disagree] !== null);
   const disagree = rows24audit.filter(r => r[COLS.lab_disagree] === 1).length;
@@ -2854,6 +2892,8 @@ function renderGsoAudit(rows) {
     card('2024 samples with GSO code', fmt(totalPanel), null),
     card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples`),
     card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples`),
+    card('↳ systematic gap', fmt(systematic), `${pctSystematic}% of coded · lab never/rarely runs the test for this code`),
+    card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),
     card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
   ].join('');
