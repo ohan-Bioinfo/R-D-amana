@@ -40,24 +40,32 @@ def build():
         nd = nodes.get(nid)
         if nd is None:
             nd = nodes[nid] = {"label": label, "parent": parent, "depth": depth,
-                               "n": 0, "nc": 0, "np": 0,
+                               "n": 0, "nc": 0, "nu": 0, "np": 0,
                                "orgs": Counter(), "months": Counter()}
         return nd
 
     total = 0
+    unknown_total = 0
     for y in (2024, 2025):
         d = pd.read_parquet(ROOT / "cleaned" / f"data{y}.parquet")
         for r in d.to_dict("records"):
             total += 1
             sector = derive_sector_5(_val(r.get("municipality")), _val(r.get("sector"))) or "Unspecified"
             cat = classify(r)[0]
-            is_fail = r.get("is_failure") is True
+            is_fail_raw = r.get("is_failure")
+            is_fail = is_fail_raw is True
+            is_unknown = is_fail_raw is None or (isinstance(is_fail_raw, float) and pd.isna(is_fail_raw))
+            if is_unknown:
+                unknown_total += 1
             has_path = r.get("has_pathogen_failure") is True
             inv = r.get("invalid_tests")
             failed = [normalize_organism(t) for t in inv if t] if inv is not None else []
             if is_fail:
                 severe = next((t for t in failed if t in pathogen_set), failed[0] if failed else "Other")
                 leaf = severe
+            elif is_unknown:
+                severe = None
+                leaf = "Unknown validity"
             else:
                 severe = None
                 leaf = "✓ Compliant"
@@ -76,6 +84,8 @@ def build():
                     nd["nc"] += 1
                     if severe:
                         nd["orgs"][severe] += 1
+                if is_unknown:
+                    nd["nu"] += 1
                 if has_path:
                     nd["np"] += 1
                 if month:
@@ -90,7 +100,7 @@ def build():
 
     def to_tree(nid):
         nd = nodes[nid]
-        node = {"id": nid, "name": nd["label"], "n": nd["n"], "nc": nd["nc"], "np": nd["np"],
+        node = {"id": nid, "name": nd["label"], "n": nd["n"], "nc": nd["nc"], "nu": nd["nu"], "np": nd["np"],
                 "top": [[o, c] for o, c in nd["orgs"].most_common(3)],
                 "spark": [nd["months"].get(m, 0) for m in MONTHS]}
         kids = children.get(nid)
@@ -119,9 +129,10 @@ def build():
             .replace("__LOGO__", logo))
     OUT.write_text(html, encoding="utf-8")
     root = nodes["ALL"]
+    known = root['n'] - root['nu']
     print(f"wrote {OUT}")
-    print(f"  root n={root['n']} (expect {total}); nodes={len(nodes)}; "
-          f"NC={100*root['nc']/root['n']:.1f}%; volmax={int(volmax)}; "
+    print(f"  root n={root['n']} (expect {total}); unknown={root['nu']}; nodes={len(nodes)}; "
+          f"NC={100*root['nc']/known:.1f}% (known-validity only); volmax={int(volmax)}; "
           f"lib={'yes' if lib else 'MISSING'}; logo={'yes' if logo else 'MISSING'}")
 
 
@@ -201,7 +212,7 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .cell .k{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
 .cell .k .ar{font-family:'Tajawal',sans-serif;text-transform:none}
 .cell .v{font-family:'IBM Plex Mono',monospace;font-size:17px;margin-top:2px}
-.cell.ok .v{color:var(--green-2)} .cell.hot .v{color:var(--c4)}
+.cell.ok .v{color:var(--green-2)} .cell.hot .v{color:var(--c4)} .cell.unknown .v{color:#64748b}
 .orgs{margin:2px 0 12px}
 .orgs .lab{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
 .orgs .lab .ar{font-family:'Tajawal',sans-serif;text-transform:none}
@@ -266,6 +277,7 @@ footer a{color:var(--peri-2)}
       <div class="readout">
         <div class="cell ok"><div class="k">Compliant <span class="ar">مطابق</span></div><div class="v" id="s_ok">—</div></div>
         <div class="cell hot"><div class="k">Non-compliant <span class="ar">غير مطابق</span></div><div class="v" id="s_nc">—</div></div>
+        <div class="cell unknown"><div class="k">Unknown validity <span class="ar">صلاحية غير معروفة</span></div><div class="v" id="s_unk">—</div></div>
         <div class="cell"><div class="k">% contaminated <span class="ar">نسبة التلوث</span></div><div class="v" id="s_rate">—</div></div>
         <div class="cell"><div class="k">% pathogen <span class="ar">نسبة الممرض</span></div><div class="v" id="s_prate">—</div></div>
       </div>
@@ -296,9 +308,9 @@ function mconf(){
   if(metric==='vol')  return {cmax:VOLMAX,lab:'samples (volume)',grad:'linear-gradient(90deg,#eceef6,#7f97c4,#006040)',ticks:['0','','','',(VOLMAX>=1000?(VOLMAX/1000).toFixed(1)+'k':''+VOLMAX)]};
   return {cmax:60,lab:'% contaminated',grad:'linear-gradient(90deg,#1f9d63,#8fb24a,#e0a53a,#e07b2f,#c0392b)',ticks:['0','','30','','60%']};
 }
-function nodeColor(o){o=o.data||o;const n=o.n||1,c=mconf();
+function nodeColor(o){o=o.data||o;const n=o.n||1,nu=o.nu||0,known=Math.max(n-nu,1),c=mconf();
   if(metric==='vol') return interp(VOL,(o.n||0)/c.cmax);
-  const rate=metric==='path'?100*(o.np||0)/n:100*(o.nc||0)/n;
+  const rate=metric==='path'?100*(o.np||0)/known:100*(o.nc||0)/known;
   return interp(CULT,rate/c.cmax);}
 function drawCbar(){const c=mconf();
   document.getElementById('cbar_grad').style.background=c.grad;
@@ -312,22 +324,23 @@ function sparkline(vals){const w=300,h=38,max=Math.max(1,...vals),n=vals.length;
     <path d="${d}" fill="none" stroke="#006040" stroke-width="1.6"/></svg>`;}
 function showStats(d){d=d||DATA;
   document.getElementById('s_title').textContent=d.name;
-  const n=d.n,nc=d.nc,ok=n-nc;
+  const n=d.n,nc=d.nc,nu=d.nu||0,ok=n-nc-nu,known=Math.max(n-nu,1);
   document.getElementById('s_n').textContent=fmt(n);
   document.getElementById('s_ok').textContent=fmt(ok);
   document.getElementById('s_nc').textContent=fmt(nc);
-  document.getElementById('s_rate').textContent=(n?100*nc/n:0).toFixed(1)+'%';
-  document.getElementById('s_prate').textContent=(n?100*d.np/n:0).toFixed(1)+'%';
+  document.getElementById('s_unk').textContent=fmt(nu);
+  document.getElementById('s_rate').textContent=(known?100*nc/known:0).toFixed(1)+'%';
+  document.getElementById('s_prate').textContent=(known?100*d.np/known:0).toFixed(1)+'%';
   const top=d.top||[],maxc=Math.max(1,...top.map(t=>t[1]));
   document.getElementById('s_orgs').innerHTML= top.length
     ? top.map(([o,c])=>`<div class="org"><span class="bar" style="width:${8+70*c/maxc}px"></span>
         <span>${o}</span><span class="cnt">${fmt(c)}</span></div>`).join('')
     : '<div class="org" style="color:var(--muted)">no contamination in this culture</div>';
   document.getElementById('s_spark').innerHTML=sparkline(d.spark||MONTHS.map(()=>0));}
-function nucleus(o){o=o||DATA;const n=o.n||1;let v,l;
+function nucleus(o){o=o||DATA;const n=o.n||1,nu=o.nu||0,known=Math.max(n-nu,1);let v,l;
   if(metric==='vol'){v=fmt(n);l='samples';}
-  else if(metric==='path'){v=(100*(o.np||0)/n).toFixed(1)+'%';l='pathogen';}
-  else {v=(100*(o.nc||0)/n).toFixed(1)+'%';l='contaminated';}
+  else if(metric==='path'){v=(100*(o.np||0)/known).toFixed(1)+'%';l='pathogen';}
+  else {v=(100*(o.nc||0)/known).toFixed(1)+'%';l='contaminated';}
   document.getElementById('c_val').textContent=v;
   document.getElementById('c_lab').textContent=(o.id==='ALL'?'all · ':'')+l;}
 function crumb(node){const chain=node.ancestors().reverse();

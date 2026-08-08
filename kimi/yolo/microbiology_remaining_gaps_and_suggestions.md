@@ -21,6 +21,7 @@
 | Reset button broke map metric/tile toggles | Reset now only clears filter chips/toggles and calls `syncAllChips()`. |
 | Severity and sample-type labels showed raw codes | Added `SEVERITY_LABEL` and `SAMPLE_TYPE_LABEL` maps for chips and chart axes. |
 | Data-quality summary under-counted unknown validity / missing facility | Fixed scope; facility count restricted to 2025 (2024 source has no facility field). |
+| Sunburst dashboards used stale / incorrect denominator | Rebuilt both sunbursts; 83 unknown-validity rows now have their own leaf; NC rate matches main dashboard at **28.1%**. |
 
 ---
 

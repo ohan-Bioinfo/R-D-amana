@@ -1,5 +1,53 @@
 # Microbiology Changelog
 
+## 2026-08-08 — sunburst dashboards rebuilt with correct non-compliance denominator
+
+### Problems addressed
+- Both sunburst dashboards (`microbiology_sunburst.html` and `microbiology_sunburst2.html`) were treating 2024 rows with unknown validity (`is_failure = NaN/None`) as "✓ Compliant", which understated the true non-compliance rate and made it inconsistent with the main Plotly dashboard.
+- The sunburst non-compliance percentage was computed as `nc / total_samples` instead of `nc / known_validity_samples`.
+
+### Changes
+- Updated `scripts/build_micro_sunburst.py` and `scripts/build_micro_sunburst2.py`:
+  - Detect rows where `is_failure` is null/NaN and assign them a new leaf label **"Unknown validity"**.
+  - Track `nu` (unknown-validity count) per node.
+  - Use `n - nu` as the denominator for `% contaminated` and `% pathogen` calculations so the rate matches the main dashboard.
+- Updated the sunburst HTML/JS templates:
+  - Added an **Unknown validity** readout cell in the specimen slip.
+  - Added `.cell.unknown` CSS styling.
+  - Updated centre nucleus readout, colour scale, and hover percentages to use the known-validity denominator.
+
+### Results
+- All three microbiology dashboards now agree:
+  - Total samples: **20,881**
+  - Unknown validity: **83**
+  - Overall non-compliance rate (known-validity only): **28.1%**
+- `node --check` passes on the extracted app JavaScript for all three dashboards.
+
+### Files touched
+- `microbiology/scripts/build_micro_sunburst.py`
+- `microbiology/scripts/build_micro_sunburst2.py`
+- `microbiology/reports/microbiology_sunburst.html`
+- `microbiology/reports/microbiology_sunburst2.html`
+- `microbiology/reports/microbiology_dashboard.html` (rebuilt for consistency)
+- `kimi/yolo/microbiology_audit_report.md`
+- `kimi/yolo/microbiology_remaining_gaps_and_suggestions.md`
+
+### How to regenerate
+```bash
+cd microbiology
+.venv/bin/python scripts/build_dashboard_combined.py
+.venv/bin/python scripts/build_micro_sunburst.py
+.venv/bin/python scripts/build_micro_sunburst2.py
+```
+
+### Push note
+- Committed and pushed to `origin/main` with message `Microbiology sunburst dashboards rebuilt with correct NC denominator (kimi push)`.
+
+### Next steps (not in this change)
+- Confirm with Muhannad the exact rule behind the Annual Report 2025 sample count (11,404 vs 11,564).
+- Once 2024 official numbers are reconciled, re-populate `OFFICIAL_COMPLIANCE[2024]`.
+- Move to chemistry audit.
+
 ## 2026-08-08 — dashboard filter/chart/label audit and fixes
 
 ### Problems addressed

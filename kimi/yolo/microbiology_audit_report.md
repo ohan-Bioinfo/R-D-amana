@@ -122,6 +122,23 @@ A focused pass was run to verify every filter control is wired and every chart l
 - All chart containers (`chart_*`) have matching render functions and are called from `renderAll()`.
 - `node --check` on the extracted dashboard JavaScript passes with no syntax errors.
 
+### 1.14 Sunburst dashboards rebuilt with correct non-compliance denominator
+Both `microbiology_sunburst.html` and `microbiology_sunburst2.html` were rebuilt from the latest cleaned parquet files.
+
+| Fix | Detail |
+|---|---|
+| Unknown-validity rows treated consistently | 83 rows in 2024 with `is_failure = NaN/None` previously fell into the "✓ Compliant" leaf, lowering the true non-compliance rate. They now get their own **"Unknown validity"** leaf. |
+| Non-compliance % now matches the main dashboard | Denominator for `% contaminated` and `% pathogen` is `n - unknown` (known-validity rows only). |
+| New readout card | Each sunburst slip now shows **Compliant / Non-compliant / Unknown validity / % contaminated / % pathogen**. |
+| Rebuilt counts | Total = **20,881**; unknown = **83**; overall NC = **28.1%** (known-validity only), matching the Plotly dashboard. |
+
+### 1.15 Cross-dashboard consistency check
+| Dashboard | Total | Unknown validity | NC rate (known-only) |
+|---|---|---|---|
+| Plotly (`microbiology_dashboard.html`) | 20,881 | 83 | 28.14% |
+| Sunburst 1 (`microbiology_sunburst.html`) | 20,881 | 83 | 28.1% |
+| Sunburst 2 (`microbiology_sunburst2.html`) | 20,881 | 83 | 28.1% |
+
 ---
 
 ## 2. Remaining gaps / items for decision
@@ -152,11 +169,15 @@ The chemistry files have not yet been audited. Re-use the same explore → repor
 - `microbiology/scripts/clean_2024.py`
 - `microbiology/scripts/enrich_gso.py`
 - `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/scripts/build_micro_sunburst.py`
+- `microbiology/scripts/build_micro_sunburst2.py`
 - `microbiology/cleaned/data2024.parquet`
 - `microbiology/cleaned/data2024_long.parquet`
 - `microbiology/cleaned/data2025.parquet`
 - `microbiology/reports/data2024_clean_report.md`
 - `microbiology/reports/microbiology_dashboard.html`
+- `microbiology/reports/microbiology_sunburst.html`
+- `microbiology/reports/microbiology_sunburst2.html`
 - `microbiology/reports/data2025_diff.md`
 - `microbiology/reports/data2025_review.md`
 - `kimi/yolo/microbiology_audit_report.md`

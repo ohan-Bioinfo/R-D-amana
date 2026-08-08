@@ -38,31 +38,41 @@ def build():
     tc = load_test_classification()
     pathogen_set = {normalize_organism(t) for t in tc["pathogen"]}
 
-    # node accumulator: id -> {label, parent, depth, n, nc, np, orgs, months}
+    # node accumulator: id -> {label, parent, depth, n, nc, nu, np, orgs, months}
+    # nu = unknown validity (is_failure is null/NaN); excluded from NC% denominator
+    # so the sunburst's contamination rate matches the main dashboard.
     nodes: dict[str, dict] = {}
 
     def touch(nid, label, parent, depth):
         nd = nodes.get(nid)
         if nd is None:
             nd = nodes[nid] = {"label": label, "parent": parent, "depth": depth,
-                               "n": 0, "nc": 0, "np": 0,
+                               "n": 0, "nc": 0, "nu": 0, "np": 0,
                                "orgs": Counter(), "months": Counter()}
         return nd
 
     total = 0
+    unknown_total = 0
     for y in (2024, 2025):
         d = pd.read_parquet(ROOT / "cleaned" / f"data{y}.parquet")
         for r in d.to_dict("records"):
             total += 1
             sector = derive_sector_5(_val(r.get("municipality")), _val(r.get("sector"))) or "Unspecified"
             cat = classify(r)[0]
-            is_fail = r.get("is_failure") is True
+            is_fail_raw = r.get("is_failure")
+            is_fail = is_fail_raw is True
+            is_unknown = is_fail_raw is None or (isinstance(is_fail_raw, float) and pd.isna(is_fail_raw))
+            if is_unknown:
+                unknown_total += 1
             has_path = r.get("has_pathogen_failure") is True
             inv = r.get("invalid_tests")
             failed = [normalize_organism(t) for t in inv if t] if inv is not None else []
             if is_fail:
                 severe = next((t for t in failed if t in pathogen_set), failed[0] if failed else "Other")
                 leaf_label = severe
+            elif is_unknown:
+                severe = None
+                leaf_label = "Unknown validity"
             else:
                 severe = None
                 leaf_label = "✓ Compliant"
@@ -83,6 +93,8 @@ def build():
                     nd["nc"] += 1
                     if severe:
                         nd["orgs"][severe] += 1
+                if is_unknown:
+                    nd["nu"] += 1
                 if has_path:
                     nd["np"] += 1
                 if month:
@@ -90,18 +102,18 @@ def build():
 
     # emit arrays sorted by depth so parents precede children
     ordered = sorted(nodes.items(), key=lambda kv: (kv[1]["depth"], kv[0]))
-    ids, labels, parents, values, ns, ncs, nps, depths, texts = [], [], [], [], [], [], [], [], []
+    ids, labels, parents, values, ns, ncs, nus, nps, depths, texts = [], [], [], [], [], [], [], [], [], []
     stats = {}
     for nid, nd in ordered:
         ids.append(nid); labels.append(nd["label"]); parents.append(nd["parent"])
         values.append(nd["n"]); ns.append(nd["n"]); ncs.append(nd["nc"])
-        nps.append(nd["np"]); depths.append(nd["depth"])
-        # Blank the repetitive "✓ Compliant" wedge labels — colour already reads
-        # green/clean and hover still shows the full label; keeps the ring legible.
-        texts.append("" if nd["label"].startswith("✓") else nd["label"])
+        nus.append(nd["nu"]); nps.append(nd["np"]); depths.append(nd["depth"])
+        # Blank the repetitive "✓ Compliant" and "Unknown validity" wedge labels —
+        # colour already reads green/grey and hover still shows the full label.
+        texts.append("" if nd["label"].startswith(("✓", "Unknown")) else nd["label"])
         top = [[o, c] for o, c in nd["orgs"].most_common(3)]
         spark = [nd["months"].get(m, 0) for m in MONTHS]
-        stats[nid] = {"n": nd["n"], "nc": nd["nc"], "np": nd["np"],
+        stats[nid] = {"n": nd["n"], "nc": nd["nc"], "nu": nd["nu"], "np": nd["np"],
                       "top": top, "spark": spark, "d": nd["depth"]}
 
     # robust cap for the volume colour scale: 92nd percentile of node counts at
@@ -111,7 +123,7 @@ def build():
     volmax = mids[int(0.92 * (len(mids) - 1))] if mids else 1
 
     NODES = {"ids": ids, "labels": labels, "parents": parents, "values": values,
-             "n": ns, "nc": ncs, "np": nps, "depth": depths, "text": texts}
+             "n": ns, "nc": ncs, "nu": nus, "np": nps, "depth": depths, "text": texts}
 
     logo_uri = ("data:image/jpeg;base64," +
                 base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
@@ -126,9 +138,10 @@ def build():
     html = inline_offline(html)
     OUT.write_text(html, encoding="utf-8")
     root = nodes["ALL"]
+    known = root['n'] - root['nu']
     print(f"wrote {OUT}")
-    print(f"  root n={root['n']} (expect {total}); nodes={len(nodes)}; "
-          f"overall NC={100*root['nc']/root['n']:.1f}%; volmax={int(volmax)}; "
+    print(f"  root n={root['n']} (expect {total}); unknown={root['nu']}; nodes={len(nodes)}; "
+          f"overall NC={100*root['nc']/known:.1f}% (known-validity only); volmax={int(volmax)}; "
           f"logo={'yes' if logo_uri else 'MISSING'}")
 
 
@@ -260,6 +273,7 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .cell .v{font-family:'IBM Plex Mono',monospace;font-size:17px;margin-top:2px}
 .cell.ok .v{color:var(--green-2)}
 .cell.hot .v{color:var(--c4)}
+.cell.unknown .v{color:#64748b}
 .orgs{margin:2px 0 12px}
 .orgs .lab{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
 .orgs .lab .ar{font-family:'Tajawal',sans-serif;text-transform:none}
@@ -334,6 +348,7 @@ footer{margin-top:24px;display:flex;gap:16px;align-items:center;color:var(--mute
       <div class="readout">
         <div class="cell ok"><div class="k">Compliant <span class="ar">مطابق</span></div><div class="v" id="s_ok">—</div></div>
         <div class="cell hot"><div class="k">Non-compliant <span class="ar">غير مطابق</span></div><div class="v" id="s_nc">—</div></div>
+        <div class="cell unknown"><div class="k">Unknown validity <span class="ar">صلاحية غير معروفة</span></div><div class="v" id="s_unk">—</div></div>
         <div class="cell"><div class="k">% contaminated <span class="ar">نسبة التلوث</span></div><div class="v" id="s_rate">—</div></div>
         <div class="cell"><div class="k">% pathogen <span class="ar">نسبة الممرض</span></div><div class="v" id="s_prate">—</div></div>
       </div>
@@ -371,9 +386,11 @@ function mconf(){
 function colorVals(){
   return NODES.ids.map((id,i)=>{
     const n=NODES.n[i]||1;
+    const known=n-(NODES.nu[i]||0);
+    const denom=Math.max(known,1);
     if(metric==='vol')  return NODES.n[i]||0;
-    if(metric==='path') return 100*(NODES.np[i]||0)/n;
-    return 100*(NODES.nc[i]||0)/n;
+    if(metric==='path') return 100*(NODES.np[i]||0)/denom;
+    return 100*(NODES.nc[i]||0)/denom;
   });
 }
 const layout={margin:{l:6,r:6,t:6,b:6},paper_bgcolor:'rgba(0,0,0,0)',
@@ -427,12 +444,14 @@ function labelFor(id){
 function showStats(id){
   const s=STATS[id]||STATS['ALL'];
   document.getElementById('s_title').textContent=labelFor(id);
-  const n=s.n,nc=s.nc,ok=n-nc;
+  const n=s.n,nc=s.nc,nu=s.nu||0,ok=n-nc-nu;
+  const known=Math.max(n-nu,1);
   document.getElementById('s_n').textContent=fmt(n);
   document.getElementById('s_ok').textContent=fmt(ok);
   document.getElementById('s_nc').textContent=fmt(nc);
-  document.getElementById('s_rate').textContent=(100*nc/n).toFixed(1)+'%';
-  document.getElementById('s_prate').textContent=(100*s.np/n).toFixed(1)+'%';
+  document.getElementById('s_unk').textContent=fmt(nu);
+  document.getElementById('s_rate').textContent=(100*nc/known).toFixed(1)+'%';
+  document.getElementById('s_prate').textContent=(100*s.np/known).toFixed(1)+'%';
   const maxc=Math.max(1,...s.top.map(t=>t[1]));
   document.getElementById('s_orgs').innerHTML= s.top.length
     ? s.top.map(([o,c])=>`<div class="org"><span class="bar" style="width:${8+70*c/maxc}px"></span>
@@ -442,8 +461,8 @@ function showStats(id){
   // centre nucleus readout — headline for the active metric
   let cv, cl;
   if(metric==='vol'){ cv=fmt(n); cl='samples'; }
-  else if(metric==='path'){ cv=(100*s.np/n).toFixed(1)+'%'; cl='pathogen'; }
-  else { cv=(100*nc/n).toFixed(1)+'%'; cl='contaminated'; }
+  else if(metric==='path'){ cv=(100*s.np/known).toFixed(1)+'%'; cl='pathogen'; }
+  else { cv=(100*nc/known).toFixed(1)+'%'; cl='contaminated'; }
   document.getElementById('c_val').textContent=cv;
   document.getElementById('c_lab').textContent=(id==='ALL'?'all · ':'')+cl;
 }
