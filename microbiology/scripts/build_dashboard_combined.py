@@ -1014,7 +1014,7 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">These metrics rely on the GSO 1016 reference mapping, which is only available for 2024. 2025 samples do not carry GSO codes in the source file. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Disagreements that hinge on a <code>&gt;10</code>/<code>&lt;10</code> prefixed result are shown as <b>ambiguous</b>, not disagreements, until the lab confirms the convention.</div>
+    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Disagreements that hinge on a <code>&gt;10</code>/<code>&lt;10</code> prefixed result are shown as <b>ambiguous</b>, not disagreements, until the lab confirms the convention.</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
@@ -2883,6 +2883,12 @@ function renderGsoAudit(rows) {
   const ambiguous = rows24audit.filter(r => r[COLS.lab_ambiguous] === 1).length;
   const agree = rows24audit.length - disagree - ambiguous;
   const pctDisagree = rows24audit.length ? (100 * disagree / rows24audit.length).toFixed(1) : 0;
+  // 2025 carries no source GSO codes; codes are assigned by sample-name match
+  // (flagged gso_code_assigned_by_name). Panel metrics stay 2024-only because
+  // the 2025 source records verdicts, not the tests run.
+  const rows25 = rows.filter(r => r[COLS.year] === 2025);
+  const coded25 = rows25.filter(r => r[COLS.gso_code]).length;
+  const pctCoded25 = rows25.length ? (100 * coded25 / rows25.length).toFixed(1) : 0;
 
   const fmt = v => v.toLocaleString();
   const card = (label, value, sub) => `
@@ -2894,8 +2900,9 @@ function renderGsoAudit(rows) {
 
   document.getElementById('gso_audit').innerHTML = [
     card('2024 samples with GSO code', fmt(totalPanel), null),
-    card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples`),
-    card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples`),
+    card('2025 samples with GSO code', fmt(coded25), `${pctCoded25}% of 2025 · assigned by sample-name match`),
+    card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples (2024)`),
+    card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples (2024)`),
     card('↳ systematic gap', fmt(systematic), `${pctSystematic}% of coded · lab never/rarely runs the test for this code`),
     card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),

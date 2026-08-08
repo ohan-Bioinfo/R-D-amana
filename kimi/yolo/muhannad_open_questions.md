@@ -85,6 +85,19 @@ how much of this is a data/scope artefact vs a real lab gap.
   non-compliant), or confirmation that none exist — then we either populate
   `OFFICIAL_COMPLIANCE[2024]` or remove the conflicting footnote.
 
+### 3.3 2025 test-level data export — بيانات 2025 على مستوى الفحص
+- **Context:** the 2025 source file records one row per *sample* with only the
+  verdict and the failed test(s). Which tests were **run** is not in the file,
+  so 2025 GSO panel completeness and GSO-limit cross-checks cannot be computed
+  (they exist for 2024 only). The Annual Report is itself built from
+  test-level counts, so this data exists in the LIMS.
+- **What we need:** a 2025 test-level export — one row per test:
+  sample ID (رمز العينة) · test name (الاختبار) · result/raw value ·
+  limit (if available) · pass/fail per test.
+- **Impact:** we build `data2025_long.parquet` and 2025 gets full parity with
+  2024: panel completeness, per-test limits, and lab-vs-standard checks
+  (~11.5k samples join the GSO audit instead of ~4.3k name-assigned codes).
+
 ---
 
 ## 4. Already confirmed by you (no action needed) / تم تأكيده سابقاً

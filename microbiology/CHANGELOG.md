@@ -557,3 +557,48 @@ python3 microbiology/scripts/build_dashboard_combined.py
 - `microbiology/reports/microbiology_sunburst.html` (regenerated)
 - `microbiology/reports/microbiology_sunburst2.html` (regenerated)
 - `kimi/yolo/HANDOFF_2026-08-08.md` (new)
+
+---
+
+## 2026-08-08 (5) — 2025 GSO code assignment by sample name (Tier 1 live)
+
+### Background
+The GSO audit card was 2024-only because the 2025 source carries no GSO code
+column. User approved a two-tier name-based assignment plus a lab request for
+2025 test-level data (the only route to true 2025 panel completeness — the
+source records verdicts, not the tests run).
+
+### What changed
+1. **`enrich_gso.py` — `assign_2025_codes_by_name()`**: writes a `gso_code`
+   column into the 2025 wide parquet before `enrich_wide`.
+   - *Tier 1 (live)*: unambiguous normalised name→code pairs learned from the
+     2024 long parquet (digits stripped, ة/ه and أ/إ/آ unified both sides).
+   - *Tier 2*: `NAME_TO_CODE_2025` curated-override dict — empty pending
+     review sign-off (`kimi/yolo/2025_gso_code_name_review.md`).
+   - Assigned rows flagged `gso_code_assigned_by_name`; idempotent (recomputed
+     each run).
+   - `enrich_wide(..., derive_categories=False)` for 2025: uncoded 2025 rows
+     keep their cleaner categories instead of being mislabeled swabs.
+2. **Dashboard GSO-audit card**: new "2025 samples with GSO code" card
+   (name-assigned) + explainer rewritten to state that panel metrics stay
+   2024-only until the lab provides test-level data.
+3. **`kimi/yolo/muhannad_open_questions.md`**: new item 3.3 requesting the
+   2025 test-level export (sample ID · test · result · limit · verdict).
+
+### Results (verified)
+- 2025 coded: **4,263 / 11,564 (36.9%)** — all flagged `gso_code_assigned_by_name`.
+- 2025 cleaner categories intact (no swab mislabeling).
+- 2024 metrics unchanged: coded 7,950; incomplete panel 4,126; disagree 51;
+  ambiguous 29. Dashboard 20,881 rows; app JS passes `node --check`.
+
+### Files touched
+- `microbiology/scripts/enrich_gso.py`
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/cleaned/data2025.parquet`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)
+- `kimi/yolo/2025_gso_code_name_review.md` (new — awaiting user mark-up)
+- `kimi/yolo/muhannad_open_questions.md` (item 3.3 added)
+
+### Next step
+User marks up the Tier 2 review doc → fill `NAME_TO_CODE_2025` → re-run
+`enrich_gso.py` + dashboard → 2025 coverage rises toward ~49%.

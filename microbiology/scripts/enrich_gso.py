@@ -257,7 +257,78 @@ def load_reference() -> tuple[dict[str, dict], dict[str, dict]]:
 
 
 # ---------------------------------------------------------------------------
-def enrich_wide(path: Path, codes_map: dict[str, dict], label: str) -> None:
+# 2025 GSO code assignment by sample name (user-approved 2026-08-08).
+# The 2025 source has no GSO code column, so codes are assigned from the
+# sample name in two tiers:
+#   Tier 1 — learned map: normalised names that map to exactly ONE code in
+#            the 2024 data (high confidence, ~36% of 2025 samples).
+#   Tier 2 — curated overrides in NAME_TO_CODE_2025 below, reviewed and
+#            approved name-by-name (wins over Tier 1 on conflict).
+# Assigned rows are flagged `gso_code_assigned_by_name` in data_quality_flags.
+# Panel completeness stays 2024-only: the 2025 source records verdicts and
+# failed tests, not the tests run.
+NAME_TO_CODE_2025: dict[str, str] = {
+    # Tier 2 curated overrides — pending review sign-off
+    # (see kimi/yolo/2025_gso_code_name_review.md). Keys are normalised with
+    # _norm_name_2025 below.
+}
+
+
+def _norm_name_2025(s) -> str | None:
+    """Normalise a sample name for cross-year matching: strip digits
+    (ثلاجة ١/٢ collapse), unify taa marbouta and alef forms, collapse space."""
+    if not isinstance(s, str):
+        return None
+    s = re.sub(r"[\d٠-٩]+", "", s)
+    s = s.replace("ة", "ه")
+    s = re.sub(r"[أإآ]", "ا", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s or None
+
+
+def assign_2025_codes_by_name(path: Path, long_2024: Path) -> None:
+    """Write a `gso_code` column into the 2025 wide parquet from sample names.
+    Idempotent: recomputed from sample_name on every run (so adding Tier 2
+    overrides takes effect on the next enrich)."""
+    df = pd.read_parquet(path)
+    # Tier 1: learn unambiguous normalised-name -> code pairs from the 2024
+    # long parquet. Canonical codes are derived from the RAW column here so
+    # this works even on a fresh checkout (no dependency on a prior enrich).
+    d24 = pd.read_parquet(long_2024, columns=["sample_name", "gso_code"])
+    d24["canon"] = [normalise_gso_code(v) for v in d24["gso_code"]]
+    d24["n"] = d24["sample_name"].map(_norm_name_2025)
+    d24 = d24.dropna(subset=["n", "canon"])
+    codes_per_name = d24.groupby("n")["canon"].agg(lambda s: set(s))
+    learned = {n: next(iter(c)) for n, c in codes_per_name.items() if len(c) == 1}
+
+    norms = df["sample_name"].map(_norm_name_2025)
+    codes: list[str | None] = []
+    for n in norms:
+        code = None
+        if n is not None:
+            code = NAME_TO_CODE_2025.get(n) or learned.get(n)
+        codes.append(code)
+    df["gso_code"] = pd.array(codes, dtype="string")
+
+    # Flag assigned rows (idempotent — strip any previous assignment flag).
+    out_flags: list[str | None] = []
+    for f, c in zip(df["data_quality_flags"], codes):
+        base = f if isinstance(f, str) else ""
+        parts = [p for p in base.split("|") if p and p != "gso_code_assigned_by_name"]
+        if c:
+            parts.append("gso_code_assigned_by_name")
+        out_flags.append("|".join(parts) if parts else None)
+    df["data_quality_flags"] = pd.array(out_flags, dtype="string")
+    df.to_parquet(path, compression="zstd", index=False)
+    assigned = sum(1 for c in codes if c)
+    print(f"  2025 name-based GSO assignment: {assigned}/{len(df)} samples coded "
+          f"({100*assigned/len(df):.1f}%) [Tier 1: {len(learned)} learned names; "
+          f"Tier 2: {len(NAME_TO_CODE_2025)} curated overrides]")
+
+
+# ---------------------------------------------------------------------------
+def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
+                derive_categories: bool = True) -> None:
     df = pd.read_parquet(path)
     if "gso_code" not in df.columns:
         # 2025 has no gso_code at source. Add empty stub columns so the schema
@@ -304,8 +375,9 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str) -> None:
     df["gso_sub_products_ar"]   = pd.array(lookup("sub_products_ar"), dtype="string")
 
     # 2024 only: populate category_canonical / category_en / sample_type from GSO.
-    # Rows with no GSO code are environmental/hygiene swabs.
-    if "category_canonical" in df.columns:
+    # (2025 keeps its cleaner-derived categories: uncoded 2025 rows are NOT
+    # necessarily swabs — many are food samples awaiting name review.)
+    if derive_categories and "category_canonical" in df.columns:
         cat_canonical: list[str | None] = []
         cat_en: list[str | None] = []
         sample_type: list[str | None] = []
@@ -518,7 +590,8 @@ def main() -> int:
     print(f"loaded {len(codes_map)} gso_codes, {len(code_test_limits)} (code,test) limit entries\n")
 
     print("--- 2025 wide ---")
-    enrich_wide(P25_WIDE, codes_map, "2025")
+    assign_2025_codes_by_name(P25_WIDE, ROOT / "cleaned" / "data2024_long.parquet")
+    enrich_wide(P25_WIDE, codes_map, "2025", derive_categories=False)
 
     # Iterate over every year that has a wide parquet on disk (anchored regex
     # — substring match would mis-exclude future filenames like data20251.parquet).
