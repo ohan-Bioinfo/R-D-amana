@@ -106,6 +106,22 @@ Many 2025 `category_canonical` values are Arabic-only and had no English label, 
 ### 1.11 Sample-type distribution chart
 A new grouped bar chart (`#chart_sample_type`, `renderSampleTypeDistribution`) shows the 2024 vs 2025 `sample_type` breakdown side-by-side, making bucket shifts visible.
 
+### 1.12 Dashboard filter / chart / labelling audit
+A focused pass was run to verify every filter control is wired and every chart label is readable.
+
+| Issue found | Fix |
+|---|---|
+| **Reset button deactivated the wrong toggles.** `btn_reset` was clearing the `.active` class from *all* `.toggle` elements, including the map metric (`% non-compliance` / `% pathogen` / `Total samples`) and map tile (`Light` / `Streets` / `Dark`) view controls, without resetting their underlying state variables. | Reset now calls `syncAllChips()` and only touches the filter chips and the three filter toggles (`Pathogen only`, `Repeat offender`, `Exclude meat & poultry`). |
+| **Severity filter chips showed raw codes** (`indicator_only`, `pathogen`, `multi_pathogen`). | Added `SEVERITY_LABEL` map and a `labelMap` option to `buildChips()`; chips now display "Indicator only", "Pathogen", "Multi-pathogen". |
+| **Severity chart axes/legends showed raw codes** in `renderSeverityMonth`, `renderYoY`, and `renderHeatmap`. | Charts now use `SEVERITY_LABEL` for display labels; `crossFilter()` resolves a clicked label back to the raw state value via `LABEL_TO_RAW`. |
+| **Sample-type distribution chart showed raw codes** (`produce`, `dairy`, etc.) on the x-axis. | Added `SAMPLE_TYPE_LABEL` map and sorted types by total count; x-axis now shows readable labels ("Fruit & Vegetables", "Dairy", etc.). |
+| **Data-quality summary under-counted `Unknown validity` and `Missing facility name`.** They were only counted for rows that also had `dq_flags`. | Moved both counts outside the flag-only loop; facility card is restricted to 2025 because 2024 source lacks facility data. |
+
+### 1.13 Verified dashboard wiring
+- All declared filter containers (`f_year`, `f_compliance`, `f_severity`, `f_sector`, `f_gso_category`, `f_microbe`, date range, quick toggles) are built and have event listeners.
+- All chart containers (`chart_*`) have matching render functions and are called from `renderAll()`.
+- `node --check` on the extracted dashboard JavaScript passes with no syntax errors.
+
 ---
 
 ## 2. Remaining gaps / items for decision

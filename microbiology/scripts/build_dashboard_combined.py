@@ -1130,6 +1130,38 @@ const yearBadgeClass = y => 'y' + String(y).slice(2);   // 2023 → 'y23', 2024 
 const DOW_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
 
+// Human-readable labels for raw internal codes that appear in filter chips
+// and chart axes. Keys must match the raw values stored in the payload.
+const SEVERITY_LABEL = {
+  indicator_only: 'Indicator only',
+  pathogen:       'Pathogen',
+  multi_pathogen: 'Multi-pathogen',
+};
+const SAMPLE_TYPE_LABEL = {
+  produce:             'Fruit & Vegetables',
+  dairy:               'Dairy',
+  sauce_condiment:     'Sauces & Condiments',
+  prepared_meal:       'Ready-to-Eat Meals',
+  raw_meat:            'Raw Meat & Poultry',
+  cooked_meat_poultry: 'Cooked Meat & Poultry',
+  fish:                'Fish & Seafood',
+  egg:                 'Egg & Egg Products',
+  cereals:             'Cereals & Legumes',
+  sweets_bakery:       'Sweets & Bakery',
+  beverage:            'Beverages',
+  water:               'Drinking Water',
+  swab:                'Environmental Swabs',
+  animal_feed:         'Animal Feed',
+  fats_oils:           'Fats & Oils',
+  other:               'Other / Unclassified',
+};
+
+// Reverse lookup so chart clicks on human-readable labels can resolve back
+// to the raw state values used by the filter chips.
+const LABEL_TO_RAW = {};
+Object.entries(SEVERITY_LABEL).forEach(([k, v]) => LABEL_TO_RAW[v] = k);
+Object.entries(SAMPLE_TYPE_LABEL).forEach(([k, v]) => LABEL_TO_RAW[v] = k);
+
 // Pre-compute pathogen/indicator sets so filter logic is O(1) per row.
 const PATHOGEN_SET = new Set(FACETS.test_classes.pathogen);
 const INDICATOR_SET = new Set(FACETS.test_classes.indicator);
@@ -1158,17 +1190,18 @@ const state = {
 
 const COMPLIANCE_OPTIONS = ['Compliant', 'Non-compliant', 'Unknown'];
 
-function buildChips(parentId, items, stateKey, valueMap) {
+function buildChips(parentId, items, stateKey, valueMap, labelMap) {
   const parent = document.getElementById(parentId);
   parent.innerHTML = '';
   items.forEach(it => {
     const el = document.createElement('div');
     el.className = 'chip';
-    el.textContent = it;
-    el.dataset.value = valueMap ? valueMap(it) : it;
+    const v = valueMap ? valueMap(it) : it;
+    el.textContent = labelMap ? (labelMap[it] || it) : it;
+    el.dataset.value = v;
+    el.title = it;  // raw value as tooltip so long labels stay discoverable
     el.addEventListener('click', () => {
       el.classList.toggle('active');
-      const v = valueMap ? valueMap(it) : it;
       if (state[stateKey].has(v)) state[stateKey].delete(v);
       else state[stateKey].add(v);
       applyFilters();
@@ -1182,7 +1215,8 @@ function buildChips(parentId, items, stateKey, valueMap) {
 function crossFilter(parentId, stateKey, value) {
   if (value == null || value === '') return;
   const set = state[stateKey];
-  const v = (stateKey === 'years') ? parseInt(value, 10) : value;
+  const raw = LABEL_TO_RAW[value] || value;
+  const v = (stateKey === 'years') ? parseInt(raw, 10) : raw;
   if (set.has(v)) set.delete(v); else set.add(v);
   const parent = document.getElementById(parentId);
   if (parent) parent.querySelectorAll('.chip').forEach(el => {
@@ -1291,7 +1325,7 @@ document.getElementById('f_date_to').addEventListener('change', e => {
 buildChips('f_year',          FACETS.years.map(y => String(y)), 'years', v => parseInt(v, 10));
 buildChips('f_compliance',    COMPLIANCE_OPTIONS,                'compliance');
 buildChips('f_sector',        FACETS.sectors,                    'sector');
-buildChips('f_severity',      FACETS.severity,                   'severity');
+buildChips('f_severity',      FACETS.severity,                   'severity', null, SEVERITY_LABEL);
 buildChips('f_gso_category',  FACETS.gso_categories || [],       'gso_category');
 
 document.querySelectorAll('#bookmark_bar [data-bm]').forEach(b =>
@@ -1422,8 +1456,7 @@ document.getElementById('btn_reset').addEventListener('click', () => {
   state.exclude_raw_meat = false;
   document.getElementById('f_date_from').value = FACETS.date_min;
   document.getElementById('f_date_to').value = FACETS.date_max;
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.toggle').forEach(t => t.classList.remove('active'));
+  syncAllChips();
   applyFilters();
 });
 
@@ -2153,7 +2186,7 @@ function renderYoY(rows) {
   }
   const traces = FACETS.years.filter(y => Object.keys(counts[y] || {}).length).map(y => ({
     type: 'bar', name: String(y),
-    x: SEVERITY_ORDER,
+    x: SEVERITY_ORDER.map(s => SEVERITY_LABEL[s] || s),
     y: SEVERITY_ORDER.map(s => counts[y][s] || 0),
     marker: { color: yearColor(y) },
     hovertemplate: y + ' · %{x}: %{y}<extra></extra>',
@@ -2163,7 +2196,7 @@ function renderYoY(rows) {
     font: { color: '#1c2742', size: 12 },
     barmode: 'group',
     margin: { l: 50, r: 18, t: 10, b: 50 },
-    xaxis: { gridcolor: '#e5e7eb' }, yaxis: { gridcolor: '#e5e7eb' },
+    xaxis: { gridcolor: '#e5e7eb', tickvals: SEVERITY_ORDER.map(s => SEVERITY_LABEL[s] || s) }, yaxis: { gridcolor: '#e5e7eb' },
     legend: { orientation: 'h', y: 1.15 },
   }, PLOTLY_CONFIG);
 }
@@ -2202,6 +2235,7 @@ function renderHeatmap(rows) {
   };
   const xLabels = types.map(shortLabel);
   const xHover  = types;  // full names for hover
+  const yLabels = SEVERITY_ORDER.map(s => SEVERITY_LABEL[s] || s);
   // Light-theme colourscale that matches the rest of the dashboard:
   // off-white at 0 (so empty cells visually disappear into the card bg)
   // → light yellow → orange → deep red for the most-severe hotspots.
@@ -2222,7 +2256,7 @@ function renderHeatmap(rows) {
   // when the visible label is truncated.
   const customMatrix = SEVERITY_ORDER.map(() => xHover);
   reactChart('chart_heatmap', [{
-    type: 'heatmap', x: xLabels, y: SEVERITY_ORDER, z: z,
+    type: 'heatmap', x: xLabels, y: yLabels, z: z,
     customdata: customMatrix,
     colorscale: colorscale, zmin: 0, showscale: true,
     text: z, texttemplate: '%{text:,}',
@@ -2238,7 +2272,7 @@ function renderHeatmap(rows) {
              font: { size: 11, color: '#64748b' }, x: 0.0, y: 0.99, xanchor: 'left' },
     margin: { l: 140, r: 18, t: 32, b: 130 },
     xaxis: { tickangle: -35, automargin: true, tickfont: { size: 11 } },
-    yaxis: { automargin: true, autorange: 'reversed' },  // worst severity on top
+    yaxis: { automargin: true, autorange: 'reversed', tickvals: yLabels },  // worst severity on top
   }, PLOTLY_CONFIG);
 }
 
@@ -2246,11 +2280,11 @@ function renderSeverityMonth(rows) {
   const byMonth = groupBy(rows, r => r[COLS.year_month]);
   const months = Array.from(byMonth.keys()).sort();
   const traces = SEVERITY_ORDER.map(sev => ({
-    type: 'bar', name: sev,
+    type: 'bar', name: SEVERITY_LABEL[sev] || sev,
     x: months,
     y: months.map(m => byMonth.get(m).filter(r => r[COLS.severity] === sev).length),
     marker: { color: SEVERITY_COLOR[sev] },
-    hovertemplate: '%{x} · ' + sev + ': %{y}<extra></extra>',
+    hovertemplate: '%{x} · ' + (SEVERITY_LABEL[sev] || sev) + ': %{y}<extra></extra>',
   }));
   reactChart('chart_severity_month', traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
@@ -2839,27 +2873,43 @@ function renderDataQualitySummary(rows) {
 
   // Flatten flags in the current view.
   const flagCounter = new Map();
-  let dateParsed = 0, idCollisions = 0, catMerged = 0, missingDate = 0, yearCoerced = 0, unknownValidity = 0, missingFacility = 0;
+  let dateParsed = 0, idCollisions = 0, catMerged = 0, missingDate = 0, yearCoerced = 0;
   for (const r of rows) {
     const flags = r[COLS.dq_flags];
-    if (!flags) continue;
-    const parts = flags.split('|');
-    for (const f of parts) {
-      flagCounter.set(f, (flagCounter.get(f) || 0) + 1);
-      if (f === 'date_parsed_from_text') dateParsed++;
-      else if (f === 'sample_id_collision') idCollisions++;
-      else if (f === 'category_merged_to_canonical') catMerged++;
-      else if (f === 'date_missing') missingDate++;
-      else if (f === 'date_year_coerced_to_2025') yearCoerced++;
+    if (flags) {
+      const parts = flags.split('|');
+      for (const f of parts) {
+        flagCounter.set(f, (flagCounter.get(f) || 0) + 1);
+        if (f === 'date_parsed_from_text') dateParsed++;
+        else if (f === 'sample_id_collision') idCollisions++;
+        else if (f === 'category_merged_to_canonical') catMerged++;
+        else if (f === 'date_missing') missingDate++;
+        else if (f === 'date_year_coerced_to_2025') yearCoerced++;
+      }
     }
-    if (r[COLS.failure] === null) unknownValidity++;
-    if (!r[COLS.facility]) missingFacility++;
   }
+  // These two are row-level properties, not data-quality flags, so count them
+  // across the whole view regardless of whether the row has dq_flags.
+  const unknownValidity = rows.filter(r => r[COLS.failure] === null).length;
+  // Facility name is only present for 2025-source rows; counting 2024 rows as
+  // "missing" would be misleading because the 2024 source simply has no facility
+  // column. Restrict this card to 2025.
+  const missingFacility = rows.filter(r => r[COLS.year] === 2025 && !r[COLS.facility]).length;
 
   // GSO-specific metrics (2024-only columns)
   const rows24 = rows.filter(r => r[COLS.year] === 2024);
   const incompletePanel = rows24.filter(r => r[COLS.panel_complete] === 0).length;
   const labDisagree = rows24.filter(r => r[COLS.lab_disagree] === 1).length;
+
+  // Top 3 raw flags (excluding the separately surfaced ones) so auditors see
+  // what else is being flagged in the current view.
+  const topFlags = Array.from(flagCounter.entries())
+    .filter(([f]) => !['date_parsed_from_text','sample_id_collision','category_merged_to_canonical'].includes(f))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3);
+  const topFlagsText = topFlags.length
+    ? topFlags.map(([f, n]) => `${f}: ${fmt(n)}`).join(' · ')
+    : 'none';
 
   document.getElementById('data_quality_summary').innerHTML = [
     card('Total in view', fmt(total), null),
@@ -2867,15 +2917,16 @@ function renderDataQualitySummary(rows) {
     card('Dates parsed from text', fmt(dateParsed), dateParsed ? `${(100*dateParsed/total).toFixed(1)}%` : null),
     card('Sample ID collisions', fmt(idCollisions), null),
     card('Categories merged', fmt(catMerged), null),
-    card('Unknown validity', fmt(unknownValidity), null),
-    card('Missing facility name', fmt(missingFacility), null),
+    card('Unknown validity (2024)', fmt(unknownValidity), null),
+    card('Missing facility name (2025)', fmt(missingFacility), null),
     card('2024 incomplete GSO panel', fmt(incompletePanel), null),
     card('2024 lab vs GSO disagrees', fmt(labDisagree), null),
+    card('Other top flags', topFlagsText, null),
   ].join('');
 }
 
 function renderSampleTypeDistribution(rows) {
-  const byTypeYear = new Map(); // {type: {year: count}}
+  const byTypeYear = new Map(); // {rawType: {year: count}}
   const years = new Set();
   for (const r of rows) {
     const t = r[COLS.sample_type] || 'other';
@@ -2886,18 +2937,22 @@ function renderSampleTypeDistribution(rows) {
     byTypeYear.get(t)[y] = (byTypeYear.get(t)[y] || 0) + 1;
   }
   const yearArr = Array.from(years).sort();
-  const types = Array.from(byTypeYear.keys()).sort();
+  // Sort types by total count descending so the chart reads naturally.
+  const typeTotals = new Map();
+  for (const [t, ymap] of byTypeYear) typeTotals.set(t, Object.values(ymap).reduce((a, b) => a + b, 0));
+  const types = Array.from(byTypeYear.keys()).sort((a, b) => typeTotals.get(b) - typeTotals.get(a));
+  const labels = types.map(t => SAMPLE_TYPE_LABEL[t] || t);
   const palette = ['#3b82f6','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
   const traces = yearArr.map((y, i) => ({
     type: 'bar',
     name: String(y),
-    x: types,
+    x: labels,
     y: types.map(t => byTypeYear.get(t)[y] || 0),
     marker: { color: palette[i % palette.length] },
   }));
   reactChart('chart_sample_type', traces, {
     paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
+    font: { color: '#1c2742', size: 11, family: CHART_FONT },
     margin: { l: 50, r: 18, t: 24, b: 100 },
     xaxis: { tickangle: -35, automargin: true },
     yaxis: { title: { text: 'Samples' }, automargin: true },

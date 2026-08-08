@@ -1,5 +1,53 @@
 # Microbiology Changelog
 
+## 2026-08-08 — dashboard filter/chart/label audit and fixes
+
+### Problems addressed
+- **Reset button** cleared the active state of every `.toggle` element, including the map metric (`% non-compliance` / `% pathogen` / `Total samples`) and map tile (`Light` / `Streets` / `Dark`) view controls, without resetting their underlying JavaScript variables, leaving the UI out of sync.
+- **Severity filter chips** and severity chart labels displayed raw codes (`indicator_only`, `pathogen`, `multi_pathogen`).
+- **Sample-type distribution chart** x-axis displayed raw codes (`produce`, `dairy`, etc.).
+- **Data-quality summary** only counted "Unknown validity" and "Missing facility name" for rows that also had `data_quality_flags`, under-reporting both.
+
+### Changes
+- Refactored `btn_reset` click handler in `scripts/build_dashboard_combined.py`:
+  - Removed the broad `document.querySelectorAll('.toggle').forEach(...)` clear.
+  - Now calls `syncAllChips()` so only the actual filter chips and filter toggles are reset; map view toggles keep their state and active appearance.
+- Added `SEVERITY_LABEL` and `SAMPLE_TYPE_LABEL` lookup maps near the top of the dashboard JS.
+- Added `LABEL_TO_RAW` reverse lookup so chart clicks on human-readable labels resolve back to the raw state values used by filter chips.
+- Extended `buildChips()` with an optional `labelMap` argument; severity chips now show "Indicator only", "Pathogen", "Multi-pathogen" while still storing raw values in `dataset.value`.
+- Updated `renderSeverityMonth`, `renderYoY`, and `renderHeatmap` to use readable severity labels on axes/legends/hover.
+- Updated `renderSampleTypeDistribution` to show readable sample-type labels and sort types by total count descending.
+- Updated `renderDataQualitySummary`:
+  - Counts `Unknown validity` across the whole view.
+  - Counts `Missing facility name` only for 2025 rows (2024 source has no facility field).
+  - Adds an "Other top flags" card showing the top 3 remaining flags in the current view.
+
+### Results
+- Dashboard JavaScript passes `node --check` with no syntax errors.
+- All filter containers (`f_year`, `f_compliance`, `f_severity`, `f_sector`, `f_gso_category`, `f_microbe`, date inputs, quick toggles) remain wired to `applyFilters()`.
+- All chart containers have matching render functions called from `renderAll()`.
+- Dashboard total remains **20,881** (2024 = 9,317; 2025 = 11,564).
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/reports/microbiology_dashboard.html`
+- `kimi/yolo/microbiology_audit_report.md`
+- `kimi/yolo/microbiology_remaining_gaps_and_suggestions.md`
+
+### How to regenerate
+```bash
+cd microbiology
+.venv/bin/python scripts/build_dashboard_combined.py
+```
+
+### Push note
+- Committed and pushed to `origin/main` with message `Microbiology dashboard filter/chart/label audit (kimi push)`.
+
+### Next steps (not in this change)
+- Confirm with Muhannad the exact rule behind the Annual Report 2025 sample count (11,404 vs 11,564).
+- Once 2024 official numbers are reconciled, re-populate `OFFICIAL_COMPLIANCE[2024]`.
+- Move to chemistry audit.
+
 ## 2026-08-08 — facility normalisation, English category fallbacks, data-quality dashboard cards
 
 ### Problems addressed

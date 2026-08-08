@@ -18,6 +18,9 @@
 | Arabic-only categories missing English labels | `clean_2025.py` adds `CATEGORY_EN_FALLBACK`; missing `category_en` dropped from 383 → 129. |
 | Data-quality flags only visible in logs | Dashboard now has a **Data-quality summary** KPI card. |
 | Sample-type breakdown not shown by year | Dashboard now has a **Sample-type distribution** grouped bar chart. |
+| Reset button broke map metric/tile toggles | Reset now only clears filter chips/toggles and calls `syncAllChips()`. |
+| Severity and sample-type labels showed raw codes | Added `SEVERITY_LABEL` and `SAMPLE_TYPE_LABEL` maps for chips and chart axes. |
+| Data-quality summary under-counted unknown validity / missing facility | Fixed scope; facility count restricted to 2025 (2024 source has no facility field). |
 
 ---
 
