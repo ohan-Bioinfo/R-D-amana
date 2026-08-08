@@ -366,3 +366,42 @@ cd microbiology
 - Confirm with Muhannad the exact rule behind the Annual Report 2025 sample count (11,404 vs 11,564).
 - Once 2024 official numbers are reconciled, re-populate `OFFICIAL_COMPLIANCE[2024]`.
 - Move to chemistry audit.
+
+---
+
+## 2026-08-08 — Microbiology sunburst interactives: readability, size, info
+
+### What changed
+- `microbiology/scripts/build_micro_sunburst.py` (Plotly) and
+  `microbiology/scripts/build_micro_sunburst2.py` (D3 `sunburst-chart`):
+  - Plate enlarged: Plotly dish `max-width` 760px → 920px; D3 SVG side cap
+    720px → 880px and `#plate` min-height 560px → 640px.
+  - Centre nucleus readout enlarged (val 23→27px Plotly / 21→25px D3,
+    label 10→11px / 9→10px).
+  - Specimen slip column widened 344px → 380px; slip typography bumped
+    (title 16→17px, big count 30→32px, readout keys 10→10.5px,
+    readout values 17→18px, organism rows 12.5→13px).
+  - Plotly sunburst wedge labels 14px → 15px.
+  - New **quick-stats strip** under the sub-heading on both pages, computed
+    from the cleaned data at build time: total samples (20,881),
+    non-compliant rate of known validity (28.1%), unknown-validity count (83),
+    and top NC GSO category (Tomato Concentrates, Sauces, Vinegar, Spices and
+    Herbs — 1,173).
+
+### Verification
+- Both builds print `root n=20881`, `unknown=83`, `NC=28.1% (known-validity
+  only)` — unchanged and consistent with the main dashboard.
+- No template placeholders left in the generated HTML.
+- Extracted app JS passes `node --check` for both pages.
+
+### Files touched
+- `microbiology/scripts/build_micro_sunburst.py`
+- `microbiology/scripts/build_micro_sunburst2.py`
+- `microbiology/reports/microbiology_sunburst.html` (regenerated)
+- `microbiology/reports/microbiology_sunburst2.html` (regenerated)
+
+### How to regenerate
+```bash
+python3 microbiology/scripts/build_micro_sunburst.py
+python3 microbiology/scripts/build_micro_sunburst2.py
+```

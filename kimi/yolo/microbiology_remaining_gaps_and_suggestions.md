@@ -62,3 +62,14 @@ Apply the same workflow to the chemistry data:
 ---
 
 *For the full list of fixes already applied, see `microbiology_audit_report.md` and `microbiology/CHANGELOG.md`.*
+
+---
+
+## 4. Update log — 2026-08-08 sunburst enhancement
+
+The two microbiology sunburst interactives were rebuilt with larger plates,
+larger readout/slip typography, and a new quick-stats strip (totals, NC rate,
+unknown count, top NC category). Numbers re-verified after rebuild: 20,881
+samples, 83 unknown validity, 28.1% NC of known validity — consistent with the
+main dashboard. No new data gaps introduced; the open items in sections 1–3
+above are unchanged.

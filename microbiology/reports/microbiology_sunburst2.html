@@ -497,12 +497,20 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .lede b{color:var(--green)} .lede .r{color:var(--c4)}
 .sub{color:var(--muted);font-size:12.5px;margin:0 2px 6px;max-width:64ch}
 .sub .ar{font-family:'Tajawal',sans-serif;direction:rtl;unicode-bidi:isolate}
+
+/* ── quick-stats strip ───────────────────────────────────────── */
+.statline{display:flex;gap:8px 22px;flex-wrap:wrap;align-items:center;margin:10px 2px 4px;
+  padding:9px 14px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  font-size:12.5px;color:var(--muted)}
+.statline .st b{color:var(--green-2);font-family:'IBM Plex Mono',monospace;font-weight:600}
+.statline .st.hot b{color:var(--c4)}
+.statline .st.ar{font-family:'Tajawal',sans-serif;direction:rtl;margin-inline-start:auto}
 .rings{display:flex;gap:8px;flex-wrap:wrap;margin:12px 2px 16px;align-items:center}
 .rings .rl{display:inline-flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--hair);border-radius:999px;padding:4px 11px 4px 5px;font-size:11.5px}
 .rings .num{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;color:#fff;font-weight:600}
 .rings .rl .ar{font-family:'Tajawal',sans-serif;color:var(--muted);direction:rtl;font-size:11px}
 .rings .arrow{color:var(--green-line)}
-.stage{display:grid;grid-template-columns:1fr 344px;gap:22px;align-items:start}
+.stage{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
 @media(max-width:900px){.stage{grid-template-columns:1fr}}
 .plate-card{position:relative;padding:14px;border-radius:18px;border:1px solid var(--hair);background:radial-gradient(circle at 50% 46%,#fbfdfb 0%,#eef2ec 62%,#e2e8e0 100%)}
 .plate-cap{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 6px 10px;flex-wrap:wrap}
@@ -517,12 +525,12 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .metric .ar{font-family:'Tajawal',sans-serif}
 .metric.on{background:var(--green);color:#fff;border-color:var(--green)}
 .dishwrap{position:relative}
-#plate{width:100%;display:grid;place-items:center;min-height:560px}
+#plate{width:100%;display:grid;place-items:center;min-height:640px}
 #plate svg{max-width:100%;height:auto}
 .nucleus{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3}
-.nucleus .card{text-align:center;max-width:150px}
-.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:21px;letter-spacing:-1px;color:var(--green-2);line-height:1}
-.nucleus .lab{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:3px}
+.nucleus .card{text-align:center;max-width:180px}
+.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:25px;letter-spacing:-1px;color:var(--green-2);line-height:1}
+.nucleus .lab{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-top:3px}
 .cbar-wrap{margin-top:6px}
 .cbar{display:flex;align-items:center;gap:10px;margin:8px 8px 2px}
 .cbar .lab{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);min-width:96px}
@@ -534,21 +542,21 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .slip .head{padding:14px 16px 12px;border-bottom:1px dashed var(--hair);background:linear-gradient(180deg,var(--green-tint),var(--panel))}
 .slip .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green)}
 .slip .eyebrow .ar{font-family:'Tajawal',sans-serif;letter-spacing:0;color:var(--muted)}
-.slip .title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin:4px 0 0;line-height:1.2;unicode-bidi:plaintext}
+.slip .title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;margin:4px 0 0;line-height:1.2;unicode-bidi:plaintext}
 .slip .body{padding:14px 16px 16px}
 .big{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
-.big .n{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:30px;letter-spacing:-1px}
+.big .n{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:32px;letter-spacing:-1px}
 .big .u{color:var(--muted);font-size:12px}
 .readout{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .cell{border:1px solid var(--hair);border-radius:9px;padding:8px 10px;background:#fdfefd}
-.cell .k{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.cell .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
 .cell .k .ar{font-family:'Tajawal',sans-serif;text-transform:none}
-.cell .v{font-family:'IBM Plex Mono',monospace;font-size:17px;margin-top:2px}
+.cell .v{font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:2px}
 .cell.ok .v{color:var(--green-2)} .cell.hot .v{color:var(--c4)} .cell.unknown .v{color:#64748b}
 .orgs{margin:2px 0 12px}
-.orgs .lab{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+.orgs .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
 .orgs .lab .ar{font-family:'Tajawal',sans-serif;text-transform:none}
-.org{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px;unicode-bidi:plaintext}
+.org{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px;unicode-bidi:plaintext}
 .org .bar{height:7px;border-radius:4px;background:var(--c4);opacity:.85;flex:0 0 auto}
 .org .cnt{font-family:'IBM Plex Mono',monospace;color:var(--muted);margin-inline-start:auto;font-size:11px}
 .spark{margin-top:6px}
@@ -572,6 +580,13 @@ footer a{color:var(--peri-2)}
 
 <div class="lede">Every sample, plated and cultured — <b>20,881</b> readings, a D3 rendering of the culture plate that <span class="r">spoiled</span> outward through year, sector, category, organism.</div>
 <div class="sub">A second design on the D3 <b>sunburst-chart</b> package (vasturiano), now at full parity with the Plotly view. Click a wedge to zoom; centre or breadcrumb to climb out; hover for the reading. <span class="ar">تصميم بديل بمكتبة D3 — انقر للتكبير.</span></div>
+<div class="statline">
+  <span class="st">Samples <b>20,881</b> · عينة</span>
+  <span class="st hot">Non-compliant <b>28.1%</b> of known validity · غير مطابق</span>
+  <span class="st">Unknown validity <b>83</b> · صلاحية غير معروفة</span>
+  <span class="st">Top NC category <b>Tomato Concentrates, Sauces, Vinegar, Spices and Herbs</b> (1,173)</span>
+  <span class="st ar">أرقام إجمالية من البيانات المنظفة ٢٠٢٤–٢٠٢٥</span>
+</div>
 
 <div class="rings">
   <span class="rl"><span class="num" style="background:var(--green-2)">1</span>Year <span class="ar">السنة</span></span><span class="arrow">›</span>
@@ -621,7 +636,7 @@ footer a{color:var(--peri-2)}
 
 <footer>
   <span>angle = sample volume · colour = selected metric</span>
-  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · updated 08 Aug 2026 · 22:03</span>
+  <span class="footer-note"><span class="ar">أمانة منطقة الرياض</span> · updated 08 Aug 2026 · 22:15</span>
 </footer>
 </div>
 <script>
@@ -685,7 +700,7 @@ function focusTo(node){focus=node;chart.focusOnNode(node);
   showStats(node.data);nucleus(node.data);crumb(node);writeHash(node.data.id);}
 
 const el=document.getElementById('plate');
-const side=Math.min(720, Math.max(520, el.clientWidth||700));
+const side=Math.min(880, Math.max(560, el.clientWidth||760));
 const chart=new Sunburst(el)
   .data(DATA).width(side).height(side)
   .label('name').size('value').color(nodeColor)

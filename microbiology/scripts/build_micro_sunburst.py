@@ -129,12 +129,27 @@ def build():
     logo_uri = ("data:image/jpeg;base64," +
                 base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
 
+    # headline numbers for the quick-stats strip: known-validity NC rate,
+    # unknown-validity count, and the top non-compliant GSO category overall
+    root_nd = nodes["ALL"]
+    known_total = root_nd["n"] - root_nd["nu"]
+    nc_pct = 100 * root_nd["nc"] / max(known_total, 1)
+    cat_nc = Counter()
+    for nd in nodes.values():
+        if nd["depth"] == 3:
+            cat_nc[nd["label"]] += nd["nc"]
+    top_cat, top_cat_nc = cat_nc.most_common(1)[0] if cat_nc else ("—", 0)
+
     html = TEMPLATE
     html = html.replace("__NODES__", json.dumps(NODES, ensure_ascii=False))
     html = html.replace("__STATS__", json.dumps(stats, ensure_ascii=False))
     html = html.replace("__MONTHS__", json.dumps(MONTHS))
     html = html.replace("__VOLMAX__", str(int(volmax)))
     html = html.replace("__TOTAL__", f"{total:,}")
+    html = html.replace("__STAT_NC_PCT__", f"{nc_pct:.1f}%")
+    html = html.replace("__STAT_UNK__", f"{root_nd['nu']:,}")
+    html = html.replace("__STAT_TOPCAT__", top_cat)
+    html = html.replace("__STAT_TOPCAT_N__", f"{top_cat_nc:,}")
     html = html.replace("__LOGO__", logo_uri)
     html = html.replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M"))
     html = inline_offline(html)
@@ -194,6 +209,14 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .sub{color:var(--muted);font-size:12.5px;margin:0 2px 6px;max-width:64ch}
 .sub .ar{font-family:'Tajawal',sans-serif;direction:rtl;unicode-bidi:isolate}
 
+/* ── quick-stats strip ───────────────────────────────────────── */
+.statline{display:flex;gap:8px 22px;flex-wrap:wrap;align-items:center;margin:10px 2px 4px;
+  padding:9px 14px;background:var(--panel);border:1px solid var(--hair);border-radius:12px;
+  font-size:12.5px;color:var(--muted)}
+.statline .st b{color:var(--green-2);font-family:'IBM Plex Mono',monospace;font-weight:600}
+.statline .st.hot b{color:var(--c4)}
+.statline .st.ar{font-family:'Tajawal',sans-serif;direction:rtl;margin-inline-start:auto}
+
 /* ── ring legend ─────────────────────────────────────────────── */
 .rings{display:flex;gap:8px;flex-wrap:wrap;margin:12px 2px 16px;align-items:center}
 .rings .rl{display:inline-flex;align-items:center;gap:7px;background:var(--panel);
@@ -204,13 +227,13 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .rings .arrow{color:var(--green-line)}
 
 /* ── stage: plate + slip ─────────────────────────────────────── */
-.stage{display:grid;grid-template-columns:1fr 344px;gap:22px;align-items:start}
+.stage{display:grid;grid-template-columns:1fr 380px;gap:22px;align-items:start}
 @media(max-width:900px){.stage{grid-template-columns:1fr}}
 
 .plate-card{position:relative;padding:14px;border-radius:18px;
   border:1px solid var(--hair);
   background:radial-gradient(circle at 50% 46%, #fbfdfb 0%, #eef2ec 62%, #e2e8e0 100%);}
-.dish{position:relative;aspect-ratio:1/1;max-width:760px;margin:0 auto;border-radius:999px;
+.dish{position:relative;aspect-ratio:1/1;max-width:920px;margin:0 auto;border-radius:999px;
   box-shadow:inset 0 0 0 1px var(--green-line), inset 0 0 44px rgba(0,72,48,.10),
              0 18px 40px -22px rgba(0,60,40,.42);
   background:
@@ -220,11 +243,11 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 #plate{width:100%;height:100%}
 /* centre readout — the plate's nucleus */
 .nucleus{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:3}
-.nucleus .card{text-align:center;transform:translateY(-1px);max-width:172px;padding:12px 16px;
+.nucleus .card{text-align:center;transform:translateY(-1px);max-width:196px;padding:12px 16px;
   border-radius:999px;background:radial-gradient(closest-side,rgba(251,252,250,.92),rgba(251,252,250,.5) 62%,transparent)}
-.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:23px;
+.nucleus .val{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:27px;
   letter-spacing:-1px;color:var(--green-2);line-height:1;text-shadow:0 1px 3px rgba(255,255,255,.9)}
-.nucleus .lab{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
+.nucleus .lab{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);
   margin-top:3px;text-shadow:0 1px 2px rgba(255,255,255,.9)}
 .plate-cap{display:flex;justify-content:space-between;align-items:center;gap:10px;
   padding:8px 6px 4px;flex-wrap:wrap}
@@ -262,24 +285,24 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .slip .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
   text-transform:uppercase;color:var(--green)}
 .slip .eyebrow .ar{font-family:'Tajawal',sans-serif;letter-spacing:0;color:var(--muted)}
-.slip .title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;
+.slip .title{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;
   margin:4px 0 0;line-height:1.2;unicode-bidi:plaintext}
 .slip .body{padding:14px 16px 16px}
 .big{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
-.big .n{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:30px;letter-spacing:-1px}
+.big .n{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:32px;letter-spacing:-1px}
 .big .u{color:var(--muted);font-size:12px}
 .readout{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
 .cell{border:1px solid var(--hair);border-radius:9px;padding:8px 10px;background:#fdfefd}
-.cell .k{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
+.cell .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted)}
 .cell .k .ar{font-family:'Tajawal',sans-serif;text-transform:none;letter-spacing:0}
-.cell .v{font-family:'IBM Plex Mono',monospace;font-size:17px;margin-top:2px}
+.cell .v{font-family:'IBM Plex Mono',monospace;font-size:18px;margin-top:2px}
 .cell.ok .v{color:var(--green-2)}
 .cell.hot .v{color:var(--c4)}
 .cell.unknown .v{color:#64748b}
 .orgs{margin:2px 0 12px}
-.orgs .lab{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
+.orgs .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:6px}
 .orgs .lab .ar{font-family:'Tajawal',sans-serif;text-transform:none}
-.org{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12.5px;unicode-bidi:plaintext}
+.org{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px;unicode-bidi:plaintext}
 .org .bar{height:7px;border-radius:4px;background:var(--c4);opacity:.85;flex:0 0 auto}
 .org .cnt{font-family:'IBM Plex Mono',monospace;color:var(--muted);margin-inline-start:auto;font-size:11px}
 .spark{margin-top:6px}
@@ -304,6 +327,13 @@ footer{margin-top:24px;display:flex;gap:16px;align-items:center;color:var(--mute
 
 <div class="lede">Every sample, plated and cultured — <b>__TOTAL__</b> readings blooming from the lab's core outward through year, sector, food category, and the organism that <span class="r">spoiled</span> it.</div>
 <div class="sub">Angle is how many samples. Colour is contamination — green reads clean, red reads spoiled. Click any colony to zoom; use the breadcrumb or the plate centre to climb back out. <span class="ar">الزاوية = عدد العينات · اللون = نسبة التلوث · انقر للتكبير.</span></div>
+<div class="statline">
+  <span class="st">Samples <b>__TOTAL__</b> · عينة</span>
+  <span class="st hot">Non-compliant <b>__STAT_NC_PCT__</b> of known validity · غير مطابق</span>
+  <span class="st">Unknown validity <b>__STAT_UNK__</b> · صلاحية غير معروفة</span>
+  <span class="st">Top NC category <b>__STAT_TOPCAT__</b> (__STAT_TOPCAT_N__)</span>
+  <span class="st ar">أرقام إجمالية من البيانات المنظفة ٢٠٢٤–٢٠٢٥</span>
+</div>
 
 <div class="rings" id="ring_legend">
   <span class="rl"><span class="num" style="background:var(--green-2)">1</span>Year <span class="ar">السنة</span></span>
@@ -416,7 +446,7 @@ function draw(){
     // and 'auto' orientation keeps short names upright where they'll fit.
     text:NODES.text,
     texttemplate:'<b>%{text}</b>',
-    textfont:{size:14,family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif"},
+    textfont:{size:15,family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif"},
     insidetextorientation:'auto',
     hovertemplate:(metric==='vol')
       ? '<b>%{label}</b><br>%{value:,} samples<extra></extra>'
