@@ -1,7 +1,7 @@
 # Microbiology — remaining gaps and suggested fixes
 
 **Date:** 2026-08-08  
-**Status:** Most microbiology gaps are now closed. Only the Annual Report 2025 reconciliation and the chemistry audit remain.
+**Status:** Microbiology data-quality gaps are now closed. Outstanding items: confirm the 2025 Annual Report inclusion rule, then move to chemistry.
 
 ---
 
@@ -14,6 +14,10 @@
 | 2024 `sample_id` derived from `gso_code` | Now uses `m_s_no` scoped by `source_file`. |
 | Hardcoded 2024 official numbers | Set to `null`; footnote now says "pending reconciliation". |
 | GSO panel completeness / disagreements hidden | New dashboard card shows panel completeness and lab-vs-GSO agreement/disagreement. |
+| Facility-chain spelling variants fragmenting rankings | `clean_2025.py` applies `FACILITY_SUBSTRING_REPLACEMENTS` (e.g. `صب وأي` → `صب واي`). |
+| Arabic-only categories missing English labels | `clean_2025.py` adds `CATEGORY_EN_FALLBACK`; missing `category_en` dropped from 383 → 129. |
+| Data-quality flags only visible in logs | Dashboard now has a **Data-quality summary** KPI card. |
+| Sample-type breakdown not shown by year | Dashboard now has a **Sample-type distribution** grouped bar chart. |
 
 ---
 

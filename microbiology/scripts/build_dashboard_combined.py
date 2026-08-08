@@ -335,6 +335,8 @@ DATA_COLS = [
     "panel_complete",# 20  True/False/null — was the full GSO panel run? (2024-only)
     "lab_disagree",  # 21  True/False/null — does lab verdict disagree with GSO limit?
     "sample_name",   # 22  Specific sample name (e.g. تبولة, جبنة فيتا) for subtype rankings
+    "sample_type",   # 23  Decision-making bucket (produce, dairy, swab, etc.)
+    "dq_flags",      # 24  Pipe-separated data_quality_flags from the cleaner
 ]
 
 
@@ -461,6 +463,8 @@ def build_data(df: pd.DataFrame) -> dict:
             (None if pd.isna(getattr(r, "gso_lab_vs_gso_disagree", None))
              else (1 if bool(getattr(r, "gso_lab_vs_gso_disagree")) else 0)),
             _val(getattr(r, "sample_name", None)),  # specific subtype name
+            _val(getattr(r, "sample_type", None)),
+            _val(getattr(r, "data_quality_flags", None)),
         ])
     return {"cols": DATA_COLS, "rows": rows}
 
@@ -980,6 +984,14 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
+  <div class="group-head">Data quality</div>
+
+  <div class="card full">
+    <h2>Data-quality summary</h2>
+    <div class="card-sub">Counts of flagged rows and structural issues in the current filtered view. These are informational — the rows are kept in the dataset.</div>
+    <div id="data_quality_summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-top:10px"></div>
+  </div>
+
   <div class="group-head">What's failing</div>
 
   <div class="card full">
@@ -1007,12 +1019,17 @@ tbody tr:hover { background: var(--sand-100); }
         <div id="chart_tests_indicator" class="chart"></div>
       </div>
     </div>
-    <div id="tests_drilldown" style="margin-top:14px"></div>
-  </div>
+
 
   <div class="card full">
     <h2>GSO 1016 categories — total samples &amp; non-compliance</h2>
     <div id="chart_gso_cat" class="chart" style="min-height:480px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Sample-type distribution</h2>
+    <div class="card-sub">Decision-making buckets (produce, dairy, swab, etc.) by year. Useful for spotting bucket drift after keyword changes.</div>
+    <div id="chart_sample_type" class="chart" style="min-height:420px"></div>
   </div>
 
   <div class="card full">
@@ -2808,6 +2825,88 @@ function renderGsoAudit(rows) {
   ].join('');
 }
 
+function renderDataQualitySummary(rows) {
+  const fmt = v => v.toLocaleString();
+  const card = (label, value, sub) => `
+    <div class="kpi">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${value}</div>
+      ${sub ? '<div class="kpi-sub">' + sub + '</div>' : ''}
+    </div>`;
+
+  const total = rows.length;
+  const flagged = rows.filter(r => r[COLS.dq_flags]).length;
+
+  // Flatten flags in the current view.
+  const flagCounter = new Map();
+  let dateParsed = 0, idCollisions = 0, catMerged = 0, missingDate = 0, yearCoerced = 0, unknownValidity = 0, missingFacility = 0;
+  for (const r of rows) {
+    const flags = r[COLS.dq_flags];
+    if (!flags) continue;
+    const parts = flags.split('|');
+    for (const f of parts) {
+      flagCounter.set(f, (flagCounter.get(f) || 0) + 1);
+      if (f === 'date_parsed_from_text') dateParsed++;
+      else if (f === 'sample_id_collision') idCollisions++;
+      else if (f === 'category_merged_to_canonical') catMerged++;
+      else if (f === 'date_missing') missingDate++;
+      else if (f === 'date_year_coerced_to_2025') yearCoerced++;
+    }
+    if (r[COLS.failure] === null) unknownValidity++;
+    if (!r[COLS.facility]) missingFacility++;
+  }
+
+  // GSO-specific metrics (2024-only columns)
+  const rows24 = rows.filter(r => r[COLS.year] === 2024);
+  const incompletePanel = rows24.filter(r => r[COLS.panel_complete] === 0).length;
+  const labDisagree = rows24.filter(r => r[COLS.lab_disagree] === 1).length;
+
+  document.getElementById('data_quality_summary').innerHTML = [
+    card('Total in view', fmt(total), null),
+    card('Rows with any flag', fmt(flagged), flagged ? `${(100*flagged/total).toFixed(1)}%` : '0%'),
+    card('Dates parsed from text', fmt(dateParsed), dateParsed ? `${(100*dateParsed/total).toFixed(1)}%` : null),
+    card('Sample ID collisions', fmt(idCollisions), null),
+    card('Categories merged', fmt(catMerged), null),
+    card('Unknown validity', fmt(unknownValidity), null),
+    card('Missing facility name', fmt(missingFacility), null),
+    card('2024 incomplete GSO panel', fmt(incompletePanel), null),
+    card('2024 lab vs GSO disagrees', fmt(labDisagree), null),
+  ].join('');
+}
+
+function renderSampleTypeDistribution(rows) {
+  const byTypeYear = new Map(); // {type: {year: count}}
+  const years = new Set();
+  for (const r of rows) {
+    const t = r[COLS.sample_type] || 'other';
+    const y = r[COLS.year];
+    if (y == null) continue;
+    years.add(y);
+    if (!byTypeYear.has(t)) byTypeYear.set(t, {});
+    byTypeYear.get(t)[y] = (byTypeYear.get(t)[y] || 0) + 1;
+  }
+  const yearArr = Array.from(years).sort();
+  const types = Array.from(byTypeYear.keys()).sort();
+  const palette = ['#3b82f6','#f59e0b','#10b981','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f97316','#6366f1'];
+  const traces = yearArr.map((y, i) => ({
+    type: 'bar',
+    name: String(y),
+    x: types,
+    y: types.map(t => byTypeYear.get(t)[y] || 0),
+    marker: { color: palette[i % palette.length] },
+  }));
+  reactChart('chart_sample_type', traces, {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { color: '#1c2742', size: 11, family: 'Segoe UI, Tahoma, sans-serif' },
+    margin: { l: 50, r: 18, t: 24, b: 100 },
+    xaxis: { tickangle: -35, automargin: true },
+    yaxis: { title: { text: 'Samples' }, automargin: true },
+    barmode: 'group',
+    bargap: 0.25,
+    legend: { orientation: 'h', y: 1.12, font: { size: 11 } },
+  }, PLOTLY_CONFIG);
+}
+
 function renderAll(rows) {
   // Single filter tier (2026-07-16): every figure derives from the one filtered
   // set. rowsActive (severity events only) is a local derivation used solely by
@@ -2820,12 +2919,14 @@ function renderAll(rows) {
 
   refreshMicrobeChipCounts(rows);
   renderKpis(rows);
+  renderDataQualitySummary(rows);
   renderGsoAudit(rows);
   renderMap(rows);
   renderTrend(rows);
   renderYoY(rows);
   renderSector(rows);
   renderGsoCategory(rows);
+  renderSampleTypeDistribution(rows);
   renderChains(rows);
   renderDow(rows);
   renderRepeatTable(rows);

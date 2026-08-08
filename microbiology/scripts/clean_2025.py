@@ -50,6 +50,65 @@ CATEGORY_CANONICAL_MERGES = {
     '(yogurt) زبادي': 'اللبان (yogurt)',
 }
 
+ # Facility-name normalisation: merge spelling/whitespace variants that otherwise
+ # fragment chain-level aggregations (repeat offenders, chain rankings).
+FACILITY_SUBSTRING_REPLACEMENTS = [
+    ("صب وأي", "صب واي"),
+]
+
+# English-label fallback for Arabic-only category_canonical values. These appear
+# when the source category lacks the "(<EN>)" pattern.
+CATEGORY_EN_FALLBACK = {
+    "الخضار المشوية و المطبوخة": "cooked and grilled vegetables",
+    "اعلاف": "animal feed",
+    "طحينة": "tahini",
+    "سمك مطبوخ": "cooked fish",
+    "لبنة": "strained yogurt",
+    "الجريش": "crushed wheat",
+    "الخبز": "bread",
+    "سلطة حارة": "spicy salad",
+    "مياة فلتر للطبخ م": "filtered cooking water",
+    "خبز": "bread",
+    "ذرة": "corn",
+    "جزر مبشور": "grated carrot",
+    "صوص رانش": "ranch sauce",
+    "نكهة فانيلا": "vanilla flavour",
+    "نكهة نعناع": "mint flavour",
+    "صوص مايونيز": "mayonnaise sauce",
+    "مسحة صانعة ثلج": "ice maker swab",
+    "رز بخاري": "bukhari rice",
+    "دجاج على الفحم": "charcoal chicken",
+    "ايدام مصقع": "muasaqaa stew",
+    "ايدام مشكل خضار": "mixed vegetable stew",
+    "ايدام مشكل فرن": "mixed oven stew",
+    "سلطة مشوي": "grilled salad",
+    "كيك شوكولاتة": "chocolate cake",
+    "تشيز كيك توت بري": "blueberry cheesecake",
+    "تراميسو": "tiramisu",
+    "تشيز كيك فراولة": "strawberry cheesecake",
+    "تشيز ايسكريم": "cheese ice cream",
+    "حلا لايك": "layali dessert",
+    "كريم كراميل": "creme caramel",
+    "الزيت القلي": "used frying oil",
+    "سمك كنعد": "kingfish",
+    "سمك هامور": "hammour",
+    "سمك فيليه": "fish fillet",
+    "سمك دنيس": "dentex",
+    "سمك سلمون": "salmon",
+    "ربيان": "shrimp",
+    "صوص محمره": "muhammara sauce",
+    "مسحة طاولة تقطيع 1": "cutting table swab 1",
+    "مسحة طاولة تقطيع 2": "cutting table swab 2",
+    "مسحة طاولة تقطيع 3": "cutting table swab 3",
+    "مسحة ثلاجة الخضار": "vegetable fridge swab",
+    "كشنة بصل": "onion kashna",
+    "لازانيا مكرونة": "lasagna pasta",
+    "كشنة رز شعبي": "folk rice kashna",
+    "مصقع": "muasaqaa",
+    "حمص": "hummus",
+    "تبولة": "tabbouleh",
+}
+
 
 class SchemaValidationError(Exception):
     pass
@@ -405,6 +464,11 @@ def clean_2025_with_audit(path: Path) -> tuple[pd.DataFrame, dict]:
             _, en = extract_category(canon)
         cat_canonical.append(canon)
         cat_en.append(en)
+    # English-label fallback for Arabic-only categories.
+    for i, (cc, en) in enumerate(zip(cat_canonical, cat_en)):
+        if en is None and isinstance(cc, str):
+            cat_en[i] = CATEGORY_EN_FALLBACK.get(cc, en)
+
     df["category_canonical"] = cat_canonical
     df["category_en"] = cat_en
     audit["changes_per_column"]["category_canonical_merged"] = merge_count
@@ -508,10 +572,18 @@ def clean_2025_with_audit(path: Path) -> tuple[pd.DataFrame, dict]:
     ]
 
     # 13. Facility chain/branch split
+    # Normalise spelling variants first so chains like "صب وأي" / "صب واي"
+    # are aggregated together.
     chains: list[str | None] = []
     branches: list[str | None] = []
     for v in df["facility_name_raw"]:
-        c, b = split_facility_name(v)
+        if isinstance(v, str):
+            v_norm = v
+            for old, new in FACILITY_SUBSTRING_REPLACEMENTS:
+                v_norm = v_norm.replace(old, new)
+        else:
+            v_norm = v
+        c, b = split_facility_name(v_norm)
         chains.append(c)
         branches.append(b)
     df["facility_chain"] = chains

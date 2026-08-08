@@ -70,11 +70,11 @@
 | `sample_id_raw` | `string` | 11564 | 0 | 11556 |
 | `sample_name` | `string` | 11564 | 0 | 5034 |
 | `category_canonical` | `string` | 11562 | 2 | 353 |
-| `category_en` | `string` | 11181 | 383 | 182 |
+| `category_en` | `string` | 11435 | 129 | 228 |
 | `category_raw` | `string` | 11562 | 2 | 361 |
 | `sample_type` | `string` | 11564 | 0 | 15 |
 | `facility_name` | `string` | 11549 | 15 | 656 |
-| `facility_chain` | `string` | 11549 | 15 | 620 |
+| `facility_chain` | `string` | 11549 | 15 | 619 |
 | `facility_branch` | `string` | 7379 | 4185 | 71 |
 | `facility_name_raw` | `string` | 11549 | 15 | 656 |
 | `municipality` | `string` | 11562 | 2 | 13 |

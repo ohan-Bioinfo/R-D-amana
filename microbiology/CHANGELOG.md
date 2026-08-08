@@ -1,5 +1,56 @@
 # Microbiology Changelog
 
+## 2026-08-08 — facility normalisation, English category fallbacks, data-quality dashboard cards
+
+### Problems addressed
+- Facility-chain spelling variants (`صب وأي` vs `صب واي`) were splitting the same chain into separate rows in repeat-offender and chain-ranking aggregations.
+- 383 rows in 2025 had `category_en = NA` because their `category_canonical` was Arabic-only.
+- Data-quality flags (sample-id collisions, validity conflicts, date parsing, category merges) were only visible in script logs and parquet columns, not surfaced in the dashboard.
+- The 2024 vs 2025 sample-type split was not shown in a single chart.
+
+### Changes
+- Added `FACILITY_SUBSTRING_REPLACEMENTS` to `scripts/clean_2025.py`:
+  - `("صب وأي", "صب واي")` merges the two Subway spelling variants before chain/branch splitting.
+- Added `CATEGORY_EN_FALLBACK` mapping in `scripts/clean_2025.py` for Arabic-only categories:
+  - Covers cooked/grilled vegetables, tahini, breads, rice dishes, fish types, sauces, salads, desserts, swab labels, etc.
+- Extended `DATA_COLS` in `scripts/build_dashboard_combined.py` to include `sample_type` and `dq_flags` in the per-row dashboard payload.
+- Added a **Data-quality summary** KPI card to the dashboard (`#data_quality_summary`, `renderDataQualitySummary`).
+- Added a **Sample-type distribution** grouped bar chart (`#chart_sample_type`, `renderSampleTypeDistribution`).
+
+### Results
+- 2025 `facility_chain == 'صب واي'` now rolls up **68 rows** under one spelling.
+- 2025 `category_en` missing dropped from **383 → 129 rows**; the remainder are mostly unique/free-text sample descriptions.
+- Dashboard total remains **20,881** (2024 = 9,317; 2025 = 11,564).
+- Dashboard now exposes quality-flag counts and year-over-year sample-type distribution.
+
+### Files touched
+- `microbiology/scripts/clean_2025.py`
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/cleaned/data2025.parquet`
+- `microbiology/cleaned/data2024.parquet`
+- `microbiology/cleaned/data2024_long.parquet`
+- `microbiology/reports/microbiology_dashboard.html`
+- `microbiology/reports/data2025_diff.md`
+- `microbiology/reports/data2025_review.md`
+- `kimi/yolo/microbiology_audit_report.md`
+- `kimi/yolo/microbiology_remaining_gaps_and_suggestions.md`
+
+### How to regenerate
+```bash
+cd microbiology
+.venv/bin/python scripts/clean_2025.py "2025-original/Data 2025.xlsx" cleaned/data2025.parquet reports/data2025_diff.md
+.venv/bin/python scripts/enrich_gso.py
+.venv/bin/python scripts/build_dashboard_combined.py
+```
+
+### Push note
+- Committed and pushed to `origin/main` with message `Microbiology re-audit enhancements (kimi push)`.
+
+### Next steps (not in this change)
+- Confirm with Muhannad the exact rule behind the Annual Report 2025 sample count (11,404 vs 11,564).
+- Once 2024 official numbers are reconciled, re-populate `OFFICIAL_COMPLIANCE[2024]`.
+- Move to chemistry audit.
+
 ## 2026-08-08 — 2024 category & swab classification fix
 
 ### Problem
