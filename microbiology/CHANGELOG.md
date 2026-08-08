@@ -535,3 +535,25 @@ python3 microbiology/scripts/build_dashboard_combined.py
 - What does a `>10` result mean in the 2024 sheets (literal "above 10", or an
   RTL-flipped `<10` "below 10 = satisfactory")? The 29 ambiguous samples
   resolve to agree/disagree once confirmed.
+
+---
+
+## 2026-08-08 (4) — Landing-page chemistry cross + sunburst rebuild + handoff note
+
+### What changed
+- `build_landing.py`: chemistry plate ring is now greyed out
+  (`grayscale(.75) opacity(.5)`) with a large **✕ cross** replacing the
+  ornament, and the hover spin disabled. The three chemistry entries remain
+  fully deactivated (no `href`, `pointer-events:none`) with
+  "under construction · قيد الإنشاء" labels.
+- Both microbiology sunbursts rebuilt on the refreshed parquets (post
+  H-mapping / aliases / re-clean): totals re-verified — root n=20,881,
+  unknown=83, NC=28.1% (known-validity only); app JS passes `node --check`.
+- New consolidated handoff note: `kimi/yolo/HANDOFF_2026-08-08.md` (what
+  changed, verified numbers, regeneration order, open items for Muhannad).
+
+### Files touched
+- `build_landing.py`, `index.html`
+- `microbiology/reports/microbiology_sunburst.html` (regenerated)
+- `microbiology/reports/microbiology_sunburst2.html` (regenerated)
+- `kimi/yolo/HANDOFF_2026-08-08.md` (new)

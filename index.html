@@ -539,11 +539,15 @@ header.hero{padding:44px 4px 26px;position:relative}
 .ring.micro{background:conic-gradient(from -90deg,
   #1f9d63,#5aa84f,#8fb24a,#e0a53a,#e07b2f,#c0392b,#1f9d63)}
 .ring.chem{background:conic-gradient(from -90deg,
-  #eceef6,#8e9fc7,#5f70a2,#7f97c4,#1f9d63,#8e9fc7,#eceef6)}
+  #eceef6,#8e9fc7,#5f70a2,#7f97c4,#1f9d63,#8e9fc7,#eceef6);
+  filter:grayscale(.75) opacity(.5)}
 .plate{width:96px;height:96px;flex:0 0 auto;position:relative;display:grid;place-items:center}
 .plate .hole{position:absolute;font-family:'IBM Plex Mono',monospace;font-size:11px;
   color:var(--muted);letter-spacing:.5px}
 .plate .glyph{position:absolute;color:var(--gold);font-size:15px;opacity:.9}
+/* chemistry is under construction: big ✕ over the plate instead of the ornament */
+.plate .glyph.cross{font-size:34px;font-weight:700;color:var(--peri);opacity:.85}
+.lab.chem:hover .ring{animation:none}
 .lab:hover .ring{animation:spin 9s linear infinite}
 
 .names .kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
@@ -652,7 +656,7 @@ footer{border-top:1px solid var(--hair)}
       <div class="lab-top">
         <div class="plate">
           <div class="ring chem"></div>
-          <span class="glyph">۞</span>
+          <span class="glyph cross" title="Under construction · قيد الإنشاء">✕</span>
         </div>
         <div class="names">
           <div class="kicker">Laboratory</div>
@@ -688,7 +692,7 @@ footer{border-top:1px solid var(--hair)}
     <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
     <span>self-contained · opens in any browser</span>
     <a class="sp signout" href="/logout">Sign out →</a>
-    <span>build 08 Aug 2026 · 22:04</span>
+    <span>build 08 Aug 2026 · 23:04</span>
   </div>
 </footer>
 </body></html>
