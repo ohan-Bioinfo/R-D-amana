@@ -5,7 +5,7 @@
 - **Rows after empty-row drop:** 11571
 - **Rows out (canonical):** 11564
 - **Rows dropped:** 0
-- **Flags raised (total):** 4481
+- **Flags raised (total):** 4423
 
 ## Cells changed per column
 
@@ -27,7 +27,6 @@
 |---|---:|---|
 | `date_parsed_from_text` | 4227 | '13/4/2025' |
 | `category_merged_to_canonical` | 153 | "'القشطة (cream)' → '(cream) قشطة'" |
-| `sample_type_unbucketed` | 58 | 'ايدام مصقع' |
 | `sample_id_collision` | 22 | 'so-0004-r01 → so-0004-r01-a (differs in: sample_name_raw,sampling_date,category |
 | `validity_says_valid_but_has_failures` | 8 | 'is_valid=true, n_failed_tests=1' |
 | `sample_id_duplicate_dropped` | 7 | 'sw-2725-r01' |
@@ -91,6 +90,6 @@
 | `failed_indicators` | `object` | 11564 | 0 | n/a |
 | `has_pathogen_failure` | `boolean` | 11564 | 0 | 2 |
 | `severity_tier` | `string` | 11564 | 0 | 4 |
-| `data_quality_flags` | `string` | 4423 | 7141 | 13 |
+| `data_quality_flags` | `string` | 4389 | 7175 | 11 |
 | `chain_invalid_count_90d` | `int32` | 11564 | 0 | 30 |
 | `is_repeat_offender_90d` | `boolean` | 11564 | 0 | 2 |

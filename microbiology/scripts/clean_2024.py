@@ -594,8 +594,18 @@ def aggregate_to_wide(long_df: pd.DataFrame) -> pd.DataFrame:
             "iso_year_week": ts.strftime("%G-W%V") if pd.notna(ts) else None,
             "quarter": int(ts.quarter) if pd.notna(ts) else None,
             "day_of_week": int(ts.dayofweek) if pd.notna(ts) else None,
-            "sample_id": first_non_null(g["gso_code"]),
-            "sample_id_raw": first_non_null(g["gso_code"]),
+            # Use m_s_no (scoped by source file) as the sample identifier instead
+            # of gso_code, which is a product standard, not a sample ID.
+            # Fall back to gso_code when m_s_no is missing, and to source_file+row
+            # only when both are missing, so every sample has a non-null ID.
+            "sample_id": (f"{sf}_{int(msno)}" if pd.notna(msno)
+                          else first_non_null(g["gso_code"])
+                          if first_non_null(g["gso_code"]) is not None
+                          else f"{sf}_row{int(g['row_excel'].min())}"),
+            "sample_id_raw": (str(int(msno)) if pd.notna(msno)
+                              else first_non_null(g["gso_code"])
+                              if first_non_null(g["gso_code"]) is not None
+                              else f"row{int(g['row_excel'].min())}"),
             "sample_name": first_non_null(g["sample_name"]),
             "category_canonical": None,
             "category_en": None,

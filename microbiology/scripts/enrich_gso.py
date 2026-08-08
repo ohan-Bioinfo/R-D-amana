@@ -29,6 +29,92 @@ P24_WIDE = ROOT / "cleaned" / "data2024.parquet"
 P24_LONG = ROOT / "cleaned" / "data2024_long.parquet"
 P25_WIDE = ROOT / "cleaned" / "data2025.parquet"
 
+# Mapping from GSO 1016 category_name_en to dashboard category labels.
+# Keeps 2024 categories stylistically aligned with 2025 raw categories.
+GSO_CATEGORY_TO_DISPLAY: dict[str, tuple[str, str]] = {
+    "Dairy Products": ("الاجبان (cheeses)", "cheeses"),
+    "Infants, Children and Certain Categories of Dietetic Foods": (
+        "Infants, Children and Certain Categories of Dietetic Foods",
+        "Infants, Children and Certain Categories of Dietetic Foods",
+    ),
+    "Meat, Poultry and its Products": (
+        "لحوم نيئة مبردة ومجمدة (Raw meat Cold or chilled )",
+        "Raw meat Cold or chilled",
+    ),
+    "Fish and Shellfish their Products": (
+        "Fish/fish product(الاسماك / منتجات الاسماك)",
+        "fish product",
+    ),
+    "Egg and Egg Products": ("egg", "egg"),
+    "Fats and Oils": ("Fats and Oils", "Fats and Oils"),
+    "Tomato Concentrates, Sauces, Vinegar, Spices and Herbs": (
+        "البهارات والصوصات", "Spices and Herbs"),
+    "Cereals; Legumes and their Products": (
+        "الحبوب والبقوليات", "Cereals; Legumes and their Products"),
+    "Fruit and Vegetables": (
+        "فواكه و خضروات طازجة (Fresh fruits and vegetables )",
+        "Fresh fruits and vegetables",
+    ),
+    "Jelly, Jam and Marmalade": ("Jelly, Jam and Marmalade", "Jelly, Jam and Marmalade"),
+    "Chocolate, Sweets and their Ingredients": (
+        "الحلا(sweetness)", "sweetness"),
+    "Drinking Water": ("المياه الغير معبأة (Unbottled water)", "Unbottled water"),
+    "Beverages": (
+        "شراب بنكهة و مركزاتها ( flavoured drink & its concentrates )",
+        "flavoured drink & its concentrates",
+    ),
+    "Ready to Eat Foods": (
+        "اطعمة جاهزة للأكل Ready to eat meals", "Ready to eat meals"),
+    "Miscellaneous Foods": ("Miscellaneous Foods", "Miscellaneous Foods"),
+}
+
+# Fallback sample_type classifier keyed on category_en keywords.
+# Mirrors the bucket logic in schemas/lab_data_2025_v1.yaml.
+SAMPLE_TYPE_KEYWORDS: list[tuple[str, list[str]]] = [
+    ("swab", ["swab", "swabs", "مسحة", "مسحات", "المسحات"]),
+    ("water", ["unbottled water", "bottled water", "drinking water", "mineral water", "مياه"]),
+    ("egg", ["egg", "بيض"]),
+    ("fats_oils", ["oil", "oils", "frying oil", "زيت قلي", "الزيت القلي", "shortening",
+                   "fat", "fats", "دهن", "الدهن", "سمن", "سمنة", "margarine", "مرجرين",
+                   "زيت نباتي", "زيت طبخ", "زيت الذرة", "زيت دوار الشمس"]),
+    ("fish", ["fish", "سمك", "اسماك", "الاسماك"]),
+    ("dairy", ["milk", "cheese", "yogurt", "cream", "dairy", "لبن", "حليب", "جبن", "جبنة", "قشطة",
+                "البان", "حلومي", "شيدر", "ice cream", "ايس كريم", "ايسكريم"]),
+    ("raw_meat", ["raw meat", "raw minced", "raw poultry", "لحوم نيئة", "نيئة", "نيء", "لحم نيء"]),
+    ("cooked_meat_poultry", ["cooked meat", "cooked chicken", "cooked", "مطبوخة", "مطبوخ", "دجاج",
+                             "poultry", "turkey", "ديك رومي"]),
+    ("cereals", ["grain", "grains", "cereal", "cereals", "الحبوب", "حبوب", "malt", "rice", "ارز",
+                 "الارز", "شابورة", "شابورا"]),
+    ("produce", ["salad", "سلطة", "السلطة", "vegetable", "خضار", "خضروات", "الخضار", "fruit",
+                 "fruits", "فاكهة", "الفواكه", "فواكه", "fresh fruits", "okra", "بامية", "الملوخية",
+                 "berries", "avocado", "افوكادو", "celery", "peaches", "grapes", "guava", "جوافة",
+                 "pine", "تبولة", "مانجا"]),
+    ("sauce_condiment", ["sauce", "صوص", "صلصة", "صلصه", "salsa", "syrup", "shira", "شيرة",
+                         "نكهة", "نكهات", "mayonnaise", "مايونيز", "spices", "herbs", "بهارات",
+                         "تتبيلة", "بابا غنوج"]),
+    ("sweets_bakery", ["sweet", "sweetness", "الحلا", "الحلويات", "sweets", "dessert", "desserts",
+                       "حلوى", "الحلوى", "bakery", "baked", "مخبوزات", "chocolate", "شوكولاتة",
+                       "tiramisu", "تراميسو", "waffle", "بيتي فور", "chips", "شبس", "فشار",
+                       "popcorn", "كريم كراميل", "mahalibah", "مهلبية", "حلا"]),
+    ("beverage", ["juice", "juices", "عصير", "عصائر", "العصائر", "drink", "drinks", "مشروب",
+                  "مشروبات", "beverage", "beverages", "soft drink"]),
+    ("prepared_meal", ["falafel", "فلافل", "bhaji", "samosa", "سمبوسك", "سمبوسة", "ready to eat",
+                       "جاهزة", "kofta", "كفتة", "kibbeh", "كبه", "كبة", "محاشي",
+                       "ايدام", "مصقع", "مشكل", "barbecue", "barbeque", "bbq", "باربكيو"]),
+    ("animal_feed", ["اعلاف", "feed", "fodder"]),
+]
+
+
+def classify_sample_type_from_en(category_en: str | None) -> str:
+    if not category_en:
+        return "other"
+    blob = category_en.casefold()
+    for sample_type, keywords in SAMPLE_TYPE_KEYWORDS:
+        for kw in keywords:
+            if kw.casefold() in blob:
+                return sample_type
+    return "other"
+
 # Canonical test-name aliases — covers spelling variants found in the GSO
 # reference table that don't exactly match the 2024 cleaner's canonical names.
 TEST_ALIAS_TO_CANONICAL = {
@@ -176,8 +262,27 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str) -> None:
         print(f"  {label} wide: no gso_code column at source — empty stub columns written for schema parity")
         return
 
-    canon = [normalise_gso_code(v) for v in df["gso_code"]]
+    initial_canon = [normalise_gso_code(v) for v in df["gso_code"]]
+    # Recover placeholder codes (e.g. "H", "31", "124") for food products by
+    # matching their sample_name to a row that already has a valid GSO code.
+    # Rows whose raw gso_code is truly absent remain environmental swabs.
+    sample_to_code: dict[str, str] = {}
+    for sn, code in zip(df["sample_name"], initial_canon):
+        if pd.notna(sn) and code and code in codes_map:
+            sample_to_code.setdefault(str(sn), code)
+    canon: list[str | None] = []
+    n_recovered = 0
+    for raw_val, sn, code in zip(df["gso_code"], df["sample_name"], initial_canon):
+        if code is None and pd.notna(raw_val) and pd.notna(sn):
+            recovered = sample_to_code.get(str(sn))
+            if recovered:
+                n_recovered += 1
+                canon.append(recovered)
+                continue
+        canon.append(code)
     df["gso_code_canonical"] = pd.array(canon, dtype="string")
+    if n_recovered:
+        print(f"  recovered {n_recovered} placeholder GSO codes by sample_name lookup")
 
     def lookup(field):
         return [codes_map.get(c, {}).get(field) for c in canon]
@@ -188,10 +293,32 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str) -> None:
     df["gso_category_name_en"]  = pd.array(lookup("category_name_en"), dtype="string")
     df["gso_sub_products_ar"]   = pd.array(lookup("sub_products_ar"), dtype="string")
 
+    # 2024 only: populate category_canonical / category_en / sample_type from GSO.
+    # Rows with no GSO code are environmental/hygiene swabs.
+    if "category_canonical" in df.columns:
+        cat_canonical: list[str | None] = []
+        cat_en: list[str | None] = []
+        sample_type: list[str | None] = []
+        for code, gso_cat_en in zip(canon, df["gso_category_name_en"]):
+            if code and gso_cat_en is not None and not pd.isna(gso_cat_en):
+                cc, ce = GSO_CATEGORY_TO_DISPLAY.get(str(gso_cat_en), (str(gso_cat_en), str(gso_cat_en)))
+                cat_canonical.append(cc)
+                cat_en.append(ce)
+                sample_type.append(classify_sample_type_from_en(ce))
+            else:
+                # No GSO code → environmental swab.
+                cat_canonical.append("(Swabs) المسحات")
+                cat_en.append("Swabs")
+                sample_type.append("swab")
+        df["category_canonical"] = pd.array(cat_canonical, dtype="string")
+        df["category_en"] = pd.array(cat_en, dtype="string")
+        df["sample_type"] = pd.array(sample_type, dtype="string")
+
     df.to_parquet(path, compression="zstd", index=False)
     matched = sum(1 for c in canon if c and c in codes_map)
-    print(f"  {label} wide: {matched}/{len(df)} rows matched a GSO code ({100*matched/len(df):.1f}%)")
-    cats = df["gso_category_name_en"].dropna().value_counts().head(20)
+    no_code = sum(1 for c in canon if not c)
+    print(f"  {label} wide: {matched}/{len(df)} rows matched a GSO code ({100*matched/len(df):.1f}%); {no_code} rows classified as swabs")
+    cats = df["category_canonical"].dropna().value_counts().head(20)
     if len(cats):
         print(f"  top categories:")
         for k, v in cats.items():

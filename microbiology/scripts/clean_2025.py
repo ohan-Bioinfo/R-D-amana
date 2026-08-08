@@ -172,14 +172,18 @@ def extract_category(v) -> tuple[str | None, str | None]:
 
 def classify_sample_type(category_canonical: str | None,
                          category_en: str | None,
+                         sample_name: str | None,
                          buckets: list[dict]) -> str:
     """Match against bucket keywords (casefold substring) on category_canonical
-    + category_en. First bucket whose any keyword hits wins. Default 'other'."""
+    + category_en. Falls back to sample_name only when the category is missing.
+    First bucket whose any keyword hits wins. Default 'other'."""
     parts = []
     if isinstance(category_canonical, str):
         parts.append(category_canonical.casefold())
     if isinstance(category_en, str):
         parts.append(category_en.casefold())
+    if not parts and isinstance(sample_name, str):
+        parts.append(sample_name.casefold())
     if not parts:
         return "other"
     blob = " | ".join(parts)
@@ -488,18 +492,18 @@ def clean_2025_with_audit(path: Path) -> tuple[pd.DataFrame, dict]:
                     audit["remaps_test_aliases"][f"{p} → {aliases[p]}"] += 1
     df["invalid_tests"] = invalid_tests_lists
 
-    # 12. n_failed_tests + is_failure composite
+    # 12. n_failed_tests + is_failure (Option A: trust the test results)
     # is_failure is the decision-maker-grade "this sample had a problem" signal.
-    # It captures EITHER signal: the validity column says invalid, OR the
-    # invalid_tests column lists failed tests. This stops the 9 inconsistent
-    # rows (where is_valid disagrees with invalid_tests) from skewing rates
-    # depending on which column the consumer happens to read.
+    # In the 2025 source there are 9 rows where the validity column and the
+    # invalid_tests column disagree. Per user direction we trust the objective
+    # test-result list, so is_failure is driven by n_failed_tests (>0 = failure).
+    # The disagreement is still flagged in data_quality_flags for audit.
     df["n_failed_tests"] = [len(x) for x in invalid_tests_lists]
-    # is_failure: True if EITHER lab marked invalid OR at least one failed test
-    # was listed. When validity was unparseable (v is None) and no tests are
-    # listed, is_failure is also None (unknown), not False.
+    # is_failure: True only if at least one failed test was listed. When the
+    # validity value was unparseable (v is None) and no tests are listed,
+    # is_failure is also None (unknown), not False.
     df["is_failure"] = [
-        None if (v is None and n == 0) else ((v is False) or (n > 0))
+        None if (v is None and n == 0) else (n > 0)
         for v, n in zip(df["is_valid"], df["n_failed_tests"])
     ]
 
@@ -516,8 +520,17 @@ def clean_2025_with_audit(path: Path) -> tuple[pd.DataFrame, dict]:
     # 14. Sample-type rollup (config-driven, YAML)
     buckets = schema["sample_type_buckets"]
     df["sample_type"] = [
-        classify_sample_type(cc, ce, buckets)
-        for cc, ce in zip(df["category_canonical"], df["category_en"])
+        classify_sample_type(cc, ce, sn, buckets)
+        for cc, ce, sn in zip(df["category_canonical"], df["category_en"], df["sample_name_raw"])
+    ]
+    # Manual overrides for categories that the keyword rules cannot distinguish.
+    # `ملحمة سماء القاهرة` rows are environmental swabs collected from the shop.
+    SAMPLE_TYPE_OVERRIDES = {
+        "ملحمة سماء القاهرة": "swab",
+    }
+    df["sample_type"] = [
+        SAMPLE_TYPE_OVERRIDES.get(cc, st)
+        for cc, st in zip(df["category_canonical"], df["sample_type"])
     ]
 
     # 15. Pathogen / indicator classification + severity tier

@@ -382,9 +382,7 @@ def build_data(df: pd.DataFrame) -> dict:
         valid = None
         if pd.notna(r.is_valid):
             valid = 1 if bool(r.is_valid) else 0
-        failure_b = 0
-        if pd.notna(r.is_failure):
-            failure_b = 1 if bool(r.is_failure) else 0
+        failure_b = None if pd.isna(r.is_failure) else (1 if bool(r.is_failure) else 0)
         pathogen_b = 0
         if pd.notna(r.has_pathogen_failure):
             pathogen_b = 1 if bool(r.has_pathogen_failure) else 0
@@ -974,6 +972,14 @@ tbody tr:hover { background: var(--sand-100); }
 
 <div class="grid">
 
+  <div class="group-head">GSO 1016 audit <span class="section-note">2024 source only</span></div>
+
+  <div class="card full">
+    <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
+    <div class="card-sub">These metrics rely on the GSO 1016 reference mapping, which is only available for 2024. 2025 samples do not carry GSO codes in the source file.</div>
+    <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
+  </div>
+
   <div class="group-head">What's failing</div>
 
   <div class="card full">
@@ -1133,7 +1139,7 @@ const state = {
   exclude_raw_meat: false,        // restored 2026-06-18: meat-sample noise distorts pathogen rates
 };
 
-const COMPLIANCE_OPTIONS = ['Compliant', 'Non-compliant'];
+const COMPLIANCE_OPTIONS = ['Compliant', 'Non-compliant', 'Unknown'];
 
 function buildChips(parentId, items, stateKey, valueMap) {
   const parent = document.getElementById(parentId);
@@ -1439,10 +1445,12 @@ function applyFilters() {
   const fMicro = state.microbe;
   const dFrom = state.date_from, dTo = state.date_to;
 
-  // Compliance (two-state chip group with off-state when both selected).
+  // Compliance (three-state chip group: Compliant / Non-compliant / Unknown).
+  // Selecting all three is the same as selecting none (no filter).
   const wantCompliant = fCo.has('Compliant');
   const wantNoncompliant = fCo.has('Non-compliant');
-  const complianceActive = fCo.size > 0 && !(wantCompliant && wantNoncompliant);
+  const wantUnknown = fCo.has('Unknown');
+  const complianceActive = fCo.size > 0 && fCo.size < 3;
 
   // Microbe chip filter: OR across selected pathogen chips PLUS the
   // INDICATOR_TOKEN meta-chip (any indicator-class failure).
@@ -1505,9 +1513,10 @@ function applyFilters() {
   function isPass(r) {
     if (r[cD] && (r[cD] < dFrom || r[cD] > dTo)) return false;
     if (complianceActive) {
-      const isNc = r[cF] === 1;
-      if (wantCompliant && isNc) return false;
-      if (wantNoncompliant && !isNc) return false;
+      const status = r[cF] === 1 ? 'Non-compliant' : r[cF] === 0 ? 'Compliant' : 'Unknown';
+      if (wantCompliant && status !== 'Compliant') return false;
+      if (wantNoncompliant && status !== 'Non-compliant') return false;
+      if (wantUnknown && status !== 'Unknown') return false;
     }
     for (const f of activeChips) if (!f.set.has(r[f.col])) return false;
     for (const e of activeExcludes) if (e.test(r)) return false;
@@ -1589,8 +1598,10 @@ function renderKpis(rowsBase) {
 
   const total          = rowsBase.length;
   const nonCompliant   = rowsBase.filter(r => r[COLS.failure] === 1).length;
-  const compliantN     = total - nonCompliant;
-  const complianceRate = pct(compliantN, total);
+  const unknownN       = rowsBase.filter(r => r[COLS.failure] === null).length;
+  const compliantN     = rowsBase.filter(r => r[COLS.failure] === 0).length;
+  const totalKnown     = compliantN + nonCompliant;
+  const complianceRate = totalKnown > 0 ? pct(compliantN, totalKnown) : 0;
   const pathogenFails  = rowsBase.filter(r => r[COLS.pathogen] === 1).length;
   const indicatorFails = rowsBase.filter(r => r[COLS.severity] === 'indicator_only').length;
   // Total failed test results (sum of n_failed). Distinct from sample
@@ -1602,7 +1613,7 @@ function renderKpis(rowsBase) {
   // Detect "100% non-compliant view" — now only triggers when the
   // microbe / pathogen-only / repeat-only filters restrict to failing
   // samples (severity filter no longer collapses Total since we use rowsBase).
-  const allNonCompliant = (total > 0 && compliantN === 0);
+  const allNonCompliant = (totalKnown > 0 && compliantN === 0);
 
   // --- Rankings ---
   function rankByVolume(keyIdx, rowSet) {
@@ -1658,23 +1669,36 @@ function renderKpis(rowsBase) {
   // Compliance rate card: when filter restricts to non-compliant samples,
   // showing 0.0% misleads — switch to a "Filter mode" badge instead.
   // Official Annual Report compliance per year (MICRO stream), provided by
-  // Muhannad. The footnote reflects the year(s) currently selected: both years
-  // → combined 71.9%, 2024 → 70.3%, 2025 → 73.2%.
+  // Muhannad. 2024 numbers are currently null because the cleaned data now
+  // has 9,317 samples (vs the hardcoded 9,108) and needs reconciliation.
   const OFFICIAL_COMPLIANCE = {
-    2024: { samples: 9108,  compliant: 6399 },
+    2024: { samples: null, compliant: null },
     2025: { samples: 11404, compliant: 8345 },
   };
   const _oYears = state.years.size ? Array.from(state.years) : Object.keys(OFFICIAL_COMPLIANCE).map(Number);
-  let _oSamp = 0, _oComp = 0;
-  for (const y of _oYears) { const o = OFFICIAL_COMPLIANCE[y]; if (o) { _oSamp += o.samples; _oComp += o.compliant; } }
+  let _oSamp = 0, _oComp = 0, _oPending = false;
+  for (const y of _oYears) {
+    const o = OFFICIAL_COMPLIANCE[y];
+    if (!o) continue;
+    if (o.samples == null || o.compliant == null) { _oPending = true; continue; }
+    _oSamp += o.samples; _oComp += o.compliant;
+  }
   const _oLabel = (state.years.size === 1) ? ('official ' + _oYears[0] + ' report') : 'official annual report';
-  const officialRef = _oSamp ? ' · ' + _oLabel + ': ' + (100 * _oComp / _oSamp).toFixed(1) + '%' : '';
+  let officialRef = '';
+  if (_oSamp) {
+    officialRef = ' · ' + _oLabel + ': ' + (100 * _oComp / _oSamp).toFixed(1) + '%';
+  }
+  if (_oPending) {
+    officialRef += ' · ' + (_oSamp ? '2024 official numbers pending reconciliation' : 'official annual report numbers pending reconciliation');
+  }
   const compRateCard = allNonCompliant
     ? { label: 'Compliance rate', value: '—',
         sub: 'filter restricts view to non-compliant samples only' + officialRef,
         cls: '' }
     : { label: 'Compliance rate', value: complianceRate.toFixed(1) + '%',
-        sub: fmtNum(compliantN) + ' / ' + fmtNum(total) + ' samples compliant' + officialRef,
+        sub: fmtNum(compliantN) + ' / ' + fmtNum(totalKnown) + ' samples compliant'
+             + (unknownN ? ' (' + fmtNum(unknownN) + ' unknown validity excluded)' : '')
+             + officialRef,
         cls: complianceRate >= 95 ? 'good' : complianceRate >= 80 ? 'warn' : 'bad' };
 
   // ── Total tests done (year-aware annual throughput) ──────────────────────
@@ -2753,6 +2777,37 @@ function escapeHtml(s) {
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+function renderGsoAudit(rows) {
+  // 2024-only: panel completeness and lab-vs-GSO-limit disagreements.
+  const rows24panel = rows.filter(r => r[COLS.year] === 2024 && r[COLS.panel_complete] !== null);
+  const totalPanel = rows24panel.length;
+  const complete = rows24panel.filter(r => r[COLS.panel_complete] === 1).length;
+  const incomplete = totalPanel - complete;
+  const pctComplete = totalPanel ? (100 * complete / totalPanel).toFixed(1) : 0;
+  const pctIncomplete = totalPanel ? (100 * incomplete / totalPanel).toFixed(1) : 0;
+
+  const rows24audit = rows.filter(r => r[COLS.year] === 2024 && r[COLS.lab_disagree] !== null);
+  const disagree = rows24audit.filter(r => r[COLS.lab_disagree] === 1).length;
+  const agree = rows24audit.length - disagree;
+  const pctDisagree = rows24audit.length ? (100 * disagree / rows24audit.length).toFixed(1) : 0;
+
+  const fmt = v => v.toLocaleString();
+  const card = (label, value, sub) => `
+    <div class="kpi">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value">${value}</div>
+      ${sub ? '<div class="kpi-sub">' + sub + '</div>' : ''}
+    </div>`;
+
+  document.getElementById('gso_audit').innerHTML = [
+    card('2024 samples with GSO code', fmt(totalPanel), null),
+    card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples`),
+    card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples`),
+    card('Lab vs GSO agrees', fmt(agree), null),
+    card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
+  ].join('');
+}
+
 function renderAll(rows) {
   // Single filter tier (2026-07-16): every figure derives from the one filtered
   // set. rowsActive (severity events only) is a local derivation used solely by
@@ -2765,6 +2820,7 @@ function renderAll(rows) {
 
   refreshMicrobeChipCounts(rows);
   renderKpis(rows);
+  renderGsoAudit(rows);
   renderMap(rows);
   renderTrend(rows);
   renderYoY(rows);

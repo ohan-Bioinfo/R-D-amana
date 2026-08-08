@@ -277,6 +277,14 @@ sample_type_buckets:
     # Egg is its own GSO category (E), NOT dairy. Keywords avoid "eggplant":
     # bare "egg" removed, use "eggs"/"egg products"/"egg and"/Arabic. (2026-07-09)
     keywords: [eggs, egg products, egg and, whole egg, بيض, البيض]
+  - id: fats_oils
+    # Fats and oils are a distinct GSO category. Placed after egg and before
+    # fish/cooked meat so broad keywords don't steal other products. (2026-08-08)
+    # NOTE: bare "زيت" is intentionally omitted — it matches "زيتون" (olives),
+    # which must stay in produce. Use the specific oil phrases instead.
+    keywords: [oil, oils, frying oil, زيت قلي, الزيت القلي, shortening,
+               fat, fats, دهن, الدهن, سمن, سمنة, margarine, مرجرين,
+               زيت نباتي, زيت طبخ, زيت الذرة, زيت دوار الشمس]
   - id: fish
     # Fish/shellfish is its own GSO category, NOT cooked_meat_poultry. Must
     # precede cooked_meat_poultry so cooked/smoked fish route here. (2026-07-09)
@@ -287,8 +295,9 @@ sample_type_buckets:
     # pickled/fermented vegetables. Egg keywords moved to the egg bucket. (2026-07-09)
     # bare "لبن" removed — it is a substring of "البنية" (brown, as in "hard brown
     # sugar / molasses") and mis-bucketed debs as dairy. "لبنة" is its own keyword. (2026-07-09)
-    keywords: [milk, cheese, yogurt, cream, لبنة, اللبان, حليب, جبن, جبنة, قشطة,
-               كريمة, زبادي, fermented milk, fermented cream, ايس كريم, ice cream, آيس]
+    keywords: [milk, cheese, yogurt, cream, dairy, لبنة, اللبان, حليب, جبن, جبنة, قشطة,
+               كريمة, زبادي, fermented milk, fermented cream, ايس كريم, ايسكريم, ice cream, آيس,
+               حلومي, شيدر]
   - id: raw_meat
     # bare "raw" removed — it matched "st-raw-berries". Use full raw-meat phrases. (2026-07-09)
     keywords: [raw meat, raw minced, raw poultry, raw ediable, لحوم نيئة, نيئة, نيء, لحم نيء,
@@ -302,7 +311,8 @@ sample_type_buckets:
     keywords: [cooked meat, cooked chicken, cooked, مطبوخة, مطبوخ, دجاج,
                smoked, مشوي, مشوية, مدخنة, تيس, ذبيحة, kabsa, كبسة,
                mortadella, مرتديلا, salami, سلامي, sausage, نقانق,
-               poultry, دواجن, liver, كبدة, الكبدة, hot dog, هوت دوج, pastrami, بسطرمة]
+               poultry, دواجن, liver, كبدة, الكبدة, hot dog, هوت دوج, pastrami, بسطرمة,
+               turkey, ديك رومي]
   - id: cereals
     # Cereals & legumes are their own GSO category — moved out of produce
     # (user direction 2026-07-09). Must precede produce. Barley matched via
@@ -311,10 +321,15 @@ sample_type_buckets:
                bulgur, برغل, البرغل, lentil, lentils, عدس, العدس,
                bean, beans, فاصوليا, الفاصوليا, freekeh, فريكة,
                chickpea, chickpeas, نخود, النخود, الجريش, جريش,
-               oats, شوفان, lupin, ترمس, wheat, قمح, القمح, flaked, puffed]
+               oats, شوفان, lupin, ترمس, wheat, قمح, القمح, flaked, puffed,
+               شابورة, شابورا]
+  # Early sweets/savoury-snack catch before produce's broad "corn" keyword grabs popcorn/chips.
+  - id: sweets_bakery
+    keywords: [popcorn, فشار, chips, شبس, حلا]
   - id: produce
     # bare "nut" removed — it matched "do-nut"; use "nuts"/"peanut"/"nut butter".
     # strawberry added (it was falling into raw_meat via the "raw" bug). (2026-07-09)
+    # Added 2026-08-08: okra, ملوخية, berries, avocado, زهرة, celery, peaches, grapes.
     keywords: [salad, سلطة, السلطة, vegetable, خضار, خضروات, الخضار, fruit, fruits, فاكهة, الفواكه,
                tomato, طماطم, الطماطم, cucumber, خيار, الخيار, olive, زيتون, الزيتون,
                cabbage, ملفوف, الملفوف, lettuce, خس, الخس, potato, بطاطس, البطاطس,
@@ -332,11 +347,15 @@ sample_type_buckets:
                thyme, زعتر, الزعتر, spinach, سبانخ, السبانخ,
                coriander, كزبرة, الكزبرة, mint, نعناع, النعناع,
                cilantro, dill, شبت,
-               سمسم, sesame, روحان, pickle, مخلل, المخلل]
+               سمسم, sesame, روحان, pickle, مخلل, المخلل,
+               okra, بامية, البامية, ملوخية, الملوخية, berries, berry, avocado, افوكادو, الافوكادو,
+               زهرة, الزهرة, cauliflower, celery, peaches, peach, grapes, grape, عنب, العنب,
+               guava, جوافة, الجوافة, فجل, تبولة, pine, الصنوبر, مانجا]
   - id: sauce_condiment
-    keywords: [sauce, صوص, صلصة, صلصه, salsa, syrup, نكهة, نكهات, mayonnaise, مايونيز,
+    keywords: [sauce, صوص, صلصة, صلصه, salsa, syrup, shira, شيرة, نكهة, نكهات, mayonnaise, مايونيز,
                ketchup, كاتشب, hot sauce, شطة, الشطة, molasses, دبس,
-               tahini, طحينة, jam, jelly, marmalade, مربى, debs, lugaimat, لقيمات, mustard, خردل, vinegar, خل]
+               tahini, طحينة, jam, jelly, marmalade, مربى, debs, lugaimat, لقيمات, mustard, خردل,
+               vinegar, خل, تتبيلة, التتبيلة, بابا غنوج]
   - id: sweets_bakery
     keywords: [sweet, sweetness, الحلا, الحلويات, sweets, dessert, desserts, حلوى, الحلوى,
                cake, كيك, biscuit, biscuits, البسكويت, بسكوت, chocolate, شوكولاته, الشوكولاته,
@@ -345,21 +364,28 @@ sample_type_buckets:
                brownie, كوب كيك, cup cake, pie, pies, فطيرة, فطائر, croissant, كروسان,
                donut, donuts, دونات, honey, عسل, العسل, dough, عجين, العجين, cream cake, تورته,
                muffin, مافن, pastry, معجنات, kunafa, كنافة, halawa, halva, طحينية,
-               maamoul, معمول, mamoul, qatayef, قطايف, baklava, بقلاوة]
+               maamoul, معمول, mamoul, qatayef, قطايف, baklava, بقلاوة,
+               تراميسو, تيراميسو, tiramisu, كريم كراميل, كريم كاراميل, creme caramel,
+               waffle, waffles, وافل, الوافل, بيتي فور, chips, شبس, فشار, popcorn,
+               مهلبية, mahalibah, mahalabia]
   - id: beverage
     keywords: [juice, juices, عصير, عصائر, العصائر, drink, drinks, مشروب, مشروبات,
                coffee, قهوة, القهوة, tea, شاي, الشاي, latte, espresso, كولد برو, كركدية,
                smoothie, سموثي, milkshake, ميلك شيك, soda, مشروبات غازية]
   - id: prepared_meal
     # falafel/bhaji moved here from sweets_bakery — they are savoury. (2026-07-09)
+    # Added 2026-08-08: محاشي, kofta, كبة.
     keywords: [falafel, فلافل, بهاجي, bhaji, samosa, samposa, سمبوسك, سمبوسة,
                rice, ارز, الارز, رز, soup, soups, شوربة, الشوربة,
                sandwich, ساندويتش, ساندوتش, ساندو, hummus, homous, حمص, الحمص, foul, فول,
                mashed, ready to eat, اطعمة جاهزة, الاطعمة الجاهزة, hareesa, هريسة, sushi, سوشي,
-               kebab, كباب, مندي, mozzarella, موزاريلا, kibbeh, كبه, الكبة,
+               kebab, كباب, مندي, mozzarella, موزاريلا, kibbeh, كبه, الكبة, كبة,
                appetizer, appetizers, مقبلات, المقبلات, kashana, كشنة, dolma, محشي, المحشي,
+               محاشي,
                pasta, مكرونة, pizza, بيتزا, البيتزا, burger, برجر, شاورما, shawarma, kabsa, مكرونات,
-               نودلز, noodles, biryani, برياني, مأكولات, prepared, جاهز]
+               نودلز, noodles, biryani, برياني, مأكولات, prepared, جاهز,
+               kofta, كفتة, الكفتة, كفته,
+               ايدام, مصقع, مشكل, barbecue, barbeque, bbq, باربكيو]
   - id: animal_feed
     keywords: [اعلاف, feed, fodder]
 
