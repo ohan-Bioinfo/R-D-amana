@@ -646,3 +646,31 @@ the item is closed in `kimi/yolo/MR_REVIEW_REQUEST.md` and
 `muhannad_open_questions.md`. Milestones 1–2 of the 100% checklist are done;
 remaining MR items: B3 (panel scope), B4 (2025 report rule), B5 (2024
 official totals), B6 (2025 test-level export), B7 (Tier 2 name mark-up).
+
+---
+
+## 2026-08-09 (3) — Sunburst rebuild (stale after >10 fix) + Tier-1b spelling-variant audit
+
+### Sunbursts
+`microbiology_sunburst.html` / `microbiology_sunburst2.html` were still built from
+the pre-`>10`-fix parquets (2026-08-08 23:04 vs parquets 2026-08-09 18:02).
+Rebuilt both; verified: root n=20,881 · unknown-validity 83 · overall NC=28.1%
+(known-validity only) · 454 nodes.
+
+### Audit sweep (no data changes)
+Fresh gap sweep of the cleaned parquets. Clean: no duplicate sample_ids, no
+facility-name collisions, no 2025 `other` bucket. Findings written to
+`kimi/yolo/2025_gso_tier1b_spelling_variants.md` for user decision:
+- **Group A:** 346 uncoded 2025 names (547 rows) are spelling variants of
+  singly-coded names → proposed Tier-1b auto-assign (would lift 2025 coded
+  coverage from 36.9% to ~41.6%). ~8 false-friend matches flagged for exclusion.
+- **Group B:** 88 names (864 rows) map to names carrying multiple 2024 codes —
+  needs disambiguation (overlaps MR item B7).
+- **Group C:** 9 rows (7 in 2025 + 2 in 2024) typed `swab` with food/drink
+  names and GSO codes — swab-vs-food contradiction awaiting user ruling.
+- **Minor:** 2024 `other` bucket = 183 rows (jams 120, halawa/tahini misc 53,
+  infant 10); optional re-bucketing proposed, not applied.
+
+### Files touched
+- `microbiology/reports/microbiology_sunburst.html`, `microbiology_sunburst2.html` (regenerated)
+- `kimi/yolo/2025_gso_tier1b_spelling_variants.md` (new report)
