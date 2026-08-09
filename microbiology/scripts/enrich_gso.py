@@ -440,7 +440,11 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
                 canon.append(recovered)
                 continue
         canon.append(code)
+    # Name-keyword rule layer (both years): cooked/prepared -> P, sauce -> G.
+    canon, rule_tags = apply_gso_name_rules(list(df["sample_name"]), canon)
     df["gso_code_canonical"] = pd.array(canon, dtype="string")
+    df["gso_code_rule_applied"] = pd.array(
+        [t or None for t in rule_tags], dtype="string")
     if n_recovered:
         print(f"  recovered {n_recovered} placeholder GSO codes by sample_name lookup")
 
@@ -456,21 +460,24 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
     # 2024 only: populate category_canonical / category_en / sample_type from GSO.
     # (2025 keeps its cleaner-derived categories: uncoded 2025 rows are NOT
     # necessarily swabs — many are food samples awaiting name review.)
-    if derive_categories and "category_canonical" in df.columns:
-        cat_canonical: list[str | None] = []
-        cat_en: list[str | None] = []
-        sample_type: list[str | None] = []
-        for code, gso_cat_en in zip(canon, df["gso_category_name_en"]):
+    if "category_canonical" in df.columns:
+        cat_canonical = list(df["category_canonical"])
+        cat_en = list(df["category_en"])
+        sample_type = list(df["sample_type"])
+        for i, (code, gso_cat_en, tag) in enumerate(
+                zip(canon, df["gso_category_name_en"], rule_tags)):
+            if not derive_categories and not tag:
+                continue  # 2025 non-rule rows keep cleaner categories
             if code and gso_cat_en is not None and not pd.isna(gso_cat_en):
-                cc, ce = GSO_CATEGORY_TO_DISPLAY.get(str(gso_cat_en), (str(gso_cat_en), str(gso_cat_en)))
-                cat_canonical.append(cc)
-                cat_en.append(ce)
-                sample_type.append(classify_sample_type_from_en(ce))
-            else:
-                # No GSO code → environmental swab.
-                cat_canonical.append("(Swabs) المسحات")
-                cat_en.append("Swabs")
-                sample_type.append("swab")
+                cc, ce = GSO_CATEGORY_TO_DISPLAY.get(
+                    str(gso_cat_en), (str(gso_cat_en), str(gso_cat_en)))
+                cat_canonical[i] = cc
+                cat_en[i] = ce
+                sample_type[i] = classify_sample_type_from_en(ce)
+            elif derive_categories:
+                cat_canonical[i] = "(Swabs) المسحات"
+                cat_en[i] = "Swabs"
+                sample_type[i] = "swab"
         df["category_canonical"] = pd.array(cat_canonical, dtype="string")
         df["category_en"] = pd.array(cat_en, dtype="string")
         df["sample_type"] = pd.array(sample_type, dtype="string")
@@ -494,6 +501,7 @@ def enrich_long(path: Path, codes_map: dict[str, dict],
     per (source_file, m_s_no) group."""
     df = pd.read_parquet(path)
     canon = [normalise_gso_code(v) for v in df["gso_code"]]
+    canon, _long_tags = apply_gso_name_rules(list(df["sample_name"]), canon)
     df["gso_code_canonical"] = pd.array(canon, dtype="string")
     df["gso_product_name_en"] = pd.array(
         [codes_map.get(c, {}).get("name_en") for c in canon], dtype="string"
