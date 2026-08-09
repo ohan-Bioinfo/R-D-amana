@@ -1,5 +1,94 @@
 # Microbiology Changelog
 
+## 2026-08-09 (4) — GSO name-rule reclassification layer (cooked→P, صوص→G) + Group A/C + dashboard surfacing
+
+### Problem
+GSO 1016 coding relied on source codes (2024) and sample-name matching against
+2024-learned names (2025). Two large, unambiguous name patterns were still
+falling through uncoded or landing on the wrong category regardless of source
+code: cooked/prepared dishes (سلطة مطبوخة, حمص, متبل, بطاطس مقلي, دجاج شواية,
+etc.) that belong under Ready-to-Eat/Prepared Foods (P), and sauce items
+(صوص كاتشب, صوص ثوم, صوص مايونيز, etc.) that belong under Sauces/Condiments
+(G). Spelling/spacing variants of already-coded 2025 names were also missed
+by the looser Tier-1 name normaliser, and wash-water swabs and food-named
+swabs were sitting in the wrong `sample_type` bucket.
+
+### Changes (Tasks 1–5, this branch)
+- **Rule 1 — cooked → P**: added `classify_prepared_to_P` keyword classifier
+  (Task 1) and wired it into both years' wide (and 2024 long) parquets via
+  `apply_gso_name_rules` (Task 2). Matches whole-token "حمص" (hummus) rather
+  than substring, so "محمص" (toasted) is not falsely caught (fixed in the
+  swab-guard commit).
+- **Rule 2 — صوص → G**: added `classify_sauce_to_G` (Task 1), same wiring
+  (Task 2). Precedence: cooked-before-sauce when a name could match both.
+- **Swab guard**: `apply_gso_name_rules` now skips environmental swab names
+  (مسحه token) so swabs are never reclassified to a food code — previously
+  133 rows (2024=25, 2025=108) would have been wrongly food-coded.
+- **Group A (2025 strict-equality tier)**: added `_norm_name_strict` +
+  Tier-1b strict-equality pass in `assign_2025_codes_by_name` (Task 3) —
+  exact-match-only (no fuzzy matching) so false friends (e.g. جبنة بيتزا vs
+  لبنه بيتزا, لحم سبايسي vs حمص سبايسي) cannot collide. +111 rows coded for
+  2025 (36.9% → 37.8% of 11,564).
+- **Group B (review doc, not auto-applied)**: generated
+  `kimi/yolo/2025_gso_groupB_disambiguation.md` — top 120 still-uncoded 2025
+  sample names (by row count) for manual code assignment; 3,163 distinct
+  uncoded names / 5,412 uncoded rows remain in 2025 after rules + Group A.
+- **Group C**: added `reclassify_group_c(df)` (Task 4) — wash-water swabs
+  (غسيل + exact keyword phrases) reclassified to `N-3` / `sample_type=water`
+  (225 rows: 2025=169, 2024=56); food-named rows previously stuck at
+  `sample_type=swab` (e.g. تشيز كيك توت, سلطة خضراء, رمان حب) now carry their
+  correct food typing. Genuine environmental swabs (مسحة طاولة تحضير شاورما,
+  etc.) remain uncoded/`swab` — untouched.
+- **New column** `gso_code_rule_applied` (values `cooked_to_P` / `sauce_to_G`
+  / null) added to both years' parquets (Task 2), recording which rows had
+  their GSO code set/overridden by the name-rule layer.
+- **Dashboard**: added `gso_code_rule_applied` to `build_dashboard_combined.py`'s
+  `DATA_COLS` payload (with a fill-missing guard on `combined` for older
+  parquets), a new GSO-audit card `↳ re-coded by name rule (cooked→P /
+  صوص→G)` showing the combined-years count, and an explainer sentence
+  describing the rule layer.
+
+### Counts (both years combined, post-rules)
+- `gso_code_rule_applied == cooked_to_P`: **2,340** rows (2024=1,051 · 2025=1,289)
+- `gso_code_rule_applied == sauce_to_G`: **2,856** rows (2024=1,047 · 2025=1,809),
+  of which G-3=2,633 / G-2=223
+- 2024 coded: 7,955 / 9,317 (85.4%)
+- 2025 coded: 6,152 / 11,564 (53.2%)
+- Row totals unchanged throughout: 2024=9,317, 2025=11,564, **total=20,881**
+
+### Files touched
+- `microbiology/scripts/enrich_gso.py` (Tasks 1–4: classifiers, rule wiring,
+  Group A strict tier, Group C reclassification)
+- `microbiology/scripts/test_gso_rules.py` (Tasks 1, 3: unit + false-friend tests)
+- `microbiology/cleaned/data2024.parquet`, `data2025.parquet` (regenerated,
+  Tasks 2–4)
+- `microbiology/scripts/build_dashboard_combined.py` (this entry: payload
+  column + guard + GSO-audit card)
+- `microbiology/reports/microbiology_dashboard.html`,
+  `microbiology_sunburst.html`, `microbiology_sunburst2.html` (rebuilt)
+- `kimi/yolo/2025_gso_groupB_disambiguation.md` (new — Group B review doc)
+
+### How to regenerate
+```bash
+python3 microbiology/scripts/enrich_gso.py
+python3 microbiology/scripts/build_dashboard_combined.py
+python3 microbiology/scripts/build_micro_sunburst.py
+python3 microbiology/scripts/build_micro_sunburst2.py
+```
+
+### Verify
+- `node --check` passes on the largest `<script>` in all three rebuilt
+  HTML files.
+- Dashboard prints `20881 rows` (2024=9317, 2025=11564).
+- Spot-check: cooked items (`حمص`, `متبل`, `بطاطس مقلي`, `دجاج شواية`, …) all
+  carry category "Ready to Eat Foods" (P); صوص items (`صوص كاتشب`, `صوص ثوم`,
+  `صوص مايونيز`, …) all carry category "Tomato Concentrates, Sauces, Vinegar,
+  Spices and Herbs" (G-2/G-3).
+
+### Push note
+- Committed and pushed to `origin/main` with message `Dashboard: surface GSO
+  rule reclassification; Group B review doc; rebuild`.
+
 ## 2026-08-08 — added build timestamp (date + time) to dashboards and landing page
 
 ### Changes

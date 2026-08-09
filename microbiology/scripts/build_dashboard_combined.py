@@ -338,6 +338,7 @@ DATA_COLS = [
     "sample_type",   # 23  Decision-making bucket (produce, dairy, swab, etc.)
     "dq_flags",      # 24  Pipe-separated data_quality_flags from the cleaner
     "panel_gap_kind",# 25  'systematic'/'sporadic'/null — why the GSO panel is incomplete (2024-only)
+    "gso_code_rule_applied",# 26  'cooked_to_P'/'sauce_to_G'/null — GSO code set/overridden by the name-rule layer (2026-08-09)
 ]
 
 
@@ -496,6 +497,7 @@ def build_data(df: pd.DataFrame) -> dict:
                 _val(getattr(r, "gso_code_canonical", None)),
                 _val(getattr(r, "gso_tests_missing", None)),
             )),
+            _val(getattr(r, "gso_code_rule_applied", None)),
         ])
     return {"cols": DATA_COLS, "rows": rows}
 
@@ -1011,7 +1013,7 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09).</div>
+    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (both years) re-codes samples whose name unambiguously implies a GSO category regardless of source code: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G); see the re-coded count below.</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
@@ -2885,6 +2887,10 @@ function renderGsoAudit(rows) {
   const rows25 = rows.filter(r => r[COLS.year] === 2025);
   const coded25 = rows25.filter(r => r[COLS.gso_code]).length;
   const pctCoded25 = rows25.length ? (100 * coded25 / rows25.length).toFixed(1) : 0;
+  // Name-rule layer (2026-08-09): rows whose GSO code was set/overridden by
+  // the cooked→P / صوص→G sample-name rules, independent of the general
+  // name-match assignment above.
+  const ruleApplied = rows.filter(r => r[COLS.gso_code_rule_applied]).length;
 
   const fmt = v => v.toLocaleString();
   const card = (label, value, sub) => `
@@ -2903,6 +2909,7 @@ function renderGsoAudit(rows) {
     card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),
     card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
+    card('↳ re-coded by name rule (cooked→P / صوص→G)', fmt(ruleApplied), 'both years · GSO code set/overridden by sample-name rule'),
   ].join('');
 }
 
@@ -3080,6 +3087,14 @@ def main() -> None:
     # fall through to the sample_type derivation, while 2024 keeps native GSO.
     combined = pd.concat(frames, ignore_index=True)
     combined = combined.sort_values(["sampling_date", "year"], kind="mergesort", na_position="last")
+
+    # Guard: DATA_COLS may reference columns not yet present on older
+    # parquets (e.g. gso_code_rule_applied, added 2026-08-09). Fill with
+    # null rather than letting build_data's getattr(..., None) silently
+    # mask a real absence.
+    for _c in DATA_COLS:
+        if _c not in combined.columns:
+            combined[_c] = None
 
     payload = {
         "data": build_data(combined),
