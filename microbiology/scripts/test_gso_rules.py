@@ -73,4 +73,13 @@ eq(_norm_name_strict("جبنة بيتزا") == _norm_name_strict("لبنه بي�
 eq(_norm_name_strict("لحم سبايسي") == _norm_name_strict("حمص سبايسي"), False,
    "meat vs hummus must NOT collapse (false friend)")
 
+# sauce-head names win over cooked->P
+_nc, _tags = apply_gso_name_rules(["صوص برجر", "بطاطس مقلي بصوص", "برجر لحم", "صوص مشوي"], ["X","J-8","X","X"])
+eq(_tags, ["sauce_to_G", "cooked_to_P", "cooked_to_P", "sauce_to_G"], "sauce head vs dish-with-sauce vs real burger")
+eq(_nc, ["G-3", "P-4", "P-4", "G-3"], "sauce head codes")
+# رز whole-token: cherry/snickers must not be rice
+eq(P("كرز"), None, "cherry is not rice")
+eq(P("سنيكرز"), None, "snickers is not rice")
+eq(P("رز برياني"), "P-5", "biryani rice still P-5")
+
 print("all rule tests passed")

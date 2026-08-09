@@ -344,7 +344,7 @@ def classify_prepared_to_P(name) -> str | None:
         return "P-6/4"
     if any(k in n for k in ["ساندويتش", "ساندوتش"]):
         return "P-1" if ("سلطه" in n or "خس" in n) else "P-2"
-    if any(k in n for k in ["رز", "ارز"]):
+    if "رز" in n.split() or "ارز" in n.split():
         return "P-5"
     if has_cook or any(k in n for k in _PREP_MAIN):
         return "P-4"
@@ -369,8 +369,16 @@ def apply_gso_name_rules(names, canon):
     new_canon = list(canon)
     tags = [""] * len(canon)
     for i, nm in enumerate(names):
-        if "مسحه" in _norm_rule(nm):   # environmental swab — never a food sample
+        nn = _norm_rule(nm)
+        if "مسحه" in nn:
             continue
+        toks = nn.split()
+        if toks and toks[0] in ("صوص", "صلصه"):   # sauce is the head noun -> G wins
+            g = classify_sauce_to_G(nm)
+            if g:
+                new_canon[i] = g
+                tags[i] = "sauce_to_G"
+                continue
         p = classify_prepared_to_P(nm)
         if p:
             new_canon[i] = p
@@ -395,10 +403,13 @@ def reclassify_group_c(df):
         return
     cc = list(df["category_canonical"]); ce = list(df["category_en"])
     st = list(df["sample_type"]); gc = list(df["gso_code_canonical"])
+    has_ra = "gso_code_rule_applied" in df.columns
+    ra = list(df["gso_code_rule_applied"]) if has_ra else [None] * len(df)
     for i, nm in enumerate(df["sample_name"]):
         nn = _norm_rule(nm)
         if nn and any(_norm_rule(k) in nn for k in _WASHWATER_KW):
             gc[i] = "N-3"; cc[i] = "مياه الشرب"; ce[i] = "Drinking Water"; st[i] = "water"
+            ra[i] = None
         elif st[i] == "swab" and pd.notna(gc[i]) and gc[i] and not str(gc[i]).startswith("N"):
             # food code but typed swab -> not a swab
             st[i] = "food"
@@ -406,6 +417,8 @@ def reclassify_group_c(df):
     df["category_canonical"] = pd.array(cc, dtype="string")
     df["category_en"] = pd.array(ce, dtype="string")
     df["sample_type"] = pd.array(st, dtype="string")
+    if has_ra:
+        df["gso_code_rule_applied"] = pd.array(ra, dtype="string")
 
 
 def assign_2025_codes_by_name(path: Path, long_2024: Path) -> None:

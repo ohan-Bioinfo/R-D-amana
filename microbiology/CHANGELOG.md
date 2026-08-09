@@ -1,5 +1,43 @@
 # Microbiology Changelog
 
+## 2026-08-10 — Final-review precision fixes: sauce-head precedence, رز whole-token, N-3 tag clear
+
+Three findings from the whole-branch final review, all in `enrich_gso.py`:
+
+- **Sauce-head precedence (Important, 66 rows)**: names whose first
+  normalised token is صوص/صلصة (e.g. `صوص برجر`, `صوص مشوي`, `صوص تارتار`,
+  `صوص حمص`, `صوص رز`) were being caught by `classify_prepared_to_P` (cooked
+  rule ran first) instead of `classify_sauce_to_G`, even though the head noun
+  of the name is the sauce itself. `apply_gso_name_rules` now checks the
+  first token first: if it is صوص/صلصة, the sauce rule wins outright; only
+  when the name's head noun is something else (e.g. `بطاطس مقلي بصوص`) does
+  cooked-before-sauce precedence still apply. Real dishes named after a
+  prepared-food noun (`برجر لحم`) are unaffected — `برجر`/`برغر` remain in
+  `_PREP_MAIN`.
+- **رز substring over-match (Important, 36 rows)**: `رز`/`ارز` were matching
+  as substrings inside كرز (cherry), churros, snickers, tenders, etc.,
+  wrongly assigning P-5 (rice). Changed to the same whole-token guard already
+  used for حمص: `"رز" in n.split() or "ارز" in n.split()`.
+- **Stale cooked_to_P tag on N-3 wash-water rows (Minor, 17 rows)**:
+  `reclassify_group_c` rewrites رز-wash-water rows' `gso_code_canonical` to
+  N-3 but was leaving `gso_code_rule_applied="cooked_to_P"` behind (the
+  wash-water sample name often contains "رز" style tokens that had tripped
+  the rule upstream). The wash-water branch now also clears the rule tag to
+  `None` on the rows it touches; the food-named-swab branch (which only
+  changes `sample_type`) is untouched.
+
+Regression tests added to `scripts/test_gso_rules.py`: sauce-head vs.
+dish-with-sauce vs. real-burger precedence; كرز/سنيكرز no longer classify as
+rice; `رز برياني` still resolves to P-5.
+
+Re-ran `enrich_gso.py` (row total unchanged: 20,881) and rebuilt all three
+dashboards (each confirms 20,881 rows). Tag tallies shifted as expected:
+`cooked_to_P` 2,340 → 2,239, `sauce_to_G` 2,856 → 2,909. Verified: no
+sauce-head name remains tagged `cooked_to_P`; `classify_prepared_to_P`
+returns `None` for pure كرز/سنيكرز names; zero rows have
+`gso_code_rule_applied=="cooked_to_P"` and `gso_code_canonical=="N-3"`
+simultaneously.
+
 ## 2026-08-09 (4) — GSO name-rule reclassification layer (cooked→P, صوص→G) + Group A/C + dashboard surfacing
 
 ### Problem
