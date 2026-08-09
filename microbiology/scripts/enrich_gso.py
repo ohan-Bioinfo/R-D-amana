@@ -383,6 +383,31 @@ def apply_gso_name_rules(names, canon):
     return new_canon, tags
 
 
+_WASHWATER_KW = ["مياه غسيل", "مياه حنفيه لغسيل", "مياه فلتر لغسيل", "غسيل الادوات",
+                 "غسيل الاسماك", "مياه غسيل ادوات"]
+
+
+def reclassify_group_c(df):
+    """Group C: rows whose name is wash-water -> N-3 (unbottled/wash water);
+    food-named rows still typed swab but carrying a food code -> drop swab typing.
+    Operates in place on category/sample_type/gso_code_canonical."""
+    if "sample_type" not in df.columns:
+        return
+    cc = list(df["category_canonical"]); ce = list(df["category_en"])
+    st = list(df["sample_type"]); gc = list(df["gso_code_canonical"])
+    for i, nm in enumerate(df["sample_name"]):
+        nn = _norm_rule(nm)
+        if nn and any(_norm_rule(k) in nn for k in _WASHWATER_KW):
+            gc[i] = "N-3"; cc[i] = "مياه الشرب"; ce[i] = "Drinking Water"; st[i] = "water"
+        elif st[i] == "swab" and pd.notna(gc[i]) and gc[i] and not str(gc[i]).startswith("N"):
+            # food code but typed swab -> not a swab
+            st[i] = "food"
+    df["gso_code_canonical"] = pd.array(gc, dtype="string")
+    df["category_canonical"] = pd.array(cc, dtype="string")
+    df["category_en"] = pd.array(ce, dtype="string")
+    df["sample_type"] = pd.array(st, dtype="string")
+
+
 def assign_2025_codes_by_name(path: Path, long_2024: Path) -> None:
     """Write a `gso_code` column into the 2025 wide parquet from sample names.
     Idempotent: recomputed from sample_name on every run (so adding Tier 2
@@ -509,6 +534,7 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
         df["category_en"] = pd.array(cat_en, dtype="string")
         df["sample_type"] = pd.array(sample_type, dtype="string")
 
+    reclassify_group_c(df)
     df.to_parquet(path, compression="zstd", index=False)
     matched = sum(1 for c in canon if c and c in codes_map)
     no_code = sum(1 for c in canon if not c)
