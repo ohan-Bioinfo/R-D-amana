@@ -64,4 +64,13 @@ _nc, _tags = apply_gso_name_rules(["مسحة طاولة تحضير شاورما"
 eq(_tags, ["", "cooked_to_P"], "swab skipped, hummus reclassified")
 eq(_nc[0], "X-1", "swab keeps its original code")
 
+from enrich_gso import _norm_name_strict
+# strict normalisation collapses spacing/punct/ال/ya but NEVER a content-word swap
+eq(_norm_name_strict("سلطة كولسلو") == _norm_name_strict("سلطه كول سلو"), True,
+   "coleslaw spacing variant collapses")
+eq(_norm_name_strict("جبنة بيتزا") == _norm_name_strict("لبنه بيتزا"), False,
+   "cheese vs labneh must NOT collapse (false friend)")
+eq(_norm_name_strict("لحم سبايسي") == _norm_name_strict("حمص سبايسي"), False,
+   "meat vs hummus must NOT collapse (false friend)")
+
 print("all rule tests passed")

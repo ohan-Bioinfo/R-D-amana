@@ -286,6 +286,22 @@ def _norm_name_2025(s) -> str | None:
     return s or None
 
 
+def _norm_name_strict(s) -> str | None:
+    """Stricter than _norm_name_2025: also unify yaa, drop leading ال,
+    remove all spaces and punctuation. Two names are 'the same product' only
+    when their strict forms are EQUAL — never a fuzzy match, so cheese/labneh
+    and similar false friends can never collapse."""
+    if not isinstance(s, str):
+        return None
+    s = re.sub(r"[\d٠-٩]+", "", s)
+    s = s.replace("ة", "ه")
+    s = re.sub(r"[أإآ]", "ا", s)
+    s = re.sub(r"[ىي]", "ي", s)
+    s = re.sub(r"[^؀-ۿ]+", "", s)   # keep Arabic letters only
+    s = re.sub(r"^ال", "", s)
+    return s or None
+
+
 # ---------------------------------------------------------------------------
 # Name-keyword GSO rules (Muhannad 2026-08-09): cooked/prepared -> Ready-to-Eat
 # (P), sauces -> G. Blanket, both years. Spec:
@@ -382,12 +398,21 @@ def assign_2025_codes_by_name(path: Path, long_2024: Path) -> None:
     codes_per_name = d24.groupby("n")["canon"].agg(lambda s: set(s))
     learned = {n: next(iter(c)) for n, c in codes_per_name.items() if len(c) == 1}
 
+    # Tier 1b: strict-equality learned map (false-friend-safe). Built from the
+    # same 2024 long data using the stricter normaliser.
+    d24["ns"] = d24["sample_name"].map(_norm_name_strict)
+    codes_per_strict = d24.dropna(subset=["ns"]).groupby("ns")["canon"].agg(lambda s: set(s))
+    learned_strict = {n: next(iter(c)) for n, c in codes_per_strict.items() if len(c) == 1}
+
     norms = df["sample_name"].map(_norm_name_2025)
+    strict_norms = df["sample_name"].map(_norm_name_strict)
     codes: list[str | None] = []
-    for n in norms:
+    for n, ns in zip(norms, strict_norms):
         code = None
         if n is not None:
             code = NAME_TO_CODE_2025.get(n) or learned.get(n)
+        if code is None and ns is not None:
+            code = learned_strict.get(ns)   # Tier-1b: strict-equality only
         codes.append(code)
     df["gso_code"] = pd.array(codes, dtype="string")
 
