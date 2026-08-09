@@ -633,3 +633,16 @@ confirmed convention.
 
 ### Closes
 - MR review item **B1** (`kimi/yolo/MR_REVIEW_REQUEST.md`) — answered and applied.
+
+---
+
+## 2026-08-09 (2) — MR confirms 'H'-code handling: ignore H, categorize by name
+
+MR answered review item **B2**: ignore the `H` code and categorize those 36
+samples by product name. This matches the mapping already applied in
+`clean_2024.py` (cheddar → A-13 ×25, ketchup → G-2 ×2, other sauces → G-3 ×9,
+flag `gso_code_h_mapped_by_name`), so no code or data change was required —
+the item is closed in `kimi/yolo/MR_REVIEW_REQUEST.md` and
+`muhannad_open_questions.md`. Milestones 1–2 of the 100% checklist are done;
+remaining MR items: B3 (panel scope), B4 (2025 report rule), B5 (2024
+official totals), B6 (2025 test-level export), B7 (Tier 2 name mark-up).

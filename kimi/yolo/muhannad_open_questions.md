@@ -15,13 +15,11 @@ Each item: what we need, why, and what changes in the dashboard once answered.
 passes. **Applied:** prefixed results are treated as below-limit pass;
 lab-vs-GSO disagreements final at 54 samples, ambiguous category retired.
 
-### 1.2 The internal code "H" — الكود الداخلي "H"
-- **Context:** 36 samples carry GSO code `H`, which does not exist in GSO 1016.
-  By product name we mapped: cheddar cheese → **A-13** (25), ketchup → **G-2**
-  (2), other sauces (mayo/ranch) → **G-3** (9).
-- **What we need:** confirm "H" is an internal lab code and that our
-  name-based mapping is correct (or give the correct code per product).
-- **Impact:** confirms 36 samples' GSO category, limits, and panel audit.
+### 1.2 ~~The internal code "H"~~ ✅ ANSWERED 2026-08-09
+**MR's answer:** ignore the `H` code and categorize the samples by product
+name — which is exactly the applied mapping: cheddar جبنة شيدر → **A-13**
+(25) · ketchup صوص كاتشب → **G-2** (2) · other sauces → **G-3** (9),
+flagged `gso_code_h_mapped_by_name`. Closed.
 
 ---
 

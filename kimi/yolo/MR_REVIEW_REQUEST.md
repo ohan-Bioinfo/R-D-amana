@@ -20,7 +20,7 @@ files; every answer is applied by us and the dashboards regenerate.
 | Category buckets (okra, molokhia, shira, waffle… → GSO categories) | ✅ fixed |
 | Test-name spelling aliases (Listeria, yeasts, Campylobacter, B. cereus, Aeromonas, Pseudomonas, C. botulinum, Fecal Coliforms) | ✅ applied — 1,010 false panel flags cleared, `test_value_unrecognised` = 0 |
 | ISO-placeholder swabs (1,328) | ✅ reclassified informational (correctly outside GSO 1016) |
-| 'H'-code samples (36) | ✅ mapped by name — **needs MR confirmation (B2)** |
+| 'H'-code samples (36) | ✅ **confirmed by MR 2026-08-09**: ignore `H`, categorize by product name — cheddar → A-13 (25), ketchup → G-2 (2), sauces → G-3 (9) |
 | 2025 GSO codes by name — Tier 1 | ✅ live: 4,263 / 11,564 (36.9%) |
 | `>10` result convention | ✅ **answered by MR 2026-08-09**: it means `<10` (below limit = pass) — applied; disagreements final at 54, ambiguous retired |
 
@@ -35,11 +35,11 @@ passes. **Applied:** prefixed results are treated as below-limit pass in the
 cross-check; disagreements finalised at **54 samples**, the "ambiguous"
 category is retired. Nothing further needed.
 
-### B2. Confirm the internal code "H" ⏱ 2 minutes
-36 samples coded `H` (not a GSO 1016 letter). We mapped by product name:
-cheddar جبنة شيدر → **A-13** (25) · ketchup صوص كاتشب → **G-2** (2) ·
-other sauces مايونيز/رانش → **G-3** (9).
-**Answer needed:** confirm the mapping, or give the correct code per product.
+### ~~B2. Confirm the internal code "H"~~ ✅ ANSWERED 2026-08-09
+**MR's answer:** ignore the `H` code and categorize the samples by product
+name. That is exactly the mapping already applied: cheddar جبنة شيدر →
+**A-13** (25) · ketchup صوص كاتشب → **G-2** (2) · other sauces مايونيز/رانش →
+**G-3** (9), flagged `gso_code_h_mapped_by_name`. Nothing further needed.
 
 ### B3. GSO panel scope — is the rarely-run test in scope? ⏱ 15 minutes
 GSO 1016 requires these tests, but the lab rarely/never runs them. For each
@@ -101,7 +101,7 @@ dips · مخلل → J-7 · صوصات → G-3 · نكهات → O-?).
 | # | Milestone | Blocked by |
 |---|---|---|
 | 1 | Lab-vs-GSO disagreements final (no ambiguous) | ✅ done 2026-08-09 (54 final) |
-| 2 | All source codes mapped & confirmed | B2 |
+| 2 | All source codes mapped & confirmed | ✅ done 2026-08-09 (H → name mapping confirmed) |
 | 3 | "Incomplete panel" = real gaps only | B3 |
 | 4 | 2025 dashboard matches Annual Report exactly | B4 |
 | 5 | 2024 verified against official numbers (or footnote removed) | B5 |
