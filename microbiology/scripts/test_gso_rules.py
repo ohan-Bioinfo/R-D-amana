@@ -55,4 +55,13 @@ codes_map, _ = load_reference()
 for c in ["P-1", "P-2", "P-3", "P-4", "P-5", "P-6/1", "P-6/2", "P-6/3", "P-6/4", "G-2", "G-3", "N-3"]:
     assert c in codes_map, f"FAIL: rule code {c} missing from gso reference"
 
+# محمص (toasted) must NOT match the حمص (hummus) sub-code
+eq(P("خبز محمص"), None, "toasted bread is not hummus")
+eq(P("حمص"), "P-6/4", "plain hummus still P-6/4")
+eq(P("سلطه حمص"), "P-6/4", "hummus salad still P-6/4")
+# environmental swabs skip the rules entirely
+_nc, _tags = apply_gso_name_rules(["مسحة طاولة تحضير شاورما", "حمص"], ["X-1", "I-1"])
+eq(_tags, ["", "cooked_to_P"], "swab skipped, hummus reclassified")
+eq(_nc[0], "X-1", "swab keeps its original code")
+
 print("all rule tests passed")

@@ -324,7 +324,7 @@ def classify_prepared_to_P(name) -> str | None:
         return "P-6/2"
     if any(k in n for k in ["سبرنق رول", "سبرينج رول", "ترايفل"]):
         return "P-6/3"
-    if any(k in n for k in ["حمص", "متبل", "بابا غنوج", "ورق عنب", "محشي", "محاشي"]):
+    if "حمص" in n.split() or any(k in n for k in ["متبل", "بابا غنوج", "ورق عنب", "محشي", "محاشي"]):
         return "P-6/4"
     if any(k in n for k in ["ساندويتش", "ساندوتش"]):
         return "P-1" if ("سلطه" in n or "خس" in n) else "P-2"
@@ -353,6 +353,8 @@ def apply_gso_name_rules(names, canon):
     new_canon = list(canon)
     tags = [""] * len(canon)
     for i, nm in enumerate(names):
+        if "مسحه" in _norm_rule(nm):   # environmental swab — never a food sample
+            continue
         p = classify_prepared_to_P(nm)
         if p:
             new_canon[i] = p
