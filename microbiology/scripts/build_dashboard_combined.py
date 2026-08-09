@@ -338,7 +338,6 @@ DATA_COLS = [
     "sample_type",   # 23  Decision-making bucket (produce, dairy, swab, etc.)
     "dq_flags",      # 24  Pipe-separated data_quality_flags from the cleaner
     "panel_gap_kind",# 25  'systematic'/'sporadic'/null — why the GSO panel is incomplete (2024-only)
-    "lab_ambiguous", # 26  True/False/null — lab-vs-GSO verdict hinges on a '>10'/'<10' prefixed result (2024-only)
 ]
 
 
@@ -497,8 +496,6 @@ def build_data(df: pd.DataFrame) -> dict:
                 _val(getattr(r, "gso_code_canonical", None)),
                 _val(getattr(r, "gso_tests_missing", None)),
             )),
-            (None if pd.isna(getattr(r, "gso_lab_vs_gso_ambiguous", None))
-             else (1 if bool(getattr(r, "gso_lab_vs_gso_ambiguous")) else 0)),
         ])
     return {"cols": DATA_COLS, "rows": rows}
 
@@ -1014,7 +1011,7 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Disagreements that hinge on a <code>&gt;10</code>/<code>&lt;10</code> prefixed result are shown as <b>ambiguous</b>, not disagreements, until the lab confirms the convention.</div>
+    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09).</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
@@ -2880,8 +2877,7 @@ function renderGsoAudit(rows) {
 
   const rows24audit = rows.filter(r => r[COLS.year] === 2024 && r[COLS.lab_disagree] !== null);
   const disagree = rows24audit.filter(r => r[COLS.lab_disagree] === 1).length;
-  const ambiguous = rows24audit.filter(r => r[COLS.lab_ambiguous] === 1).length;
-  const agree = rows24audit.length - disagree - ambiguous;
+  const agree = rows24audit.length - disagree;
   const pctDisagree = rows24audit.length ? (100 * disagree / rows24audit.length).toFixed(1) : 0;
   // 2025 carries no source GSO codes; codes are assigned by sample-name match
   // (flagged gso_code_assigned_by_name). Panel metrics stay 2024-only because
@@ -2907,7 +2903,6 @@ function renderGsoAudit(rows) {
     card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),
     card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
-    card('↳ ambiguous (>10 convention)', fmt(ambiguous), 'prefixed result — awaiting lab confirmation, not counted as disagreement'),
   ].join('');
 }
 

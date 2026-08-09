@@ -9,19 +9,11 @@ Each item: what we need, why, and what changes in the dashboard once answered.
 
 ## 1. Lab recording conventions / اتفاقيات التسجيل في المختبر
 
-### 1.1 What does a `>10` result mean? — ماذا يعني نتيجة `>10`؟
-- **Context:** 14,627 test rows in 2024 have results written `>10` (14,120) or
-  `<10` (507). **99.4% are marked valid (مطابق)** by the lab.
-- **The problem:** read literally, `>10` means "above 10", which should *fail*
-  tests with a limit of 10 — contradicting the lab's own valid verdict. It
-  looks like an RTL flip of `<10` ("below 10 = satisfactory"), but we cannot
-  assume.
-- **What we need:** a one-line confirmation of the convention:
-  - (a) literal "above 10", or
-  - (b) actually `<10` (below detection / satisfactory)?
-- **Impact:** 29 samples currently parked as **"ambiguous"** in the GSO audit
-  card resolve to agree/disagree. If (b), most become "agree" and the
-  disagreement count drops further.
+### 1.1 ~~What does a `>10` result mean?~~ ✅ ANSWERED 2026-08-09
+**MR's answer:** `>10` is written incorrectly in the source — it means
+**less than 10** (`أقل من 10`), so the sample is compliant and the test
+passes. **Applied:** prefixed results are treated as below-limit pass;
+lab-vs-GSO disagreements final at 54 samples, ambiguous category retired.
 
 ### 1.2 The internal code "H" — الكود الداخلي "H"
 - **Context:** 36 samples carry GSO code `H`, which does not exist in GSO 1016.

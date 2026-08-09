@@ -602,3 +602,34 @@ source records verdicts, not the tests run).
 ### Next step
 User marks up the Tier 2 review doc → fill `NAME_TO_CODE_2025` → re-run
 `enrich_gso.py` + dashboard → 2025 coverage rises toward ~49%.
+
+---
+
+## 2026-08-09 — `>10` convention confirmed by MR: below-limit = pass
+
+### What changed
+MR confirmed the 2024 sheets' `>10` results are a data-entry flip of
+`أقل من 10` — they mean **below the reporting limit**, i.e. satisfactory /
+pass. `enrich_gso.py` now evaluates any comparison-prefixed result
+(`>10` / `<10` / `≥` / `≤`) as **0 (non-detect)** in the
+validity-vs-GSO-limit cross-check. The `ambiguous_prefixed_result` category
+introduced 2026-08-08 is retired: the `gso_lab_vs_gso_ambiguous` column and
+its dashboard card are removed, and the explainer text now states the
+confirmed convention.
+
+### Results (verified against parquets)
+- Row level: 30 ambiguous → **27 agree + 3 lab_says_fail_should_pass**.
+  Decisions now: agree 18,194 · lab_says_pass_should_fail 48 ·
+  lab_says_fail_should_pass 14 (was 89 disagreement/ambiguous → 62 true).
+- Sample level: lab-vs-GSO disagreements **51 true + 29 ambiguous → 54 final**.
+- Everything else unchanged: 20,881 rows (9,317 / 11,564); panel incomplete
+  4,126; 2025 name-assigned codes 4,263; app JS passes `node --check`.
+
+### Files touched
+- `microbiology/scripts/enrich_gso.py`
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/cleaned/data2024.parquet`, `data2024_long.parquet`, `data2025.parquet`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)
+
+### Closes
+- MR review item **B1** (`kimi/yolo/MR_REVIEW_REQUEST.md`) — answered and applied.

@@ -288,3 +288,16 @@ Full re-clean reproduced row counts exactly (9,317 wide / 36,461 long /
 
 **Open for the lab:** confirm what `>10` means — the 29 ambiguous samples
 resolve to agree/disagree once known.
+
+---
+
+## 9. `>10` convention resolved (2026-08-09)
+
+MR confirmed `>10` in the 2024 sheets is a data-entry flip of `أقل من 10` —
+below the reporting limit, so the sample passes. Applied in `enrich_gso.py`:
+comparison-prefixed results evaluate as 0 (non-detect) in the
+validity-vs-GSO cross-check. The one-day-old "ambiguous" category is retired
+(column + dashboard card removed). Final numbers: row level agree 18,194,
+disagreements 62 (48 pass-should-fail + 14 fail-should-pass); sample level
+**54 disagreements** (was 51 true + 29 ambiguous). All other metrics
+unchanged; JS clean. MR review item B1 closed.

@@ -22,19 +22,18 @@ files; every answer is applied by us and the dashboards regenerate.
 | ISO-placeholder swabs (1,328) | ✅ reclassified informational (correctly outside GSO 1016) |
 | 'H'-code samples (36) | ✅ mapped by name — **needs MR confirmation (B2)** |
 | 2025 GSO codes by name — Tier 1 | ✅ live: 4,263 / 11,564 (36.9%) |
-| `>10` disagreements | ✅ parked as "ambiguous" — **needs MR answer (B1)** |
+| `>10` result convention | ✅ **answered by MR 2026-08-09**: it means `<10` (below limit = pass) — applied; disagreements final at 54, ambiguous retired |
 
 ---
 
 ## B. What we need from MR / المطلوب من السيد مهند
 
-### B1. Result convention: what does `>10` mean? ⏱ 1 minute
-14,627 test rows (2024) have results written `>10` or `<10`; **99.4% are
-lab-valid**. Literal reading contradicts the verdicts — likely an RTL flip of
-`<10` ("below 10 = satisfactory").
-**Answer needed:** (a) literal "above 10" · or (b) it means `<10`.
-**Impact:** 29 samples currently "ambiguous" resolve to agree/disagree;
-lab-vs-GSO disagreement count finalises (currently 51 true + 29 ambiguous).
+### ~~B1. Result convention: what does `>10` mean?~~ ✅ ANSWERED 2026-08-09
+**MR's answer:** `>10` is written wrong in the source — it actually means
+**less than 10** (`أقل من 10`), so the sample is compliant and the test
+passes. **Applied:** prefixed results are treated as below-limit pass in the
+cross-check; disagreements finalised at **54 samples**, the "ambiguous"
+category is retired. Nothing further needed.
 
 ### B2. Confirm the internal code "H" ⏱ 2 minutes
 36 samples coded `H` (not a GSO 1016 letter). We mapped by product name:
@@ -101,7 +100,7 @@ dips · مخلل → J-7 · صوصات → G-3 · نكهات → O-?).
 
 | # | Milestone | Blocked by |
 |---|---|---|
-| 1 | Lab-vs-GSO disagreements final (no ambiguous) | B1 |
+| 1 | Lab-vs-GSO disagreements final (no ambiguous) | ✅ done 2026-08-09 (54 final) |
 | 2 | All source codes mapped & confirmed | B2 |
 | 3 | "Incomplete panel" = real gaps only | B3 |
 | 4 | 2025 dashboard matches Annual Report exactly | B4 |
