@@ -286,6 +286,85 @@ def _norm_name_2025(s) -> str | None:
     return s or None
 
 
+# ---------------------------------------------------------------------------
+# Name-keyword GSO rules (Muhannad 2026-08-09): cooked/prepared -> Ready-to-Eat
+# (P), sauces -> G. Blanket, both years. Spec:
+# docs/superpowers/specs/2026-08-09-micro-gso-rule-reclassification-design.md
+def _norm_rule(s) -> str:
+    """Aggressive normalisation for keyword matching."""
+    if not isinstance(s, str):
+        return ""
+    s = re.sub(r"[\d٠-٩]+", "", s)          # drop digits
+    s = s.replace("ة", "ه")                 # taa marbuta -> haa
+    s = re.sub(r"[أإآ]", "ا", s)            # unify alef
+    s = re.sub(r"[ىي]", "ي", s)             # unify yaa
+    s = re.sub(r"[^\w؀-ۿ]+", " ", s)   # punctuation -> space
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+# cooking-method triggers (masculine stem catches feminine via substring)
+_COOK_KW = ["مقلي", "مطبوخ", "مشوي", "مسلوق", "مدخن", "شوايه", "شواء",
+            "على الفحم", "الفحم", "محشي", "محاشي"]
+# prepared/RTE nouns that are P even without a cooking word
+_PREP_MAIN = ["شاورما", "كباب", "كبه", "برجر", "برغر"]
+
+
+def classify_prepared_to_P(name) -> str | None:
+    """Cooked/prepared item -> Ready-to-Eat P sub-code (or None)."""
+    n = _norm_rule(name)
+    if not n:
+        return None
+    has_cook = any(k in n for k in _COOK_KW)
+    # sub-code checks, most specific first
+    if "كولسلو" in n:
+        return "P-3"
+    if any(k in n for k in ["فلافل", "بهاجي"]):
+        return "P-6/1"
+    if any(k in n for k in ["سمبوسه", "شوربه", "بطاطس مهروسه", "تارت", "فلان", "كريم كراميل"]):
+        return "P-6/2"
+    if any(k in n for k in ["سبرنق رول", "سبرينج رول", "ترايفل"]):
+        return "P-6/3"
+    if any(k in n for k in ["حمص", "متبل", "بابا غنوج", "ورق عنب", "محشي", "محاشي"]):
+        return "P-6/4"
+    if any(k in n for k in ["ساندويتش", "ساندوتش"]):
+        return "P-1" if ("سلطه" in n or "خس" in n) else "P-2"
+    if any(k in n for k in ["رز", "ارز"]):
+        return "P-5"
+    if has_cook or any(k in n for k in _PREP_MAIN):
+        return "P-4"
+    return None
+
+
+def classify_sauce_to_G(name) -> str | None:
+    """Sauce -> G (G-2 tomato, G-3 otherwise), or None."""
+    n = _norm_rule(name)
+    if not n:
+        return None
+    if any(k in n for k in ["كاتشب", "كتشب", "صلصه طماطم", "صلصه بيتزا", "صلصه الطماطم"]):
+        return "G-2"
+    if "صوص" in n or "صلصه" in n:
+        return "G-3"
+    return None
+
+
+def apply_gso_name_rules(names, canon):
+    """Override canonical GSO codes from name rules. Precedence: cooked -> P,
+    then sauce -> G, else keep. Returns (new_canon, tags)."""
+    new_canon = list(canon)
+    tags = [""] * len(canon)
+    for i, nm in enumerate(names):
+        p = classify_prepared_to_P(nm)
+        if p:
+            new_canon[i] = p
+            tags[i] = "cooked_to_P"
+            continue
+        g = classify_sauce_to_G(nm)
+        if g:
+            new_canon[i] = g
+            tags[i] = "sauce_to_G"
+    return new_canon, tags
+
+
 def assign_2025_codes_by_name(path: Path, long_2024: Path) -> None:
     """Write a `gso_code` column into the 2025 wide parquet from sample names.
     Idempotent: recomputed from sample_name on every run (so adding Tier 2
