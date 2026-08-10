@@ -1161,7 +1161,9 @@ const YEAR_COLOR_DEFAULT = '#3b82f6';
 const yearColor = y => YEAR_COLOR[y] || YEAR_COLOR_DEFAULT;
 const yearBadgeClass = y => 'y' + String(y).slice(2);   // 2023 → 'y23', 2024 → 'y24', 2025 → 'y25'
 const DOW_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-const PLOTLY_CONFIG = { displayModeBar: false, responsive: true };
+const PLOTLY_CONFIG = { responsive: true, scrollZoom: true, displayModeBar: 'hover',
+  displaylogo: false, doubleClick: 'reset',
+  modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d', 'toggleSpikelines'] };
 
 // Human-readable labels for raw internal codes that appear in filter chips
 // and chart axes. Keys must match the raw values stored in the payload.
@@ -1668,7 +1670,7 @@ function reactChart(id, traces, layout, config) {
   layout.hoverlabel = Object.assign(
     { font: { family: CHART_FONT, size: 12 }, bgcolor: '#fffdf8', bordercolor: '#e8dcc4' },
     layout.hoverlabel || {});
-  Plotly.react(id, traces, layout, config);
+  Plotly.react(id, traces, layout, config || PLOTLY_CONFIG);
 }
 
 function renderKpis(rowsBase) {
