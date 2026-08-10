@@ -1,5 +1,35 @@
 # Microbiology Changelog
 
+## 2026-08-11 — Core dashboard: tabbed, touch-first redesign
+
+Restructured `microbiology_dashboard.html` (via `scripts/build_dashboard_combined.py`)
+from one long scroll of ~13 panels into a **5-tab, touch-first instrument**. Totals
+unchanged: **20,881 rows** (2024=9,317 · 2025=11,564); emitted JS passes `node --check`;
+still self-contained offline HTML with the Riyadh masthead.
+
+- **Zoom / pinch / touch on every chart.** Shared `PLOTLY_CONFIG` now enables
+  `scrollZoom`, `displayModeBar:'hover'`, `doubleClick:'reset'` (lasso/select/autoscale
+  removed); `reactChart` defaults to it. The map keeps its own explicit config.
+- **5-tab shell with "lab-record divider" tabs** (📊 Overview · 📍 Location · 🍱 Products ·
+  🦠 Organisms & tests · 📋 GSO & Quality). Masthead + filter bar + KPI strip + Views/bookmarks
+  stay pinned above all tabs. Charts render once and `Plotly.Plots.resize()` on tab-show
+  (Plotly can't lay out in a hidden container). Interior Where/When/Who dividers retired.
+- **Active tab persisted in the URL hash** (`tab=`); old links without it open Overview.
+- **Extended click-to-drill:** the severity × GSO-category heatmap is now tappable
+  (cell → filters that GSO category, mapping the shortened axis label back to the full
+  name). Sample-type and chains charts were left non-interactive — no matching filter
+  dimension exists (adding those filters is separate feature work).
+- **Sortable GSO 1016 categories table** in the GSO & Quality tab: Category · Code ·
+  Samples · Non-compliant · NC %, header-click sort (numeric-aware). Represents the
+  numbers; makes no scope judgment.
+- **Merged the two failed-tests bars into one chart** with a Pathogens/Indicators toggle
+  (per-year stacking preserved; drilldown preserved). Added a 3-stop data-palette token
+  set (`--data-compliant/indicator/pathogen/neutral`) and retinted the non-compliance
+  rate line to `#c0392b` for a consistent NC signal.
+
+Spec: `docs/superpowers/specs/2026-08-10-micro-dashboard-tabbed-redesign-design.md`.
+Plan: `docs/superpowers/plans/2026-08-10-micro-dashboard-tabbed-redesign.md`.
+
 ## 2026-08-10 — Standalone Interactive Microbiology Deliverables (Interactive 3 to 7)
 
 Created 5 dedicated interactive HTML reports in `microbiology/reports/` and linked them on the main landing page (`index.html`) under the Microbiology card list:
