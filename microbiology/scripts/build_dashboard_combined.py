@@ -1133,6 +1133,7 @@ tbody tr:hover { background: var(--sand-100); }
     </div>
     <div id="chart_tests" class="chart" style="min-height:420px"></div>
     <div id="tests_drilldown"></div>
+  </div>
 
   <div class="card">
     <h2>Severity breakdown by month</h2>
@@ -3114,7 +3115,14 @@ function showTab(name) {
   });
 }
 document.getElementById('tabnav').addEventListener('click', e => {
-  const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab);
+  const b = e.target.closest('button[data-tab]');
+  if (b) {
+    showTab(b.dataset.tab);
+    // Sync the open tab into the URL hash immediately so a "copy link" right
+    // after a tab click carries the right tab (not just after the next filter).
+    const _h = serializeState();
+    history.replaceState(null, '', _h ? '#' + _h : location.pathname + location.search);
+  }
 });
 document.getElementById('tests_toggle').addEventListener('click', e => {
   const b = e.target.closest('button[data-t]'); if (!b) return;
