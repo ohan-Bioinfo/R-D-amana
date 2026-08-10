@@ -210,6 +210,31 @@ footer{border-top:1px solid var(--hair)}
           <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
           <span class="arrow">→</span>
         </a>
+        <a class="entry" href="microbiology/reports/microbiology_sankey.html">
+          <span class="ico">🔀</span>
+          <span class="txt"><span class="lb">Interactive 3</span><span class="sub">Sankey · sector → food → organism → severity</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="microbiology/reports/microbiology_treemap.html">
+          <span class="ico">🟦</span>
+          <span class="txt"><span class="lb">Interactive 4</span><span class="sub">Treemap · hierarchy &amp; volume</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="microbiology/reports/microbiology_heatmap_matrix.html">
+          <span class="ico">🔥</span>
+          <span class="txt"><span class="lb">Interactive 5</span><span class="sub">Heatmap · sector location × pathogen matrix</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="microbiology/reports/microbiology_network.html">
+          <span class="ico">🕸️</span>
+          <span class="txt"><span class="lb">Interactive 6</span><span class="sub">Network · food product ↔ microbe graph</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="microbiology/reports/microbiology_streamgraph.html">
+          <span class="ico">📈</span>
+          <span class="txt"><span class="lb">Interactive 7</span><span class="sub">Streamgraph · organism trends over time</span></span>
+          <span class="arrow">→</span>
+        </a>
       </div>
     </section>
 

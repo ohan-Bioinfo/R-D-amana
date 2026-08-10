@@ -1,19 +1,19 @@
 # Microbiology Changelog
 
-## 2026-08-10 — Advanced Interactive Microbiology Dashboard Visualizations
+## 2026-08-10 — Standalone Interactive Microbiology Deliverables (Interactive 3 to 7)
 
-Added 5 interactive visualizations to `microbiology/scripts/build_dashboard_combined.py` and updated `microbiology_dashboard.html`:
+Created 5 dedicated interactive HTML reports in `microbiology/reports/` and linked them on the main landing page (`index.html`) under the Microbiology card list:
 
-- 🔀 **Sankey Flow Diagram (`renderSankeyFlow`)**: Multi-stage flow chart tracking sample failures: `Location (Sector) → Food Category → Organism → Severity Outcome`. Node thickness reflects sample volume.
-- 🌞 **Sunburst & 🟦 Treemap Hierarchical Explorer (`renderHierarchyExplorer`)**: Multi-level drilldown (`Sector → Food Category → Product Subtype → Organism`) with an interactive view mode toggle (`🌞 Sunburst View` / `🟦 Treemap View`).
-- 🔥 **Sector Location × Pathogen Matrix Heatmap (`renderSectorOrganismMatrix`)**: Contamination intensity matrix mapping 5 Riyadh Sectors (East, North, West, Central, South) against top 10 pathogens/indicators.
-- 🕸️ **Food Category ↔ Microbe Co-occurrence Network Graph (`renderNetworkGraph`)**: Bipartite relationship graph connecting Food Categories (green nodes) with Microbes/Pathogens (red nodes). Node diameter scales with sample volume; link thickness reflects co-occurrence count.
-- 📈 **Organism Prevalence Streamgraph (`renderOrganismStreamgraph`)**: Smooth stacked area streamgraph depicting month-by-month evolution of relative pathogen prevalence over 2024–2025.
+- 🔀 **Interactive 3 · Sankey Flow Explorer** (`build_micro_sankey.py` → `microbiology_sankey.html`): Multi-stage flow tracking sample failures (`Location/Sector → Food Category → Organism → Severity Outcome`).
+- 🟦 **Interactive 4 · Treemap & Hierarchy Explorer** (`build_micro_treemap.py` → `microbiology_treemap.html`): Hierarchical treemap (`Sector → Category → Subtype → Organism`) with volume and non-compliance metric toggles.
+- 🔥 **Interactive 5 · Sector Location × Pathogen Matrix Heatmap** (`build_micro_heatmap_matrix.py` → `microbiology_heatmap_matrix.html`): Contamination intensity matrix mapping 5 Riyadh Sectors against top pathogens.
+- 🕸️ **Interactive 6 · Product Category ↔ Microbe Network Graph** (`build_micro_network.py` → `microbiology_network.html`): Bipartite relationship graph connecting Food Categories (green nodes) with Microbes (red nodes).
+- 📈 **Interactive 7 · Organism Prevalence Streamgraph** (`build_micro_streamgraph.py` → `microbiology_streamgraph.html`): Smooth stacked area streamgraph depicting monthly pathogen relative prevalence over 2024–2025.
 
-**Wiring & Verification:**
-- Integrated into `renderAll(rows)` so all 5 visualizations react dynamically to global filters (Date Range, Sector, Compliance, Severity, Microbes).
-- Rebuilt deliverables: `microbiology_dashboard.html` (7,026 KB, 20,881 rows) and `index.html`.
-- Evaluated JavaScript syntax inside output HTML via `node --check` function verification; 100% clean.
+**Wiring & Integrity:**
+- Kept the main decision dashboard (`microbiology_dashboard.html`) clean and focused on its core Riyadh map, filters, and KPIs.
+- Updated `build_landing.py` to display cards for Interactive 3 through 7.
+- Updated `microbiology/scripts/refresh.sh` to build all interactive deliverables in sequence.
 
 ## 2026-08-10 — Name rules made 2025-ONLY (restores the 2024 panel audit)
 
