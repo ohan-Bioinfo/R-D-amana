@@ -1070,6 +1070,26 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_heatmap" class="chart"></div>
   </div>
 
+  <div class="group-head">Interactive Flow &amp; Hierarchy Dynamics</div>
+
+  <div class="card full">
+    <h2>Sankey Diagram — Contamination Flow (Location → Category → Organism → Severity)</h2>
+    <div class="card-sub">Multi-stage flow chart tracking non-compliant samples from Riyadh Sectors into Food Categories, Organism pathogens/indicators, and final Severity Tiers. Node widths indicate sample volume.</div>
+    <div id="chart_sankey" class="chart" style="min-height:500px"></div>
+  </div>
+
+  <div class="card full">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:10px">
+      <h2 style="margin:0">Hierarchical Contamination Explorer</h2>
+      <div class="toggle-row" id="hierarchy-mode-toggles">
+        <div class="toggle active" data-mode="sunburst">🌞 Sunburst View</div>
+        <div class="toggle" data-mode="treemap">🟦 Treemap View</div>
+      </div>
+    </div>
+    <div class="card-sub">Interactive hierarchical drilldown of sample failures: Sector location → GSO Food Category → Product Subtype → Organism. Click any slice or box to expand that level.</div>
+    <div id="chart_hierarchy" class="chart" style="min-height:520px"></div>
+  </div>
+
   <div class="group-head">Where</div>
 
   <div class="card full">
@@ -1093,11 +1113,31 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_sector" class="chart"></div>
   </div>
 
+  <div class="group-head">Microbial Risk &amp; Relationship Matrix</div>
+
+  <div class="card full">
+    <h2>Sector Location × Pathogen Matrix Heatmap</h2>
+    <div class="card-sub">Contamination intensity matrix mapping Riyadh Sectors (East, North, West, Central, South) against top pathogens and indicators. Darker shade indicates higher failure volume.</div>
+    <div id="chart_sector_organism_matrix" class="chart" style="min-height:380px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Food Category ↔ Microbe Co-occurrence Network Graph</h2>
+    <div class="card-sub">Relationship graph connecting Food Categories (green nodes) with Microbes/Pathogens (red nodes). Link thickness represents co-occurrence volume; node diameter scales with failure count.</div>
+    <div id="chart_network_graph" class="chart" style="min-height:480px"></div>
+  </div>
+
   <div class="group-head">When</div>
 
   <div class="card full">
     <h2>Non-compliance rate &amp; per-microbe rate over time <span class="section-note" style="font-size:11px">(click legend to toggle organisms)</span></h2>
     <div id="chart_trend" class="chart"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Organism Prevalence Streamgraph (Relative Microbe Trends Over Time)</h2>
+    <div class="card-sub">Smooth stacked streamgraph showing how the relative proportion of top pathogens (Salmonella, Staph aureus, E. coli, Listeria, Bacillus, TBC, Yeast &amp; Mould) evolves month-by-month over 2024–2025.</div>
+    <div id="chart_streamgraph" class="chart" style="min-height:380px"></div>
   </div>
 
   <div class="card">
@@ -1364,6 +1404,15 @@ buildChips('f_gso_category',  FACETS.gso_categories || [],       'gso_category')
 document.querySelectorAll('#bookmark_bar [data-bm]').forEach(b =>
   b.addEventListener('click', () => applyBookmark(b.dataset.bm)));
 document.getElementById('btn_copy_link').addEventListener('click', copyViewLink);
+
+document.querySelectorAll('#hierarchy-mode-toggles .toggle').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('#hierarchy-mode-toggles .toggle').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentHierarchyMode = t.dataset.mode;
+    if (window.__lastRows) renderHierarchyExplorer(window.__lastRows);
+  });
+});
 
 // Microbe chips: one per pathogen (frequency-ordered, count in label) + a final
 // 'Indicator' chip representing the whole indicator class. OR semantics — selecting
@@ -3016,10 +3065,421 @@ function renderSampleTypeDistribution(rows) {
   }, PLOTLY_CONFIG);
 }
 
+let currentHierarchyMode = 'sunburst';
+
+function renderSankeyFlow(rows) {
+  const nodeNames = [];
+  const nodeMap = new Map();
+  function getNode(name, group) {
+    const key = group + ':' + name;
+    if (!nodeMap.has(key)) {
+      nodeMap.set(key, nodeNames.length);
+      nodeNames.push({ name: name, group: group });
+    }
+    return nodeMap.get(key);
+  }
+
+  const flows = new Map();
+
+  rows.forEach(r => {
+    if (r[COLS.severity] === 'none') return;
+    const sector = r[COLS.sector] || 'Unassigned Sector';
+    const category = r[COLS.gso_category] || SAMPLE_TYPE_LABEL[r[COLS.sample_type]] || 'Other Category';
+    const severity = SEVERITY_LABEL[r[COLS.severity]] || 'Indicator';
+    const failedTests = r[COLS.failed_tests] || [];
+
+    const secIdx = getNode(sector, 'sector');
+    const catIdx = getNode(category, 'category');
+
+    const k1 = secIdx + '->' + catIdx;
+    flows.set(k1, (flows.get(k1) || 0) + 1);
+
+    if (failedTests.length > 0) {
+      failedTests.forEach(t => {
+        const orgIdx = getNode(t, 'organism');
+        const k2 = catIdx + '->' + orgIdx;
+        flows.set(k2, (flows.get(k2) || 0) + 1);
+
+        const sevIdx = getNode(severity, 'severity');
+        const k3 = orgIdx + '->' + sevIdx;
+        flows.set(k3, (flows.get(k3) || 0) + 1);
+      });
+    } else {
+      const sevIdx = getNode(severity, 'severity');
+      const k3 = catIdx + '->' + sevIdx;
+      flows.set(k3, (flows.get(k3) || 0) + 1);
+    }
+  });
+
+  const sources = [], targets = [], values = [];
+  flows.forEach((count, key) => {
+    const [s, t] = key.split('->').map(Number);
+    sources.push(s);
+    targets.push(t);
+    values.push(count);
+  });
+
+  const colors = nodeNames.map(n => {
+    if (n.group === 'sector') return '#c8a85a';
+    if (n.group === 'category') return '#22853f';
+    if (n.group === 'organism') return '#a8331a';
+    if (n.group === 'severity') {
+      if (n.name.includes('Pathogen')) return '#b91c1c';
+      if (n.name.includes('Indicator')) return '#facc15';
+      return '#0e5c36';
+    }
+    return '#6c6f7e';
+  });
+
+  const trace = {
+    type: 'sankey',
+    orientation: 'h',
+    valueformat: '.0f',
+    valuesuffix: ' failures',
+    node: {
+      pad: 15,
+      thickness: 18,
+      line: { color: '#e8dcc4', width: 0.5 },
+      label: nodeNames.map(n => n.name),
+      color: colors
+    },
+    link: {
+      source: sources,
+      target: targets,
+      value: values,
+      color: 'rgba(200, 168, 90, 0.22)'
+    }
+  };
+
+  reactChart('chart_sankey', [trace], {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 15, r: 15, t: 15, b: 15 },
+    height: 480
+  }, PLOTLY_CONFIG);
+}
+
+function renderHierarchyExplorer(rows) {
+  const ids = ['ROOT'];
+  const labels = ['Riyadh Microbiology'];
+  const parents = [''];
+  const values = [0];
+  const colors = ['#0a3d24'];
+
+  const sectorCounts = new Map();
+  const catCounts = new Map();
+  const orgCounts = new Map();
+
+  let totalCount = 0;
+
+  rows.forEach(r => {
+    const sec = r[COLS.sector] || 'Unassigned Sector';
+    const cat = r[COLS.gso_category] || SAMPLE_TYPE_LABEL[r[COLS.sample_type]] || 'Other Category';
+    const failedTests = r[COLS.failed_tests] || [];
+
+    if (r[COLS.severity] !== 'none' || failedTests.length > 0) {
+      const orgs = failedTests.length > 0 ? failedTests : ['General Non-compliance'];
+      orgs.forEach(org => {
+        totalCount++;
+        sectorCounts.set(sec, (sectorCounts.get(sec) || 0) + 1);
+
+        const kCat = sec + '||' + cat;
+        catCounts.set(kCat, (catCounts.get(kCat) || 0) + 1);
+
+        const kOrg = sec + '||' + cat + '||' + org;
+        orgCounts.set(kOrg, (orgCounts.get(kOrg) || 0) + 1);
+      });
+    }
+  });
+
+  values[0] = totalCount || 1;
+
+  sectorCounts.forEach((count, sec) => {
+    ids.push('SEC:' + sec);
+    labels.push(sec);
+    parents.push('ROOT');
+    values.push(count);
+    colors.push('#c8a85a');
+  });
+
+  catCounts.forEach((count, kCat) => {
+    const [sec, cat] = kCat.split('||');
+    ids.push('CAT:' + kCat);
+    labels.push(cat);
+    parents.push('SEC:' + sec);
+    values.push(count);
+    colors.push('#22853f');
+  });
+
+  const topOrgsByCat = new Map();
+  orgCounts.forEach((count, kOrg) => {
+    const [sec, cat, org] = kOrg.split('||');
+    const kParent = sec + '||' + cat;
+    if (!topOrgsByCat.has(kParent)) topOrgsByCat.set(kParent, []);
+    topOrgsByCat.get(kParent).push({ org, count, kOrg });
+  });
+
+  topOrgsByCat.forEach((list, kParent) => {
+    list.sort((a, b) => b.count - a.count);
+    list.slice(0, 5).forEach(item => {
+      ids.push('ORG:' + item.kOrg);
+      labels.push(item.org);
+      parents.push('CAT:' + kParent);
+      values.push(item.count);
+      colors.push('#a8331a');
+    });
+  });
+
+  const trace = {
+    type: currentHierarchyMode,
+    ids: ids,
+    labels: labels,
+    parents: parents,
+    values: values,
+    branchvalues: 'total',
+    hoverinfo: 'label+value+percent parent',
+    marker: {
+      colors: colors,
+      line: { width: 0.5, color: '#faf6ee' }
+    }
+  };
+
+  reactChart('chart_hierarchy', [trace], {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 10, r: 10, t: 10, b: 10 },
+    height: 500
+  }, PLOTLY_CONFIG);
+}
+
+function renderSectorOrganismMatrix(rows) {
+  const orgCounts = new Map();
+  rows.forEach(r => {
+    (r[COLS.failed_tests] || []).forEach(t => {
+      orgCounts.set(t, (orgCounts.get(t) || 0) + 1);
+    });
+  });
+
+  const topOrgs = Array.from(orgCounts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(e => e[0]);
+
+  const sectors = ['Riyadh East', 'Riyadh North', 'Riyadh West', 'Riyadh Central', 'Riyadh South'];
+  const z = sectors.map(() => topOrgs.map(() => 0));
+
+  rows.forEach(r => {
+    const sec = r[COLS.sector];
+    const sIdx = sectors.indexOf(sec);
+    if (sIdx === -1) return;
+
+    (r[COLS.failed_tests] || []).forEach(t => {
+      const oIdx = topOrgs.indexOf(t);
+      if (oIdx !== -1) {
+        z[sIdx][oIdx]++;
+      }
+    });
+  });
+
+  const textMatrix = z.map((row, i) =>
+    row.map((val, j) => `${sectors[i]}<br>${topOrgs[j]}<br>Failures: ${val}`)
+  );
+
+  const trace = {
+    type: 'heatmap',
+    x: topOrgs,
+    y: sectors,
+    z: z,
+    text: textMatrix,
+    hoverinfo: 'text',
+    colorscale: [
+      [0, '#faf6ee'],
+      [0.2, '#f0e3bf'],
+      [0.5, '#c8a85a'],
+      [0.8, '#a8331a'],
+      [1.0, '#7a2616']
+    ],
+    showscale: true
+  };
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 120, r: 20, t: 30, b: 100 },
+    height: 380,
+    xaxis: { tickangle: -30 }
+  };
+
+  reactChart('chart_sector_organism_matrix', [trace], layout, PLOTLY_CONFIG);
+}
+
+function renderNetworkGraph(rows) {
+  const catMap = new Map();
+  const orgMap = new Map();
+  const linksMap = new Map();
+
+  rows.forEach(r => {
+    const cat = r[COLS.gso_category] || SAMPLE_TYPE_LABEL[r[COLS.sample_type]] || 'Other Category';
+    const failedTests = r[COLS.failed_tests] || [];
+
+    if (failedTests.length > 0) {
+      catMap.set(cat, (catMap.get(cat) || 0) + 1);
+      failedTests.forEach(t => {
+        orgMap.set(t, (orgMap.get(t) || 0) + 1);
+        const k = cat + '||' + t;
+        linksMap.set(k, (linksMap.get(k) || 0) + 1);
+      });
+    }
+  });
+
+  const topCats = Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 8).map(e => e[0]);
+  const topOrgs = Array.from(orgMap.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10).map(e => e[0]);
+
+  const catCoords = new Map();
+  topCats.forEach((c, idx) => {
+    const y = 1 - (idx / (topCats.length - 1 || 1)) * 2;
+    catCoords.set(c, { x: 0, y: y });
+  });
+
+  const orgCoords = new Map();
+  topOrgs.forEach((o, idx) => {
+    const y = 1 - (idx / (topOrgs.length - 1 || 1)) * 2;
+    orgCoords.set(o, { x: 3, y: y });
+  });
+
+  const edgeX = [], edgeY = [];
+  linksMap.forEach((weight, k) => {
+    const [c, o] = k.split('||');
+    if (catCoords.has(c) && orgCoords.has(o)) {
+      const p1 = catCoords.get(c);
+      const p2 = orgCoords.get(o);
+      edgeX.push(p1.x, p2.x, null);
+      edgeY.push(p1.y, p2.y, null);
+    }
+  });
+
+  const edgeTrace = {
+    type: 'scatter',
+    mode: 'lines',
+    x: edgeX,
+    y: edgeY,
+    line: { color: 'rgba(200, 168, 90, 0.4)', width: 1.5 },
+    hoverinfo: 'none'
+  };
+
+  const catTrace = {
+    type: 'scatter',
+    mode: 'markers+text',
+    x: topCats.map(c => catCoords.get(c).x),
+    y: topCats.map(c => catCoords.get(c).y),
+    text: topCats,
+    textposition: 'left center',
+    marker: {
+      size: topCats.map(c => Math.min(35, Math.max(12, Math.sqrt(catMap.get(c) || 1) * 3))),
+      color: '#22853f',
+      line: { color: '#faf6ee', width: 1.5 }
+    },
+    hoverinfo: 'text'
+  };
+
+  const orgTrace = {
+    type: 'scatter',
+    mode: 'markers+text',
+    x: topOrgs.map(o => orgCoords.get(o).x),
+    y: topOrgs.map(o => orgCoords.get(o).y),
+    text: topOrgs,
+    textposition: 'right center',
+    marker: {
+      size: topOrgs.map(o => Math.min(35, Math.max(12, Math.sqrt(orgMap.get(o) || 1) * 3))),
+      color: '#a8331a',
+      line: { color: '#faf6ee', width: 1.5 }
+    },
+    hoverinfo: 'text'
+  };
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 150, r: 150, t: 20, b: 20 },
+    height: 480,
+    showlegend: false,
+    xaxis: { showgrid: false, zeroline: false, showticklabels: false, range: [-0.8, 3.8] },
+    yaxis: { showgrid: false, zeroline: false, showticklabels: false, range: [-1.2, 1.2] }
+  };
+
+  reactChart('chart_network_graph', [edgeTrace, catTrace, orgTrace], layout, PLOTLY_CONFIG);
+}
+
+function renderOrganismStreamgraph(rows) {
+  const monthsSet = new Set();
+  const orgTotal = new Map();
+
+  rows.forEach(r => {
+    const ym = r[COLS.year_month];
+    if (!ym) return;
+    monthsSet.add(ym);
+
+    (r[COLS.failed_tests] || []).forEach(t => {
+      orgTotal.set(t, (orgTotal.get(t) || 0) + 1);
+    });
+  });
+
+  const topOrgs = Array.from(orgTotal.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7)
+    .map(e => e[0]);
+
+  const months = Array.from(monthsSet).sort();
+  const orgMonthCounts = new Map();
+  topOrgs.forEach(org => {
+    orgMonthCounts.set(org, new Map(months.map(m => [m, 0])));
+  });
+
+  rows.forEach(r => {
+    const ym = r[COLS.year_month];
+    if (!ym) return;
+    (r[COLS.failed_tests] || []).forEach(t => {
+      if (orgMonthCounts.has(t)) {
+        const m = orgMonthCounts.get(t);
+        m.set(ym, (m.get(ym) || 0) + 1);
+      }
+    });
+  });
+
+  const colors = [
+    '#22853f', '#c8a85a', '#a8331a', '#7a2616',
+    '#9a7b2a', '#0e5c36', '#b91c1c'
+  ];
+
+  const traces = topOrgs.map((org, idx) => {
+    const countsMap = orgMonthCounts.get(org);
+    const yValues = months.map(m => countsMap.get(m) || 0);
+    return {
+      name: org,
+      x: months,
+      y: yValues,
+      type: 'scatter',
+      mode: 'lines',
+      stackgroup: 'one',
+      line: { shape: 'spline', width: 1.5 },
+      fillcolor: colors[idx % colors.length] + 'c0',
+      marker: { color: colors[idx % colors.length] }
+    };
+  });
+
+  const layout = {
+    paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)',
+    margin: { l: 40, r: 20, t: 20, b: 50 },
+    height: 380,
+    xaxis: { title: 'Year-Month' },
+    yaxis: { title: 'Failed Tests Count' },
+    legend: { orientation: 'h', y: 1.15, font: { size: 11 } }
+  };
+
+  reactChart('chart_streamgraph', traces, layout, PLOTLY_CONFIG);
+}
+
 function renderAll(rows) {
   // Single filter tier (2026-07-16): every figure derives from the one filtered
   // set. rowsActive (severity events only) is a local derivation used solely by
   // the two intrinsically severity-event charts (severity-month, heatmap).
+  window.__lastRows = rows;
   const rowsActive = rows.filter(r => r[COLS.severity] !== 'none');
 
   document.getElementById('meta_rows').textContent = FACETS.row_count.toLocaleString();
@@ -3045,6 +3505,13 @@ function renderAll(rows) {
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
+
+  // New interactive visualizations
+  renderSankeyFlow(rows);
+  renderHierarchyExplorer(rows);
+  renderSectorOrganismMatrix(rowsActive);
+  renderNetworkGraph(rowsActive);
+  renderOrganismStreamgraph(rows);
 }
 
 deserializeState(location.hash);

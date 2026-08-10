@@ -1,5 +1,20 @@
 # Microbiology Changelog
 
+## 2026-08-10 — Advanced Interactive Microbiology Dashboard Visualizations
+
+Added 5 interactive visualizations to `microbiology/scripts/build_dashboard_combined.py` and updated `microbiology_dashboard.html`:
+
+- 🔀 **Sankey Flow Diagram (`renderSankeyFlow`)**: Multi-stage flow chart tracking sample failures: `Location (Sector) → Food Category → Organism → Severity Outcome`. Node thickness reflects sample volume.
+- 🌞 **Sunburst & 🟦 Treemap Hierarchical Explorer (`renderHierarchyExplorer`)**: Multi-level drilldown (`Sector → Food Category → Product Subtype → Organism`) with an interactive view mode toggle (`🌞 Sunburst View` / `🟦 Treemap View`).
+- 🔥 **Sector Location × Pathogen Matrix Heatmap (`renderSectorOrganismMatrix`)**: Contamination intensity matrix mapping 5 Riyadh Sectors (East, North, West, Central, South) against top 10 pathogens/indicators.
+- 🕸️ **Food Category ↔ Microbe Co-occurrence Network Graph (`renderNetworkGraph`)**: Bipartite relationship graph connecting Food Categories (green nodes) with Microbes/Pathogens (red nodes). Node diameter scales with sample volume; link thickness reflects co-occurrence count.
+- 📈 **Organism Prevalence Streamgraph (`renderOrganismStreamgraph`)**: Smooth stacked area streamgraph depicting month-by-month evolution of relative pathogen prevalence over 2024–2025.
+
+**Wiring & Verification:**
+- Integrated into `renderAll(rows)` so all 5 visualizations react dynamically to global filters (Date Range, Sector, Compliance, Severity, Microbes).
+- Rebuilt deliverables: `microbiology_dashboard.html` (7,026 KB, 20,881 rows) and `index.html`.
+- Evaluated JavaScript syntax inside output HTML via `node --check` function verification; 100% clean.
+
 ## 2026-08-10 — Name rules made 2025-ONLY (restores the 2024 panel audit)
 
 Muhannad flagged (from the dashboard GSO-audit card) that the "both years"
