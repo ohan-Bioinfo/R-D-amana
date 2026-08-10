@@ -1,5 +1,17 @@
 # Microbiology Changelog
 
+## 2026-08-10 — Validation file for Muhannad + Group B doc cleanup
+
+- Added `microbiology/VALIDATION_2026-08-10.md` — a consolidated input file for
+  Muhannad: records the GSO rule-layer changes, asks him to validate the
+  reclassification + the 2,069 2024 native-code overrides, and lists every open
+  issue/decision (Group B/C, edge cases, MR items B3–B7, enhancement backlog)
+  with fill-in fields.
+- Regenerated `kimi/yolo/2025_gso_groupB_disambiguation.md` to **exclude
+  environmental swab names** (363 `مسحة …` names, 1,674 rows, were polluting the
+  top of the list). Now shows the top 150 real food/drink names of the 3,751
+  non-swab uncoded 2025 rows for code sign-off. No parquet/data change.
+
 ## 2026-08-10 — Final-review precision fixes: sauce-head precedence, رز whole-token, N-3 tag clear
 
 Three findings from the whole-branch final review, all in `enrich_gso.py`:
