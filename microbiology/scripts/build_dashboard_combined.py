@@ -670,6 +670,23 @@ TEMPLATE = r"""<!DOCTYPE html>
   --logo: url("__LOGO_DATA_URI__");
   --najdi-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' opacity='0.06'><path d='M30 0 L60 30 L30 60 L0 30 Z M30 12 L48 30 L30 48 L12 30 Z' fill='%23faf6ee'/></svg>");
 }
+/* ── lab-record divider tabs ─────────────────────────────── */
+.tabnav { display:flex; gap:2px; align-items:flex-end; margin:14px 0 0;
+  border-bottom:2px solid var(--gold-700); flex-wrap:wrap; position:sticky; top:0; z-index:20;
+  background:var(--bg); padding-top:6px; }
+.tabnav button { appearance:none; border:1px solid var(--line); border-bottom:none;
+  background:var(--bg-3); color:var(--muted); font:600 12.5px/1 'Space Grotesk',system-ui,sans-serif;
+  letter-spacing:.3px; padding:10px 16px 9px; border-radius:9px 9px 0 0; cursor:pointer;
+  display:flex; align-items:center; gap:7px; transition:.15s; margin-bottom:-2px; }
+.tabnav button .ar { font-family:'Tajawal',sans-serif; font-weight:500; font-size:11px; color:var(--muted); }
+.tabnav button:hover { background:var(--bg-2); color:var(--fg); }
+.tabnav button.active { background:var(--bg-2); color:var(--green-700); border-color:var(--gold-700);
+  border-bottom:2px solid var(--bg-2); }
+.tabnav button.active::before { content:"۞"; color:var(--gold-700); font-size:13px; }
+.tabpanel[hidden] { display:none; }
+.tabpanel { animation:tabfade .2s ease both; }
+@keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+@media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
 * { box-sizing: border-box; }
 html, body { background: var(--sand-50); color: var(--ink-900); margin: 0;
   font-family: 'IBM Plex Sans Arabic', 'Tajawal', 'Tahoma', system-ui, sans-serif;
@@ -1007,70 +1024,15 @@ tbody tr:hover { background: var(--sand-100); }
      repeat-offender filter is active. Kept at the top so it's seen immediately. -->
 <div id="slice-banner" style="display:none; background:#fef3c7; border:1px solid #fbbf24; border-radius:4px; padding:10px 14px; font-size:12px; color:#92400e; margin-bottom:14px"></div>
 
+<nav class="tabnav" id="tabnav">
+  <button data-tab="overview" class="active">📊 Overview <span class="ar">نظرة عامة</span></button>
+  <button data-tab="location">📍 Location <span class="ar">المواقع</span></button>
+  <button data-tab="products">🍱 Products <span class="ar">المنتجات</span></button>
+  <button data-tab="organisms">🦠 Organisms &amp; tests <span class="ar">الكائنات</span></button>
+  <button data-tab="gso">📋 GSO &amp; Quality <span class="ar">الجودة</span></button>
+</nav>
 <div class="grid">
-
-  <div class="group-head">GSO 1016 audit <span class="section-note">2024 source only</span></div>
-
-  <div class="card full">
-    <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (<b>2025 only</b>) re-codes 2025 samples whose name unambiguously implies a GSO category: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G). <b>2024 keeps the lab's native codes</b> so the panel audit above judges each sample against the code it was actually tested under; see the re-coded count below.</div>
-    <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
-  </div>
-
-  <div class="group-head">Data quality</div>
-
-  <div class="card full">
-    <h2>Data-quality summary</h2>
-    <div class="card-sub">Counts of flagged rows and structural issues in the current filtered view. These are informational — the rows are kept in the dataset.</div>
-    <div id="data_quality_summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-top:10px"></div>
-  </div>
-
-  <div class="group-head">What's failing</div>
-
-  <div class="card full">
-    <h2>Top 10 most-contaminated subtypes</h2>
-    <div class="card-sub">Grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active). 🧫 = environmental surface swab, not a food product.</div>
-    <div id="top-subtypes" style="overflow:auto"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Top 10 failed tests (microbes)</h2>
-    <div class="card-sub">Failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. In a 2025-only view each bar also shows the official Annual-Report <b>test</b>-level non-compliant / total count (test-level &ge; sample-level, since a re-tested sample is counted per test); the table below gives the full total / compliant / non-compliant breakdown for every organism.</div>
-    <div id="top-microbes" style="overflow:auto"></div>
-    <div id="official-test-table" style="margin-top:16px; overflow:auto"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Non-compliant tests · pathogens vs indicators <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
-        <div id="chart_tests_pathogen" class="chart"></div>
-      </div>
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Indicators</div>
-        <div id="chart_tests_indicator" class="chart"></div>
-      </div>
-    </div>
-
-
-  <div class="card full">
-    <h2>GSO 1016 categories — total samples &amp; non-compliance</h2>
-    <div id="chart_gso_cat" class="chart" style="min-height:480px"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Sample-type distribution</h2>
-    <div class="card-sub">Decision-making buckets (produce, dairy, swab, etc.) by year. Useful for spotting bucket drift after keyword changes.</div>
-    <div id="chart_sample_type" class="chart" style="min-height:420px"></div>
-  </div>
-
-  <div class="card full">
-    <h2>Severity tier × GSO 1016 category</h2>
-    <div id="chart_heatmap" class="chart"></div>
-  </div>
-
-  <div class="group-head">Where</div>
+<section class="tabpanel" data-tab="overview">
 
   <div class="card full">
     <h2>Riyadh map — bubble size = total samples · colour = metric</h2>
@@ -1088,38 +1050,29 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="chart_map" class="chart" style="min-height:560px"></div>
   </div>
 
-  <div class="card full" data-needs-year="2025">
-    <h2>Sectors — total samples &amp; non-compliance <span class="year-required-badge">2025 source</span></h2>
-    <div id="chart_sector" class="chart"></div>
-  </div>
-
-  <div class="group-head">When</div>
-
   <div class="card full">
     <h2>Non-compliance rate &amp; per-microbe rate over time <span class="section-note" style="font-size:11px">(click legend to toggle organisms)</span></h2>
     <div id="chart_trend" class="chart"></div>
   </div>
 
-  <div class="card">
-    <h2>Year-on-year comparison</h2>
-    <div id="chart_yoy" class="chart"></div>
+  <div class="card full">
+    <h2>Top 10 failed tests (microbes)</h2>
+    <div class="card-sub">Failing-<b>sample</b> count per organism/test (e.g. العدد الكلي, استافيلوكوكس اورياس). Respects the year and microbe/pathogen filters. In a 2025-only view each bar also shows the official Annual-Report <b>test</b>-level non-compliant / total count (test-level &ge; sample-level, since a re-tested sample is counted per test); the table below gives the full total / compliant / non-compliant breakdown for every organism.</div>
+    <div id="top-microbes" style="overflow:auto"></div>
+    <div id="official-test-table" style="margin-top:16px; overflow:auto"></div>
   </div>
 
-  <div class="card">
-    <h2>Severity breakdown by month</h2>
-    <div id="chart_severity_month" class="chart"></div>
+</section>
+<section class="tabpanel" data-tab="location" hidden>
+
+  <div class="card full" data-needs-year="2025">
+    <h2>Sectors — total samples &amp; non-compliance <span class="year-required-badge">2025 source</span></h2>
+    <div id="chart_sector" class="chart"></div>
   </div>
 
   <div class="card full">
-    <h2>Sampling cadence by day-of-week</h2>
-    <div id="chart_dow" class="chart"></div>
-  </div>
-
-  <div class="group-head">Who</div>
-
-  <div class="card full tall" data-needs-year="2025">
-    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2025 source</span></h2>
-    <div id="chart_chains" class="chart tall"></div>
+    <h2>Severity tier × GSO 1016 category</h2>
+    <div id="chart_heatmap" class="chart"></div>
   </div>
 
   <div class="card full" data-needs-year="2025">
@@ -1132,6 +1085,79 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="repeat_table"></div>
   </div>
 
+</section>
+<section class="tabpanel" data-tab="products" hidden>
+
+  <div class="card full">
+    <h2>GSO 1016 categories — total samples &amp; non-compliance</h2>
+    <div id="chart_gso_cat" class="chart" style="min-height:480px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Sample-type distribution</h2>
+    <div class="card-sub">Decision-making buckets (produce, dairy, swab, etc.) by year. Useful for spotting bucket drift after keyword changes.</div>
+    <div id="chart_sample_type" class="chart" style="min-height:420px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Top 10 most-contaminated subtypes</h2>
+    <div class="card-sub">Grouped by the specific <code>sample_name</code> (e.g. تبولة, جبنة فيتا) with its GSO 1016 parent category. Minimum 20 samples per row (5 when a microbe/severity filter is active). 🧫 = environmental surface swab, not a food product.</div>
+    <div id="top-subtypes" style="overflow:auto"></div>
+  </div>
+
+  <div class="card full tall" data-needs-year="2025">
+    <h2>Top 15 chains by non-compliant samples <span class="year-required-badge">2025 source</span></h2>
+    <div id="chart_chains" class="chart tall"></div>
+  </div>
+
+</section>
+<section class="tabpanel" data-tab="organisms" hidden>
+
+  <div class="card full">
+    <h2>Non-compliant tests · pathogens vs indicators <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
+      <div>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
+        <div id="chart_tests_pathogen" class="chart"></div>
+      </div>
+      <div>
+        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Indicators</div>
+        <div id="chart_tests_indicator" class="chart"></div>
+      </div>
+    </div>
+
+
+  <div class="card">
+    <h2>Severity breakdown by month</h2>
+    <div id="chart_severity_month" class="chart"></div>
+  </div>
+
+</section>
+<section class="tabpanel" data-tab="gso" hidden>
+
+  <div class="card full">
+    <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
+    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (<b>2025 only</b>) re-codes 2025 samples whose name unambiguously implies a GSO category: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G). <b>2024 keeps the lab's native codes</b> so the panel audit above judges each sample against the code it was actually tested under; see the re-coded count below.</div>
+    <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Data-quality summary</h2>
+    <div class="card-sub">Counts of flagged rows and structural issues in the current filtered view. These are informational — the rows are kept in the dataset.</div>
+    <div id="data_quality_summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>Year-on-year comparison</h2>
+    <div id="chart_yoy" class="chart"></div>
+  </div>
+
+  <div class="card full">
+    <h2>Sampling cadence by day-of-week</h2>
+    <div id="chart_dow" class="chart"></div>
+  </div>
+
+</section>
 </div>
 
 <footer>Generated from data&lt;YEAR&gt;.parquet (auto-discovered) — <span id="meta_rows">…</span> rows · date range <span id="meta_range">…</span></footer>
@@ -3017,6 +3043,20 @@ function renderSampleTypeDistribution(rows) {
     legend: { orientation: 'h', y: 1.12, font: { size: 11 } },
   }, PLOTLY_CONFIG);
 }
+
+function showTab(name) {
+  window.__activeTab = name;
+  document.querySelectorAll('#tabnav button').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('.tabpanel').forEach(p => {
+    const on = p.dataset.tab === name;
+    p.hidden = !on;
+    if (on) p.querySelectorAll('.js-plotly-plot').forEach(g => { try { Plotly.Plots.resize(g); } catch (e) {} });
+  });
+}
+document.getElementById('tabnav').addEventListener('click', e => {
+  const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab);
+});
 
 function renderAll(rows) {
   // Single filter tier (2026-07-16): every figure derives from the one filtered
