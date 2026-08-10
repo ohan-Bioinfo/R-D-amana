@@ -37,16 +37,13 @@ def build():
 
             if is_fail:
                 sev = "Multi-pathogen" if (len([t for t in failed if t in pathogen_set]) > 1) else ("Pathogen" if has_path else "Indicator only")
-            else:
-                sev = "Compliant / Pass"
-
-            records.append({
-                "year": y,
-                "sector": sec,
-                "category": cat,
-                "severity": sev,
-                "failed": failed if failed else (["Non-compliant (General)"] if is_fail else []),
-            })
+                records.append({
+                    "year": y,
+                    "sector": sec,
+                    "category": cat,
+                    "severity": sev,
+                    "failed": failed if failed else ["Non-compliant (General)"],
+                })
 
     logo_uri = ("data:image/jpeg;base64," +
                 base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
@@ -128,7 +125,6 @@ function render() {
   let totalFailures = 0;
 
   filtered.forEach(r => {
-    if (r.severity === 'Compliant / Pass') return;
     totalFailures++;
     const secIdx = getNode(r.sector, 'sector');
     const catIdx = getNode(r.category, 'category');

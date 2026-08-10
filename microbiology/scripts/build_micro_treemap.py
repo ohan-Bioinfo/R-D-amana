@@ -145,6 +145,7 @@ function render() {
 
   subCounts.forEach((count, kSub) => {
     const [sec, cat, sub] = kSub.split('||');
+    const kCat = sec + '||' + cat;
     ids.push('SUB:' + kSub); labels.push(sub); parents.push('CAT:' + kCat); values.push(count);
   });
 
