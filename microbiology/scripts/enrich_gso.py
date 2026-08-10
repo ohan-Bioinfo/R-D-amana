@@ -505,8 +505,13 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
                 canon.append(recovered)
                 continue
         canon.append(code)
-    # Name-keyword rule layer (both years): cooked/prepared -> P, sauce -> G.
-    canon, rule_tags = apply_gso_name_rules(list(df["sample_name"]), canon)
+    # Name-keyword rule layer — 2025 ONLY. 2024 keeps the lab's native GSO codes
+    # so the 2024 panel-completeness / limit audit compares each sample against the
+    # code it was actually tested under, not a name-derived P/G (Muhannad 2026-08-10).
+    if label == "2025":
+        canon, rule_tags = apply_gso_name_rules(list(df["sample_name"]), canon)
+    else:
+        rule_tags = [""] * len(canon)
     df["gso_code_canonical"] = pd.array(canon, dtype="string")
     df["gso_code_rule_applied"] = pd.array(
         [t or None for t in rule_tags], dtype="string")
@@ -547,7 +552,8 @@ def enrich_wide(path: Path, codes_map: dict[str, dict], label: str,
         df["category_en"] = pd.array(cat_en, dtype="string")
         df["sample_type"] = pd.array(sample_type, dtype="string")
 
-    reclassify_group_c(df)
+    if label == "2025":            # Group C corrections are 2025-only too
+        reclassify_group_c(df)
     df.to_parquet(path, compression="zstd", index=False)
     matched = sum(1 for c in canon if c and c in codes_map)
     no_code = sum(1 for c in canon if not c)
@@ -566,8 +572,9 @@ def enrich_long(path: Path, codes_map: dict[str, dict],
     audit columns (tests_missing, panel_complete) joined back as constant
     per (source_file, m_s_no) group."""
     df = pd.read_parquet(path)
+    # 2024 long parquet: keep NATIVE codes (no name-rule override) so panel
+    # completeness + limit checks use the code the lab actually tested under.
     canon = [normalise_gso_code(v) for v in df["gso_code"]]
-    canon, _long_tags = apply_gso_name_rules(list(df["sample_name"]), canon)
     df["gso_code_canonical"] = pd.array(canon, dtype="string")
     df["gso_product_name_en"] = pd.array(
         [codes_map.get(c, {}).get("name_en") for c in canon], dtype="string"

@@ -1013,7 +1013,7 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
-    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (both years) re-codes samples whose name unambiguously implies a GSO category regardless of source code: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G); see the re-coded count below.</div>
+    <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (<b>2025 only</b>) re-codes 2025 samples whose name unambiguously implies a GSO category: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G). <b>2024 keeps the lab's native codes</b> so the panel audit above judges each sample against the code it was actually tested under; see the re-coded count below.</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
@@ -2909,7 +2909,7 @@ function renderGsoAudit(rows) {
     card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),
     card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
-    card('↳ re-coded by name rule (cooked→P / صوص→G)', fmt(ruleApplied), 'both years · GSO code set/overridden by sample-name rule'),
+    card('↳ re-coded by name rule (cooked→P / صوص→G)', fmt(ruleApplied), '2025 only · 2024 keeps its native lab codes'),
   ].join('');
 }
 

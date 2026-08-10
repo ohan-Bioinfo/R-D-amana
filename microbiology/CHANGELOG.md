@@ -1,5 +1,27 @@
 # Microbiology Changelog
 
+## 2026-08-10 — Name rules made 2025-ONLY (restores the 2024 panel audit)
+
+Muhannad flagged (from the dashboard GSO-audit card) that the "both years"
+override had broken 2024 panel completeness: **systematic gaps collapsed
+1,756 → 13**, sporadic inflated, lab-vs-GSO disagreements 62 → 109. Cause: the
+2024 panel/limit audit judges each sample against the tests required for the
+code the lab **actually tested it under** (its native code); overriding e.g. a
+C-9 chicken to P-4 compared it against the wrong panel, and P became a
+heterogeneous bucket so no ≥90% systematic gap survived.
+
+**Fix (decision: rules 2025-only):**
+- `enrich_gso.py` — `apply_gso_name_rules` and `reclassify_group_c` now run only
+  when `label == "2025"`; the `enrich_long` (2024) override was removed. 2024
+  keeps its native lab codes end-to-end.
+- Dashboard explainer + the "re-coded by name rule" card now say **2025 only ·
+  2024 keeps its native lab codes**.
+
+**Verified:** 2024 `gso_code_rule_applied` non-null = **0**; panel_complete
+restored to **3,756 / 4,126**, lab-vs-GSO disagreements to **54**. 2025 rules
+intact (cooked_to_P 1,235, sauce_to_G 1,844; 2025 coverage 53.1%). Row total
+20,881; dashboard + both sunbursts rebuilt, `node --check` clean.
+
 ## 2026-08-10 — Validation file for Muhannad + Group B doc cleanup
 
 - Added `microbiology/VALIDATION_2026-08-10.md` — a consolidated input file for

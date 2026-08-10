@@ -64,9 +64,9 @@ The "both years" decision means the rules **overrode the lab's own 2024 GSO code
 your ruling, but it shifts 2024 category counts and panel-completeness, and may affect
 any reconciliation against 2024 official numbers.
 
-- [ ] Keep 2024 override (full consistency) — confirmed.
-- [ ] Actually, apply rules to **2025 only**; leave 2024 native codes intact. (I'll switch it.)
-- [ ] Show me the 2,069 affected 2024 rows before I decide.
+- [x] **RESOLVED 2026-08-10 — chose 2025-only.** Rules no longer touch 2024; the
+  panel audit is restored (systematic gaps, panel_complete 3,756/4,126, disagree 54).
+  2024 categories are back to the lab's native codes. See CHANGELOG 2026-08-10.
 
 ---
 
