@@ -666,6 +666,9 @@ TEMPLATE = r"""<!DOCTYPE html>
   --year24: var(--gold-500);  /* gold */
   --year25: var(--green-700); /* green */
 
+  /* Data-semantic palette — consistent meaning across charts */
+  --data-compliant:#2f9e6b; --data-indicator:#e0a53a; --data-pathogen:#c0392b; --data-neutral:#64748b;
+
   --shadow: 0 1px 0 rgba(154,123,42,0.04), 0 4px 12px -4px rgba(10,61,36,0.08);
   --logo: url("__LOGO_DATA_URI__");
   --najdi-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' opacity='0.06'><path d='M30 0 L60 30 L30 60 L0 30 Z M30 12 L48 30 L30 48 L12 30 Z' fill='%23faf6ee'/></svg>");
@@ -815,6 +818,10 @@ h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 .toggle { padding: 6px 12px; background: #fff; border: 1px solid var(--line);
   border-radius: 8px; font-size: 12px; cursor: pointer; user-select: none; color: var(--fg); }
 .toggle.active { background: var(--pathogen); border-color: var(--pathogen); color: #fff; }
+.seg-toggle { display:inline-flex; gap:2px; margin:0 0 12px; border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+.seg-toggle button { appearance:none; border:none; background:var(--bg-3); color:var(--muted);
+  font:600 12px 'Space Grotesk',system-ui,sans-serif; padding:8px 16px; cursor:pointer; }
+.seg-toggle button.active { background:var(--green-700); color:#fff; }
 select { width: 100%; padding: 7px 10px; background: #fff; color: var(--fg);
   border: 1px solid var(--line); border-radius: 8px; font-size: 13px; font-family: inherit; }
 select[multiple] { height: 90px; }
@@ -1120,17 +1127,12 @@ tbody tr:hover { background: var(--sand-100); }
 
   <div class="card full">
     <h2>Non-compliant tests · pathogens vs indicators <span class="section-note" style="font-size:11px">(click a bar to drill down)</span></h2>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:18px">
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Pathogens</div>
-        <div id="chart_tests_pathogen" class="chart"></div>
-      </div>
-      <div>
-        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:6px">Indicators</div>
-        <div id="chart_tests_indicator" class="chart"></div>
-      </div>
+    <div class="seg-toggle" id="tests_toggle">
+      <button data-t="pathogen" class="active">Pathogens</button>
+      <button data-t="indicator">Indicators</button>
     </div>
-
+    <div id="chart_tests" class="chart" style="min-height:420px"></div>
+    <div id="tests_drilldown"></div>
 
   <div class="card">
     <h2>Severity breakdown by month</h2>
@@ -2426,8 +2428,11 @@ function renderChains(rows) {
 // Cache of the last per-organism rows index so the drilldown click handler
 // can resolve rows without rescanning the full filtered set.
 let _testsByOrganism = new Map();
+let _testsKind = 'pathogen';
+let _testsLastRows = [];
 
 function renderTests(rows) {
+  _testsLastRows = rows;
   // Per-organism, per-year failure count. `failed_tests` is already deduped
   // at build-time (no double-count for variant spellings).
   const perOrg = new Map();  // test → {year → count}
@@ -2489,8 +2494,7 @@ function renderTests(rows) {
     });
   }
 
-  buildPanel('chart_tests_pathogen', 'pathogen');
-  buildPanel('chart_tests_indicator', 'indicator');
+  buildPanel('chart_tests', _testsKind);
   document.getElementById('tests_drilldown').innerHTML = '';
 }
 
@@ -2727,7 +2731,7 @@ function _renderVolumeVsRate(domId, items, labelKey, opts) {
     type: 'scatter', mode: 'lines+markers',
     x: labels, y: items.map(i => i.rate),
     name: 'Non-compliance %', yaxis: 'y2',
-    line: { color: '#ea580c', width: 3, shape: 'spline' },
+    line: { color: '#c0392b', width: 3, shape: 'spline' },
     marker: { size: 9, line: { color: '#fff', width: 1.5 } },
     hovertemplate: '<b>%{x}</b><br>Non-compliance: %{y:.1f}%<extra></extra>',
   });
@@ -2739,8 +2743,8 @@ function _renderVolumeVsRate(domId, items, labelKey, opts) {
     xaxis: { tickangle: opts.tickangle || -30, gridcolor: '#e5e7eb', automargin: true },
     yaxis: { gridcolor: '#e5e7eb', title: { text: 'Samples', font: { size: 11 } }, zeroline: true, zerolinecolor: '#cbd5e1' },
     yaxis2: { overlaying: 'y', side: 'right',
-              title: { text: '% non-compliance', font: { size: 11, color: '#ea580c' } },
-              showgrid: false, range: [0, 100], tickfont: { color: '#ea580c' } },
+              title: { text: '% non-compliance', font: { size: 11, color: '#c0392b' } },
+              showgrid: false, range: [0, 100], tickfont: { color: '#c0392b' } },
     legend: { orientation: 'h', y: -0.30, font: { size: 11 } },
     hovermode: 'x unified',
     bargap: 0.20,
@@ -3111,6 +3115,12 @@ function showTab(name) {
 }
 document.getElementById('tabnav').addEventListener('click', e => {
   const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab);
+});
+document.getElementById('tests_toggle').addEventListener('click', e => {
+  const b = e.target.closest('button[data-t]'); if (!b) return;
+  _testsKind = b.dataset.t;
+  document.querySelectorAll('#tests_toggle button').forEach(x => x.classList.toggle('active', x === b));
+  renderTests(_testsLastRows);
 });
 
 function renderAll(rows) {
