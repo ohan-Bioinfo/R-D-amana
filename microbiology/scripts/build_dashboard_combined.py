@@ -1298,6 +1298,7 @@ function serializeState() {
   if (state.exclude_raw_meat) p.push('xmeat=1');
   if (state.date_from && state.date_from !== FACETS.date_min) p.push('df=' + encodeURIComponent(state.date_from));
   if (state.date_to && state.date_to !== FACETS.date_max) p.push('dt=' + encodeURIComponent(state.date_to));
+  if (window.__activeTab && window.__activeTab !== 'overview') p.push('tab=' + window.__activeTab);
   return p.join('&');
 }
 
@@ -1372,6 +1373,8 @@ function deserializeState(hash) {
   const df = params.get('df'); if (df) state.date_from = decodeURIComponent(df);
   const dt = params.get('dt'); if (dt) state.date_to = decodeURIComponent(dt);
   syncAllChips();
+  const _tab = params.get('tab');
+  if (_tab && document.querySelector('.tabpanel[data-tab="' + _tab + '"]')) showTab(_tab);
 }
 
 document.getElementById('f_date_from').value = FACETS.date_min;
