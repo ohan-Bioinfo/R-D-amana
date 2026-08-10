@@ -2299,6 +2299,10 @@ function renderHeatmap(rows) {
   };
   const xLabels = types.map(shortLabel);
   const xHover  = types;  // full names for hover
+  // Map shortened x labels back to the full GSO category names so a cell
+  // click can filter on the real value (not the truncated display string).
+  const _xFull = {};
+  xLabels.forEach((lbl, i) => _xFull[lbl] = types[i]);
   const yLabels = SEVERITY_ORDER.map(s => SEVERITY_LABEL[s] || s);
   // Light-theme colourscale that matches the rest of the dashboard:
   // off-white at 0 (so empty cells visually disappear into the card bg)
@@ -2338,6 +2342,9 @@ function renderHeatmap(rows) {
     xaxis: { tickangle: -35, automargin: true, tickfont: { size: 11 } },
     yaxis: { automargin: true, autorange: 'reversed', tickvals: yLabels },  // worst severity on top
   }, PLOTLY_CONFIG);
+  const _hmN = document.getElementById('chart_heatmap');
+  _hmN.removeAllListeners && _hmN.removeAllListeners('plotly_click');
+  _hmN.on('plotly_click', e => { const full = _xFull[e.points[0].x]; if (full) crossFilter('f_gso_category', 'gso_category', full); });
 }
 
 function renderSeverityMonth(rows) {
