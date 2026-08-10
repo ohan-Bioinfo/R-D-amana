@@ -687,6 +687,11 @@ TEMPLATE = r"""<!DOCTYPE html>
 .tabpanel { animation:tabfade .2s ease both; }
 @keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 @media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
+.gso-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.gso-table th, .gso-table td { text-align:left; padding:7px 12px; border-bottom:1px solid var(--line); }
+.gso-table th { position:sticky; top:0; background:var(--bg-3); font:600 11px 'Space Grotesk',sans-serif;
+  text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+.gso-table td:nth-child(n+3) { font-family:'IBM Plex Mono',monospace; }
 * { box-sizing: border-box; }
 html, body { background: var(--sand-50); color: var(--ink-900); margin: 0;
   font-family: 'IBM Plex Sans Arabic', 'Tajawal', 'Tahoma', system-ui, sans-serif;
@@ -1139,6 +1144,12 @@ tbody tr:hover { background: var(--sand-100); }
     <h2>GSO 1016 panel completeness &amp; lab-vs-standard disagreements</h2>
     <div class="card-sub">Panel metrics rely on the GSO 1016 reference mapping and per-test records, which only exist for 2024. <b>2025 samples get GSO codes by sample-name matching</b> (learned from 2024 + curated overrides; flagged <code>gso_code_assigned_by_name</code>) — but the 2025 source records verdicts, not the tests run, so panel completeness and limit cross-checks stay <b>2024-only</b> until the lab provides 2025 test-level data. Incomplete panels are split into <b>systematic</b> gaps (the lab skips that test for ≥90% of samples under the same GSO code — a standing practice gap) and <b>sporadic</b> gaps (the test is normally run but was missing for that sample). Test-name spelling aliases between the reference and the lab sheets are normalised before counting (see CHANGELOG 2026-08-08). Results written with a comparison prefix (<code>&gt;10</code> / <code>&lt;10</code>) are treated as below the reporting limit — satisfactory / pass — per the lab's confirmed convention (MR, 2026-08-09). A name-rule layer (<b>2025 only</b>) re-codes 2025 samples whose name unambiguously implies a GSO category: cooked/prepared items (سلطة مطبوخة, etc.) → Ready-to-Eat/Prepared (P), and صوص (sauce) items → Sauces/Condiments (G). <b>2024 keeps the lab's native codes</b> so the panel audit above judges each sample against the code it was actually tested under; see the re-coded count below.</div>
     <div id="gso_audit" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:14px; margin-top:10px"></div>
+  </div>
+
+  <div class="card full">
+    <h2>GSO 1016 categories — sortable table</h2>
+    <div class="card-sub">Click a column header to sort. Represents the numbers; makes no scope judgment.</div>
+    <div id="gso_info_table" style="overflow-x:auto"></div>
   </div>
 
   <div class="card full">
@@ -2951,6 +2962,40 @@ function renderGsoAudit(rows) {
   ].join('');
 }
 
+function renderGsoInfoTable(rows) {
+  const agg = {};  // category -> {code, n, nc}
+  rows.forEach(r => {
+    const cat = r[COLS.gso_category] || '—';
+    const a = agg[cat] || (agg[cat] = { code: r[COLS.gso_code] || '', n: 0, nc: 0 });
+    a.n++; if (r[COLS.failure] === 1) a.nc++;
+  });
+  const data = Object.entries(agg).map(([cat, a]) =>
+    ({ cat, code: a.code, n: a.n, nc: a.nc, rate: a.n ? 100 * a.nc / a.n : 0 }))
+    .sort((x, y) => y.n - x.n);
+  const cols = [['cat','Category'],['code','Code'],['n','Samples'],['nc','Non-compliant'],['rate','NC %']];
+  const th = cols.map(([k, l]) => `<th data-k="${k}" style="cursor:pointer">${l} <span class="sort-ar"></span></th>`).join('');
+  const body = data.map(d =>
+    `<tr><td>${d.cat}</td><td>${d.code}</td><td>${d.n.toLocaleString()}</td>` +
+    `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
+  const el = document.getElementById('gso_info_table');
+  el.innerHTML = `<table class="gso-table"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table>`;
+  el.__data = data; el.__cols = cols; el.__dir = {};
+  el.querySelectorAll('th').forEach(h => h.addEventListener('click', () => sortGsoTable(h.dataset.k)));
+}
+function sortGsoTable(k) {
+  const el = document.getElementById('gso_info_table');
+  const dir = el.__dir[k] = -(el.__dir[k] || 1);
+  const num = k !== 'cat' && k !== 'code';
+  const sorted = [...el.__data].sort((a, b) => num ? dir * (a[k] - b[k]) : dir * String(a[k]).localeCompare(String(b[k])));
+  el.__data = sorted;
+  const body = sorted.map(d =>
+    `<tr><td>${d.cat}</td><td>${d.code}</td><td>${d.n.toLocaleString()}</td>` +
+    `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
+  el.querySelector('tbody').innerHTML = body;
+  el.querySelectorAll('th').forEach(h => h.querySelector('.sort-ar').textContent =
+    h.dataset.k === k ? (dir < 0 ? '▾' : '▴') : '');
+}
+
 function renderDataQualitySummary(rows) {
   const fmt = v => v.toLocaleString();
   const card = (label, value, sub) => `
@@ -3082,6 +3127,7 @@ function renderAll(rows) {
   renderKpis(rows);
   renderDataQualitySummary(rows);
   renderGsoAudit(rows);
+  renderGsoInfoTable(rows);
   renderMap(rows);
   renderTrend(rows);
   renderYoY(rows);
