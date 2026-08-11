@@ -421,6 +421,16 @@ TEMPLATE = r"""<!DOCTYPE html>
 .tabpanel { animation:tabfade .2s ease both; }
 @keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 @media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
+/* GSO-only focus view (opened from the lab hub's "GSO & Quality" tile):
+   strip the multi-tab dashboard chrome + filters and show just the
+   categorisation (guideline + sortable GSO table + drilldown). Filtering
+   stays available via the full Dashboard tile. */
+body.focus-gso #tabnav,
+body.focus-gso #global-banner,
+body.focus-gso #test-banner,
+body.focus-gso #section-desc,
+body.focus-gso .control-row { display:none !important; }
+body.focus-gso .tabpanel:not([data-tab="gso"]) { display:none !important; }
 .gso-table { width:100%; border-collapse:collapse; font-size:12.5px; }
 .gso-table th, .gso-table td { text-align:left; padding:7px 12px; border-bottom:1px solid var(--sand-200); }
 .gso-table th { position:sticky; top:0; background:var(--sand-100); font:600 11px system-ui,sans-serif;
@@ -2000,8 +2010,14 @@ try {
   });
 
   renderAll();
-  const _m = (location.hash || '').match(/tab=([a-z]+)/);
+  const _hash = location.hash || '';
+  const _m = _hash.match(/tab=([a-z]+)/);
   if (_m && document.querySelector('.tabpanel[data-tab="' + _m[1] + '"]')) window.__activeTab = _m[1];
+  // GSO-only focus view: hide the multi-tab chrome, show just the categorisation.
+  if (/[#&]focus\b/.test(_hash)) {
+    document.body.classList.add('focus-gso');
+    window.__activeTab = 'gso';
+  }
   showTab(window.__activeTab || 'overview');
 } catch (err) {
   console.error('Dashboard init failed:', err);

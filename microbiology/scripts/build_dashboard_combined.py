@@ -694,6 +694,16 @@ TEMPLATE = r"""<!DOCTYPE html>
 .tabpanel { animation:tabfade .2s ease both; }
 @keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 @media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
+/* GSO-only focus view (opened from the lab hub's "GSO & Quality" tile):
+   strip the multi-tab dashboard chrome + filters and show just the GSO &
+   Quality content. Filtering stays available via the full Dashboard tile. */
+body.focus-gso #tabnav,
+body.focus-gso #kpis,
+body.focus-gso #slice-banner,
+body.focus-gso #year_bar,
+body.focus-gso #bookmark_bar,
+body.focus-gso .filter-section { display:none !important; }
+body.focus-gso .tabpanel:not([data-tab="gso"]) { display:none !important; }
 .gso-table { width:100%; border-collapse:collapse; font-size:12.5px; }
 .gso-table th, .gso-table td { text-align:left; padding:7px 12px; border-bottom:1px solid var(--line); }
 .gso-table th { position:sticky; top:0; background:var(--bg-3); font:600 11px 'Space Grotesk',sans-serif;
@@ -1393,6 +1403,11 @@ function deserializeState(hash) {
   syncAllChips();
   const _tab = params.get('tab');
   if (_tab && document.querySelector('.tabpanel[data-tab="' + _tab + '"]')) showTab(_tab);
+  // GSO-only focus view: hide the multi-tab chrome, show just GSO & Quality.
+  if (params.get('focus')) {
+    document.body.classList.add('focus-gso');
+    showTab('gso');
+  }
 }
 
 document.getElementById('f_date_from').value = FACETS.date_min;

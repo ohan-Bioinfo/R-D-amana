@@ -406,7 +406,7 @@ LABS = [
         desc="Pathogen &amp; indicator screening across Riyadh's sectors — compliance, "
              "severity, and the organism behind each failure.",
         dash="reports/microbiology_dashboard.html",
-        gso="reports/microbiology_dashboard.html#tab=gso",
+        gso="reports/microbiology_dashboard.html#tab=gso&focus=1",
         report="../Gemini-reports/Microbiology_Comprehensive_Report.html",
         viz=[
             ("◎", "Sunburst", "reports/microbiology_sunburst.html", "Plotly · zoomable culture plate"),
@@ -425,7 +425,7 @@ LABS = [
         desc="Heavy metals, pesticides, aflatoxins, water &amp; more — limit exceedances "
              "and the analyte that failed each assay.",
         dash="reports/chemistry_dashboard.html",
-        gso="reports/chemistry_dashboard.html#tab=gso",
+        gso="reports/chemistry_dashboard.html#tab=gso&focus=1",
         report="../Gemini-reports/Chemistry_Comprehensive_Report.html",
         viz=[
             ("◎", "Sunburst", "reports/chemistry_sunburst.html", "Plotly · zoomable assay plate"),

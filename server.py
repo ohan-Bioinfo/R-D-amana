@@ -23,10 +23,47 @@ TOKEN = "ok"  # demo gate — the credential (demo/demo) is the only secret
 ALLOW_PREFIX = ("microbiology/reports/", "chemistry/reports/",
                 "Gemini-reports/",
                 "microbiology/index.html", "chemistry/index.html")
+# Deliverable HTML (dashboards, sunbursts, reports) has no built-in nav — the
+# server injects a floating Hub/Sign-out control so viewers are never stranded.
+# The lab hub + lab index pages have their own nav, so they are excluded.
+DELIVERABLE_PREFIX = ("microbiology/reports/", "chemistry/reports/", "Gemini-reports/")
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css",
         ".js": "application/javascript", ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg", ".png": "image/png", ".svg": "image/svg+xml",
         ".json": "application/json", ".ico": "image/x-icon"}
+
+# Self-contained floating nav injected before </body> on deliverable pages.
+# Absolute links (/ and /logout) resolve from any folder depth when served.
+NAV_HTML = """
+<style>
+#rnd-nav{position:fixed;top:10px;right:10px;z-index:2147483647;display:flex;gap:6px;
+  font-family:'Space Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif}
+#rnd-nav a{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+  font-size:12.5px;font-weight:600;letter-spacing:.2px;text-decoration:none;color:#fff;
+  background:rgba(0,77,51,.92);border:1px solid rgba(255,255,255,.24);
+  box-shadow:0 4px 14px -4px rgba(0,50,34,.55);-webkit-backdrop-filter:blur(4px);
+  backdrop-filter:blur(4px);opacity:.85;transition:background .15s,opacity .15s,transform .12s}
+#rnd-nav a:hover,#rnd-nav a:focus-visible{opacity:1;transform:translateY(-1px);outline:none}
+#rnd-nav a:focus-visible{box-shadow:0 0 0 3px rgba(255,255,255,.6)}
+#rnd-nav a.hub:hover,#rnd-nav a.hub:focus-visible{background:#004d33}
+#rnd-nav a.out{background:rgba(122,38,22,.92)}
+#rnd-nav a.out:hover,#rnd-nav a.out:focus-visible{background:#7a2616}
+@media print{#rnd-nav{display:none}}
+@media(max-width:520px){#rnd-nav{top:8px;right:8px}#rnd-nav a{padding:6px 10px;font-size:11.5px}}
+@media(prefers-reduced-motion:reduce){#rnd-nav a{transition:none}}
+</style>
+<nav id="rnd-nav" aria-label="R&amp;D navigation">
+  <a class="hub" href="/" title="Back to the R&amp;D hub">⌂ Hub</a>
+  <a class="out" href="/logout" title="Sign out">Sign out</a>
+</nav>
+"""
+NAV_BYTES = NAV_HTML.encode("utf-8")
+
+
+def _inject_nav(data: bytes) -> bytes:
+    """Splice the floating nav in before the last </body> (bytes-level, no full decode)."""
+    i = data.rfind(b"</body>")
+    return data + NAV_BYTES if i == -1 else data[:i] + NAV_BYTES + data[i:]
 
 
 def _b64(rel: str) -> str:
@@ -84,7 +121,10 @@ class Handler(BaseHTTPRequestHandler):
         if ROOT not in target.parents or not target.is_file():
             return self._send(404, b"Not found", "text/plain")
         ctype = MIME.get(target.suffix.lower(), "application/octet-stream")
-        return self._send(200, target.read_bytes(), ctype)
+        data = target.read_bytes()
+        if ctype.startswith("text/html") and rel.startswith(DELIVERABLE_PREFIX):
+            data = _inject_nav(data)
+        return self._send(200, data, ctype)
 
     do_HEAD = do_GET
 
