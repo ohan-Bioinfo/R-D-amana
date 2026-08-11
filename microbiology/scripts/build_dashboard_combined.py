@@ -370,7 +370,11 @@ def build_data(df: pd.DataFrame) -> dict:
     from collections import Counter as _GapCounter
     gap_kind_by_key: dict = {}
     if "gso_tests_missing" in df.columns and "gso_code_canonical" in df.columns:
-        _coded = df["gso_code_canonical"].notna()
+        # 2024-only: panel/test data exists solely for 2024. 2025 rule-assigned
+        # codes carry no test records, so counting them in the per-code totals
+        # dilutes the >=90% skip-rate and wrongly flips systematic gaps to
+        # sporadic (regression found 2026-08-11: 14/4112 instead of ~1758/2368).
+        _coded = df["gso_code_canonical"].notna() & (df["year"] == 2024)
         _code_tot = df.loc[_coded, "gso_code_canonical"].value_counts()
         _pair = _GapCounter()
         for _c, _m in zip(df.loc[_coded, "gso_code_canonical"],
@@ -2931,7 +2935,9 @@ function renderGsoAudit(rows) {
   const pctSystematic = totalPanel ? (100 * systematic / totalPanel).toFixed(1) : 0;
   const pctSporadic = totalPanel ? (100 * sporadic / totalPanel).toFixed(1) : 0;
 
-  const rows24audit = rows.filter(r => r[COLS.year] === 2024 && r[COLS.lab_disagree] !== null);
+  // Audited = 2024 rows that actually carry a GSO code. Uncoded rows have
+  // lab_disagree=0 by default and must not inflate the "agrees" count.
+  const rows24audit = rows.filter(r => r[COLS.year] === 2024 && r[COLS.gso_code] && r[COLS.lab_disagree] !== null);
   const disagree = rows24audit.filter(r => r[COLS.lab_disagree] === 1).length;
   const agree = rows24audit.length - disagree;
   const pctDisagree = rows24audit.length ? (100 * disagree / rows24audit.length).toFixed(1) : 0;
@@ -2954,8 +2960,13 @@ function renderGsoAudit(rows) {
       ${sub ? '<div class="kpi-sub">' + sub + '</div>' : ''}
     </div>`;
 
+  // Coded 2024 rows vs panel-evaluated rows: 68 coded samples have no test
+  // records in the long file, so the panel can't be judged for them — say so.
+  const coded24 = rows.filter(r => r[COLS.year] === 2024 && r[COLS.gso_code]).length;
+
   document.getElementById('gso_audit').innerHTML = [
-    card('2024 samples with GSO code', fmt(totalPanel), null),
+    card('2024 samples with GSO code', fmt(coded24),
+         coded24 !== totalPanel ? `panel evaluated for ${fmt(totalPanel)} · no test records for ${fmt(coded24 - totalPanel)}` : null),
     card('2025 samples with GSO code', fmt(coded25), `${pctCoded25}% of 2025 · assigned by sample-name match`),
     card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples (2024)`),
     card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples (2024)`),

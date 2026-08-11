@@ -880,3 +880,35 @@ facility-name collisions, no 2025 `other` bucket. Findings written to
 ### Files touched
 - `microbiology/reports/microbiology_sunburst.html`, `microbiology_sunburst2.html` (regenerated)
 - `kimi/yolo/2025_gso_tier1b_spelling_variants.md` (new report)
+
+---
+
+## 2026-08-11 — Dashboard audit after tabbed redesign: GSO-tab accuracy fixes
+
+Audited `microbiology_dashboard.html` after the Claude tabbed redesign +
+GSO rule reclassification (commits through 9188995). JS valid, markup
+balanced, filters/tabs/hash-sync/drill-downs all sound; payload matches the
+parquets (20,881 = 9,317 + 11,564; unknown validity 83; NC 28.1%;
+2025 coded now 6,139 = 53.1% after the rule layer; rule tests green).
+Three accuracy bugs found and fixed in `build_dashboard_combined.py`:
+
+1. **Systematic/sporadic panel-gap split was broken** (regression). The
+   ≥90% skip-rate denominators counted 2025 rule-coded rows, which have no
+   test records — flipping nearly all systematic gaps to sporadic
+   (14 / 4,112 shown). Restricted the computation to 2024 rows →
+   **systematic 1,758 · sporadic 2,368** (of 4,126 incomplete panels).
+2. **"Lab vs GSO agrees" counted uncoded samples.** The audit set was all
+   9,317 2024 rows; uncoded rows default to agree. Now restricted to coded
+   rows → **agree 7,896 · disagree 54** of 7,950 audited.
+3. **"2024 samples with GSO code" card showed 7,882** (panel-evaluated rows)
+   instead of the true coded count. Now shows **7,950** with a sub-note:
+   "panel evaluated for 7,882 · no test records for 68".
+
+Not a bug (verified consistent): dashboard KPIs and both sunbursts all use
+`is_failure` (NC 5,852), which counts the 8 flagged
+`validity_says_valid_but_has_failures` 2025 rows as non-compliant;
+`is_valid` (5,845) is the source-verdict column. Both round to NC 28.1%.
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated, JS `node --check` OK)
