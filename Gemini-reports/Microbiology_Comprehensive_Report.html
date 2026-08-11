@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أمانة منطقة الرياض · Microbiology Pipeline — Statistics, Challenges & Enhancement Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   Najdi Heritage Report Theme
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --green-900:#0a3d24; --green-700:#0e5c36; --green-500:#22853f; --green-100:#dcefe1;
+  --gold-700:#9a7b2a;  --gold-500:#c8a85a;  --gold-200:#f0e3bf;
+  --clay-700:#7a2616;  --clay-500:#a8331a;  --clay-100:#f7d9d0;
+  --sand-50:#faf6ee;   --sand-100:#f4ecde;  --sand-200:#e8dcc4;  --sand-300:#d4c5a4;
+  --ink-900:#1a1f2c;   --ink-700:#3d4256;   --ink-500:#6c6f7e;
+  --bg: var(--sand-50); --fg: var(--ink-900); --muted: var(--ink-500); --line: var(--sand-200);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(14,92,54,0.06), transparent 60%);
+  color: var(--fg);
+  font-family: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  font-size: 14px; line-height: 1.65;
+  padding-bottom: 80px;
+}
+
+/* ─── Masthead ────────────────────────────────────────────────── */
+.masthead {
+  background: linear-gradient(180deg, var(--green-900) 0%, var(--green-700) 100%);
+  color: #faf6ee; border-bottom: 4px solid var(--gold-500);
+  padding: 32px 40px 28px; position: relative; overflow: hidden;
+}
+.masthead::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' opacity='0.05'><path d='M0 20 Q15 0 30 20 T60 20 T90 20 T120 20' stroke='%23f0e3bf' stroke-width='1.5' fill='none'/></svg>") repeat-x bottom/120px 40px;
+}
+.masthead-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.masthead h1 {
+  font-family: 'Tajawal', sans-serif; font-weight: 900; font-size: 28px;
+  letter-spacing: 0.5px; margin-bottom: 6px;
+}
+.masthead .subtitle {
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px;
+  color: var(--gold-500); margin-bottom: 10px;
+}
+.masthead .meta {
+  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold-200);
+  letter-spacing: 1px; opacity: 0.85;
+}
+
+/* ─── Page body ───────────────────────────────────────────────── */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+
+/* ─── Table of Contents ──────────────────────────────────────── */
+.toc {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 14px;
+  padding: 22px 28px; margin: 28px 0; box-shadow: 0 2px 12px -4px rgba(10,61,36,0.08);
+}
+.toc h3 { font-family: 'Tajawal'; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--gold-700); margin-bottom: 12px; }
+.toc ol { padding-left: 22px; }
+.toc li { margin-bottom: 4px; }
+.toc a { color: var(--green-700); text-decoration: none; font-weight: 500; font-size: 13.5px; }
+.toc a:hover { text-decoration: underline; }
+
+/* ─── Section Headings ───────────────────────────────────────── */
+h2 {
+  font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 700;
+  color: var(--green-900); margin: 38px 0 6px; padding-bottom: 8px;
+  border-bottom: 2px solid var(--gold-500); display: flex; align-items: center; gap: 10px;
+}
+h2::before { content: "۞"; color: var(--gold-500); font-size: 16px; }
+h3 {
+  font-family: 'Tajawal'; font-size: 15px; font-weight: 700; color: var(--green-700);
+  margin: 22px 0 8px; letter-spacing: 0.3px;
+}
+.section-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  margin-left: 10px; vertical-align: middle;
+}
+.badge-red { background: var(--clay-100); color: var(--clay-700); }
+.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-green { background: var(--green-100); color: var(--green-900); }
+.badge-blue { background: #e0f2fe; color: #0c4a6e; }
+
+/* ─── KPI Grid ───────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px; margin: 18px 0 24px;
+}
+.kpi {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px 18px; box-shadow: 0 1px 4px rgba(10,61,36,0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(10,61,36,0.1); }
+.kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.kpi .value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 700;
+  color: var(--green-900); line-height: 1.1; }
+.kpi .sub { font-size: 11.5px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
+.kpi.accent-red .value { color: var(--clay-500); }
+.kpi.accent-gold .value { color: var(--gold-700); }
+.kpi.accent-green .value { color: var(--green-500); }
+
+/* ─── Tables ─────────────────────────────────────────────────── */
+.data-table { width: 100%; border-collapse: collapse; margin: 14px 0 20px;
+  font-size: 13px; background: #fffdf8; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 6px rgba(10,61,36,0.06); }
+.data-table th {
+  background: var(--green-900); color: var(--gold-200); text-align: left;
+  padding: 10px 14px; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1px; font-weight: 600; font-family: 'DM Mono', monospace;
+}
+.data-table td { padding: 9px 14px; border-bottom: 1px solid var(--sand-200); vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--sand-100); }
+.data-table .num { font-family: 'DM Mono', monospace; font-weight: 500; text-align: right; }
+.data-table .bold { font-weight: 700; }
+.data-table .indent { padding-left: 30px; color: var(--ink-500); font-size: 12.5px; }
+
+/* ─── Priority Cards ─────────────────────────────────────────── */
+.priority-card {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 12px;
+  padding: 18px 22px; margin: 12px 0;
+  border-left: 4px solid var(--gold-500);
+  box-shadow: 0 1px 6px rgba(10,61,36,0.05);
+}
+.priority-card.p-red { border-left-color: var(--clay-500); }
+.priority-card.p-yellow { border-left-color: #f59e0b; }
+.priority-card.p-green { border-left-color: var(--green-500); }
+.priority-card.p-blue { border-left-color: #3b82f6; }
+.priority-card .pid { font-family: 'DM Mono'; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-right: 8px; }
+.priority-card.p-red .pid { background: var(--clay-100); color: var(--clay-700); }
+.priority-card.p-yellow .pid { background: #fef3c7; color: #92400e; }
+.priority-card.p-green .pid { background: var(--green-100); color: var(--green-900); }
+.priority-card.p-blue .pid { background: #e0f2fe; color: #0c4a6e; }
+.priority-card h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
+  color: var(--ink-900); margin-bottom: 6px; display: flex; align-items: center; }
+.priority-card p { font-size: 13px; color: var(--ink-700); line-height: 1.55; }
+.priority-card .tag { display: inline-block; padding: 1px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; background: var(--sand-200); color: var(--ink-700);
+  margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ─── Inventory Grid ─────────────────────────────────────────── */
+.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px; margin: 16px 0 24px; }
+.inv-card {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; transition: transform 0.12s;
+}
+.inv-card:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(10,61,36,0.08); }
+.inv-card .icon { font-size: 22px; margin-bottom: 6px; }
+.inv-card .name { font-family: 'Tajawal'; font-weight: 700; font-size: 13.5px;
+  color: var(--green-900); }
+.inv-card .desc { font-size: 12px; color: var(--ink-500); margin-top: 3px; }
+
+/* ─── Phase Timeline ─────────────────────────────────────────── */
+.timeline { position: relative; padding-left: 28px; margin: 18px 0 30px; }
+.timeline::before { content: ""; position: absolute; left: 10px; top: 4px; bottom: 4px;
+  width: 2px; background: linear-gradient(180deg, var(--green-500), var(--gold-500), var(--clay-500)); }
+.timeline-item { position: relative; margin-bottom: 18px; }
+.timeline-item::before { content: ""; position: absolute; left: -22px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--green-500);
+  background: #fffdf8; }
+.timeline-item.t2::before { border-color: var(--gold-500); }
+.timeline-item.t3::before { border-color: #f59e0b; }
+.timeline-item.t4::before { border-color: var(--clay-500); }
+.timeline-item h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
+  color: var(--green-900); }
+.timeline-item ul { margin-top: 4px; padding-left: 18px; font-size: 13px; color: var(--ink-700); }
+.timeline-item li { margin-bottom: 2px; }
+.timeline-item .effort { font-family: 'DM Mono'; font-size: 10.5px; color: var(--muted);
+  margin-left: 6px; }
+
+/* ─── Blockquotes ────────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--gold-500); background: var(--sand-100);
+  padding: 12px 18px; margin: 14px 0; border-radius: 0 8px 8px 0;
+  font-size: 13px; color: var(--ink-700);
+}
+blockquote strong { color: var(--green-900); }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 20px; font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--line); margin-top: 50px;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.kpi, .inv-card, .priority-card { animation: fadeUp 0.4s ease both; }
+.kpi:nth-child(2) { animation-delay: 0.05s; } .kpi:nth-child(3) { animation-delay: 0.1s; }
+.kpi:nth-child(4) { animation-delay: 0.15s; } .kpi:nth-child(5) { animation-delay: 0.2s; }
+.kpi:nth-child(6) { animation-delay: 0.25s; } .kpi:nth-child(7) { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- MASTHEAD                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<header class="masthead">
+  <div class="masthead-inner">
+    <h1>🔬 Microbiology Pipeline — Comprehensive Report</h1>
+    <div class="subtitle">Statistics · GSO Challenges · Numerical Ledger · Dashboard Enhancement Proposal</div>
+    <div class="meta">REPORT DATE: 2026-08-11 · SCOPE: 2024–2025 · TOTAL SAMPLES: 20,881 · أمانة منطقة الرياض</div>
+  </div>
+</header>
+
+<div class="page">
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TABLE OF CONTENTS                                              -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<nav class="toc">
+  <h3>۞ Contents</h3>
+  <ol>
+    <li><a href="#s1">Headline Numbers — At a Glance</a></li>
+    <li><a href="#s2">Pipeline Stages</a></li>
+    <li><a href="#s3">GSO Classification Challenges</a></li>
+    <li><a href="#s4">Data Quality & Statistical Challenges</a></li>
+    <li><a href="#s5">Numerical Ledger — All Counts</a></li>
+    <li><a href="#s6">Current Dashboard Inventory</a></li>
+    <li><a href="#s7">Enhancement Opportunities</a></li>
+    <li><a href="#s8">Implementation Roadmap</a></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — HEADLINE KPIs                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s1">Headline Numbers — At a Glance</h2>
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Total Samples</div><div class="value">20,881</div><div class="sub">2024 + 2025 combined</div></div>
+  <div class="kpi"><div class="label">2024 Samples</div><div class="value">9,317</div><div class="sub">Native GSO codes from lab</div></div>
+  <div class="kpi"><div class="label">2025 Samples</div><div class="value">11,564</div><div class="sub">Official report: 11,404 (+160 gap)</div></div>
+  <div class="kpi accent-red"><div class="label">Non-Compliance Rate</div><div class="value">28.14%</div><div class="sub">Known-validity denominator only</div></div>
+  <div class="kpi accent-gold"><div class="label">Unknown Validity</div><div class="value">83</div><div class="sub">2024 samples missing pass/fail</div></div>
+  <div class="kpi accent-red"><div class="label">Lab vs GSO Disagreements</div><div class="value">54</div><div class="sub">48 pass→fail · 14 fail→pass</div></div>
+  <div class="kpi accent-gold"><div class="label">Incomplete GSO Panels</div><div class="value">4,090</div><div class="sub">1,756 systematic · 2,334 sporadic</div></div>
+  <div class="kpi accent-green"><div class="label">Full Panels Run</div><div class="value">3,756</div><div class="sub">47.9% of coded 2024 samples</div></div>
+  <div class="kpi"><div class="label">Total Tests (2024)</div><div class="value">36,461</div><div class="sub">Official: 36,596 (Δ −135)</div></div>
+  <div class="kpi"><div class="label">RTL Flips Fixed</div><div class="value">14,120</div><div class="sub">>10 convention → non-detect</div></div>
+  <div class="kpi accent-red"><div class="label">Top NC Category</div><div class="value">Sauces</div><div class="sub">G-2/G-3 — 1,173 non-compliant</div></div>
+  <div class="kpi"><div class="label">Pending Group B</div><div class="value">3,751</div><div class="sub">32% of 2025 still uncoded</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — PIPELINE STAGES                                    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s2">Pipeline Stages</h2>
+<table class="data-table">
+  <thead><tr><th>#</th><th>Stage</th><th>Scripts</th><th>Key Operations</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="bold">Extraction & Cleaning</td><td><code>clean_2024.py</code>, <code>clean_2025.py</code></td><td>Ingest raw Excel, resolve ID collisions, normalize headers, parse dates</td></tr>
+    <tr><td class="num">2</td><td class="bold">Normalization</td><td><code>clean_*.py</code></td><td>Canonicalize spelling (organisms, facilities, categories), merge Arabic variants</td></tr>
+    <tr><td class="num">3</td><td class="bold">Enrichment & GSO Mapping</td><td><code>enrich_gso.py</code></td><td>Assign GSO 1016 codes via tiered fallback chain, keyword rules, name-matching</td></tr>
+    <tr><td class="num">4</td><td class="bold">Validation & Auditing</td><td><code>enrich_gso.py</code></td><td>Cross-check lab verdicts vs GSO limits, panel completeness, severity tiers</td></tr>
+    <tr><td class="num">5</td><td class="bold">Dashboarding</td><td><code>build_dashboard_combined.py</code> + 7 interactive builders</td><td>Generate self-contained Plotly/D3 HTML reports</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — GSO CHALLENGES                                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s3">GSO Classification & Categorization Challenges</h2>
+
+<h3>A. Precedence Rules & Contextual Ambiguity</h3>
+<blockquote>
+  <strong>Sauce vs. Main Dish:</strong> Distinguishing between <code>صوص برجر</code> (sauce is the product) vs <code>برجر لحم بصوص</code> (sauce is a condiment). The rule engine requires whole-token scanning with sauce-head precedence to avoid assigning cooked foods into sauce categories.
+</blockquote>
+<blockquote>
+  <strong>Substring False Positives:</strong> Arabic substring matching for <code>رز</code> (Rice) falsely matches inside <code>كرز</code> (Cherry) and <code>سنيكرز</code> (Snickers). Strict whole-token bounds prevent this.
+</blockquote>
+
+<h3>B. Swab vs. Food Samples</h3>
+<p>Environmental swabs (<code>مسحة طاولة</code>) are entered in the same columns as food samples with placeholder GSO codes. A dedicated detection layer isolates the word <code>مسحة</code> into a swab bucket. Wash-water swabs (<code>غسيل رز</code>) are pushed to the <code>N-3</code> water bucket instead.</p>
+
+<h3>C. Placeholder Codes & 2025 Extrapolation</h3>
+<p><strong>Code "H":</strong> 36 samples used a placeholder letter — mapped by product name (e.g., Cheddar → A-13). <strong>2025:</strong> No GSO column at all. Tier 1 exact-name matching against 2024 achieved ~37% initial coverage, with strict equality to prevent false friends (<code>جبنة بيتزا</code> ≠ <code>لبنه بيتزا</code>).</p>
+
+<table class="data-table">
+  <thead><tr><th>Rule / Action</th><th>Rows Affected</th></tr></thead>
+  <tbody>
+    <tr><td>Cooked/Grilled/Fried → <strong>Ready-to-Eat (P)</strong></td><td class="num bold">2,239</td></tr>
+    <tr><td>Sauces (صوص) → <strong>G-2 / G-3</strong></td><td class="num bold">2,909</td></tr>
+    <tr><td>Wash-water → <strong>N-3 Unbottled Water</strong></td><td class="num">225</td></tr>
+    <tr><td>Group A strict name matches</td><td class="num">111</td></tr>
+    <tr><td>Swabs preserved from food misclassification</td><td class="num">133</td></tr>
+    <tr><td>Placeholder 'H' code manually mapped</td><td class="num">36</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4 — DATA QUALITY CHALLENGES                            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s4">Data Quality & Statistical Challenges</h2>
+
+<h3>A. Lab Validity Conflicts</h3>
+<p>Rows marked "Valid/Pass" despite having failed pathogen tests, and rows marked "Invalid/Fail" with no failures. <strong>Resolution:</strong> Objective test list (<code>n_failed_tests > 0</code>) overrides the subjective validity column. <strong>9 conflicts</strong> resolved in 2025.</p>
+
+<h3>B. Denominator Honesty</h3>
+<p>Statistical threshold (min 20 samples) enforced before calculating percentages to prevent noise (e.g., 1/1 = "100% failure").</p>
+
+<h3>C. Date Parsing Anomalies</h3>
+<p>Raw sheets contained dates recorded as 2026, 2027, 2028 — coerced back to 2025 via date logic.</p>
+
+<h3>D. Test-Name Alias Normalization</h3>
+<p><code>لستيريا</code>, <code>L.monocytogenes</code>, <code>الليستيريا</code> → single canonical form. <code>CAMPYLOPACTER</code> vs <code>كامبيلوباكتر</code> merged. 7 alias mappings applied.</p>
+
+<h3>E. RTL Numeric Flipping (<code>>10</code> Convention)</h3>
+<p><strong>14,120 rows</strong> in 2024 carried a <code>>10</code> prefix — confirmed as an RTL data-entry flip for <code><10</code> (below reporting limit = pass). Without this fix, thousands of compliant samples would have been falsely flagged as failures.</p>
+
+<h3>F. Panel Completeness — Systematic vs. Sporadic</h3>
+<table class="data-table">
+  <thead><tr><th>Gap Type</th><th>Definition</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">Systematic</td><td>Lab skips the test for ≥90% of samples under the same GSO code</td><td class="num">1,756</td></tr>
+    <tr><td class="bold">Sporadic</td><td>Test normally run but was missed for that specific sample</td><td class="num">2,334</td></tr>
+    <tr><td class="bold">Total Incomplete</td><td></td><td class="num bold">4,090</td></tr>
+    <tr><td class="bold" style="color:var(--green-500)">Full Panel Complete</td><td>All required GSO tests run</td><td class="num bold">3,756</td></tr>
+  </tbody>
+</table>
+
+<h3>G. Severity Tiers</h3>
+<table class="data-table">
+  <thead><tr><th>Tier</th><th>Criteria</th></tr></thead>
+  <tbody>
+    <tr><td class="bold" style="color:var(--clay-700)">Multi-pathogen</td><td>≥2 distinct pathogen failures</td></tr>
+    <tr><td class="bold" style="color:var(--clay-500)">Pathogen</td><td>Exactly 1 pathogen failure</td></tr>
+    <tr><td class="bold" style="color:var(--gold-700)">Indicator Only</td><td>≥1 failure, all hygiene indicators (Coliforms, Yeasts)</td></tr>
+  </tbody>
+</table>
+<p><em>Note:</em> Pseudomonas was manually elevated to Pathogen tier due to drinking water implications.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5 — NUMERICAL LEDGER                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s5">Numerical Ledger — All Counts</h2>
+
+<h3>5.1 Master Dataset</h3>
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">Total Processed Samples</td><td class="num bold">20,881</td></tr>
+    <tr><td>2024 Samples</td><td class="num">9,317</td></tr>
+    <tr><td>2025 Samples</td><td class="num">11,564</td></tr>
+    <tr><td>2024 Long Format Rows (Pre-Pivot)</td><td class="num">36,461</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Official vs. Pipeline Discrepancies</h3>
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td>2025 Official Annual Report</td><td class="num">11,404</td></tr>
+    <tr><td class="bold">2025 Pipeline Total</td><td class="num bold">11,564</td></tr>
+    <tr><td class="bold" style="color:var(--clay-500)">Discrepancy</td><td class="num bold" style="color:var(--clay-500)">+160</td></tr>
+    <tr><td class="indent">Sector (قطاع) samples</td><td class="num">505</td></tr>
+    <tr><td class="indent">Private (خاص) samples</td><td class="num">67</td></tr>
+    <tr><td class="indent">ID Collisions Rescued</td><td class="num">22</td></tr>
+  </tbody>
+</table>
+
+<h3>5.3 Compliance & Severities</h3>
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold" style="color:var(--clay-500)">Overall NC Rate (Known Validity)</td><td class="num bold" style="color:var(--clay-500)">28.14%</td></tr>
+    <tr><td>2024 Compliant (Passed)</td><td class="num">6,420</td></tr>
+    <tr><td>2024 Non-Compliant (Failed)</td><td class="num">2,814</td></tr>
+    <tr><td>Unknown Validity</td><td class="num">83</td></tr>
+    <tr><td>Top Contaminated Category (Sauces G-2/G-3)</td><td class="num">1,173</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 GSO 1016 Coverage</h3>
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td>2024 Samples with Native GSO Codes</td><td class="num">7,919</td></tr>
+    <tr><td>2025 Programmatically Mapped</td><td class="num">6,152</td></tr>
+    <tr><td class="bold">2025 Pending Manual Review (Group B)</td><td class="num bold">3,751</td></tr>
+    <tr><td>2024 Environmental Swabs</td><td class="num">1,398</td></tr>
+    <tr><td>2025 Environmental Swabs</td><td class="num">1,674</td></tr>
+    <tr><td>2025 "Other" Bucket (reduced from 23)</td><td class="num" style="color:var(--green-500)">0</td></tr>
+    <tr><td>2025 Missing English Categories (from 383)</td><td class="num">129</td></tr>
+  </tbody>
+</table>
+
+<h3>5.5 GSO Audits & Disagreements (2024 Only)</h3>
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">Full Panel Complete</td><td class="num bold">3,756</td></tr>
+    <tr><td class="bold">Incomplete Panels</td><td class="num bold">4,090</td></tr>
+    <tr><td class="indent">Systematic Gaps</td><td class="num">1,756</td></tr>
+    <tr><td class="indent">Sporadic Gaps</td><td class="num">2,334</td></tr>
+    <tr><td class="bold">Lab vs GSO Disagreements</td><td class="num bold">54</td></tr>
+    <tr><td class="indent">Lab Pass → should Fail</td><td class="num">48</td></tr>
+    <tr><td class="indent">Lab Fail → should Pass</td><td class="num">14</td></tr>
+  </tbody>
+</table>
+
+<h3>5.6 Data Quality Fixes</h3>
+<table class="data-table">
+  <thead><tr><th>Fix</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td><code>>10</code> RTL logic flips</td><td class="num">14,120</td></tr>
+    <tr><td>ISO Method Swabs (outside GSO scope)</td><td class="num">1,328</td></tr>
+    <tr><td>Subway (<code>صب واي</code>) spelling merges</td><td class="num">68</td></tr>
+    <tr><td><em>C. botulinum</em> typos fixed</td><td class="num">22</td></tr>
+    <tr><td>Validity logic conflicts resolved</td><td class="num">9</td></tr>
+  </tbody>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6 — DASHBOARD INVENTORY                                -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s6">Current Dashboard Inventory</h2>
+
+<h3>Main Dashboard — 5 Tabs, 19 Charts, 12 KPI Cards</h3>
+<div class="inv-grid">
+  <div class="inv-card"><div class="icon">🗺️</div><div class="name">Riyadh Bubble Map</div><div class="desc">Sector centroids · 3 metrics · 3 tile styles</div></div>
+  <div class="inv-card"><div class="icon">📈</div><div class="name">Monthly Trend Combo</div><div class="desc">Stacked bars + multi-line per-microbe rates</div></div>
+  <div class="inv-card"><div class="icon">🦠</div><div class="name">Top 10 Microbes Bar</div><div class="desc">With official Annual Report reference overlay</div></div>
+  <div class="inv-card"><div class="icon">📊</div><div class="name">Sector Stacked Bar + Line</div><div class="desc">5-sector volume & NC rate</div></div>
+  <div class="inv-card"><div class="icon">🔥</div><div class="name">Severity × GSO Heatmap</div><div class="desc">Matrix of severity tiers vs food categories</div></div>
+  <div class="inv-card"><div class="icon">🔁</div><div class="name">Repeat-Offender Chains</div><div class="desc">90-day streak ranking</div></div>
+  <div class="inv-card"><div class="icon">🍱</div><div class="name">GSO Categories Bar</div><div class="desc">Top 15 categories stacked by year</div></div>
+  <div class="inv-card"><div class="icon">📦</div><div class="name">Sample-Type Distribution</div><div class="desc">Grouped bar by year</div></div>
+  <div class="inv-card"><div class="icon">⚠️</div><div class="name">Top 10 Subtypes</div><div class="desc">Most-contaminated Arabic product names</div></div>
+  <div class="inv-card"><div class="icon">🏪</div><div class="name">Top 15 Chains</div><div class="desc">NC volume split Indicator vs Pathogen</div></div>
+  <div class="inv-card"><div class="icon">🧬</div><div class="name">Test Failures + 3-Panel Drilldown</div><div class="desc">Click organism → year/facility/category breakdown</div></div>
+  <div class="inv-card"><div class="icon">📅</div><div class="name">Severity by Month</div><div class="desc">Stacked bar of severity tiers per month</div></div>
+  <div class="inv-card"><div class="icon">📋</div><div class="name">GSO Audit Grid (9 cards)</div><div class="desc">Panel completeness, gaps, disagreements</div></div>
+  <div class="inv-card"><div class="icon">📑</div><div class="name">GSO Sortable Table</div><div class="desc">Click-to-sort reference table</div></div>
+  <div class="inv-card"><div class="icon">🏷️</div><div class="name">Data Quality Grid (10 cards)</div><div class="desc">Flags, collisions, merges, unknowns</div></div>
+  <div class="inv-card"><div class="icon">📊</div><div class="name">Year-on-Year Comparison</div><div class="desc">Grouped bar by severity tier</div></div>
+  <div class="inv-card"><div class="icon">📆</div><div class="name">Day-of-Week Cadence</div><div class="desc">Volume & NC rate by weekday</div></div>
+  <div class="inv-card"><div class="icon">📄</div><div class="name">Official Test Table</div><div class="desc">2025 Annual Report organism breakdown</div></div>
+  <div class="inv-card"><div class="icon">🔖</div><div class="name">12 Headline KPI Cards</div><div class="desc">Total, compliance, severity, rankings</div></div>
+</div>
+
+<h3>Standalone Interactives (7 reports)</h3>
+<div class="inv-grid">
+  <div class="inv-card"><div class="icon">🌞</div><div class="name">Sunburst (Plotly)</div><div class="desc">Zoomable culture-plate hierarchy</div></div>
+  <div class="inv-card"><div class="icon">🌀</div><div class="name">Sunburst 2 (D3)</div><div class="desc">D3 radial hierarchy chart</div></div>
+  <div class="inv-card"><div class="icon">🔀</div><div class="name">Sankey Flow</div><div class="desc">Sector → Food → Organism → Severity</div></div>
+  <div class="inv-card"><div class="icon">🟦</div><div class="name">Treemap</div><div class="desc">Hierarchy volume & contamination</div></div>
+  <div class="inv-card"><div class="icon">🔥</div><div class="name">Heatmap Matrix</div><div class="desc">Sector × Pathogen positive rate</div></div>
+  <div class="inv-card"><div class="icon">🔗</div><div class="name">Network Graph</div><div class="desc">Food ↔ Microbe bipartite connections</div></div>
+  <div class="inv-card"><div class="icon">🌊</div><div class="name">Streamgraph</div><div class="desc">Organism prevalence over time</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7 — ENHANCEMENT OPPORTUNITIES                          -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s7">Enhancement Opportunities</h2>
+
+<h3>🔴 Priority 1 — Data Gaps That Block Features <span class="section-badge badge-red">BLOCKING</span></h3>
+
+<div class="priority-card p-red"><h4><span class="pid">P1.1</span> 2025 Test-Level Data Missing</h4><p>Panel completeness & GSO limit cross-checks are <strong>2024-only</strong>. The GSO & Quality tab is half-empty for 2025. Requires the lab to provide a LIMS export (one row per test).</p></div>
+
+<div class="priority-card p-red"><h4><span class="pid">P1.2</span> 2024 Official Numbers = <code>null</code></h4><p>Compliance card reads "pending reconciliation". Need official 2024 totals from the lab to populate <code>OFFICIAL_COMPLIANCE[2024]</code>.</p></div>
+
+<div class="priority-card p-red"><h4><span class="pid">P1.3</span> 2025 Annual Report +160 Discrepancy</h4><p>Our 11,564 vs official 11,404. No single exclusion rule reproduces 11,404. Need the lab's exact inclusion criteria.</p></div>
+
+<div class="priority-card p-red"><h4><span class="pid">P1.4</span> 2024 Has No Facility/Chain Data</h4><p>5 charts are tagged <code>data-needs-year="2025"</code> and hidden when viewing 2024 alone. If facility data exists in the 2024 source, it should be extracted.</p></div>
+
+<div class="priority-card p-red"><h4><span class="pid">P1.5</span> 3,751 Uncoded 2025 Samples (Group B)</h4><p>32% of 2025 falls into "Miscellaneous Foods", inflating that bucket in every chart. Requires Group B disambiguation + Tier-1c heuristics.</p></div>
+
+<h3>🟡 Priority 2 — Missing Analytical Dimensions <span class="section-badge badge-yellow">ANALYTICAL</span></h3>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.1</span> Quarter-over-Quarter Chart <span class="tag">Low effort</span></h4><p>The <code>quarter</code> column is already in the payload but <strong>no chart uses it</strong>. A QoQ stacked bar would show seasonal patterns more clearly than the monthly trend.</p></div>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.2</span> Facility-Level Drilldown Table <span class="tag">Medium effort</span></h4><p>Lowest granularity today is "chain". A searchable table showing individual facility branches (name, sample count, NC rate) would be directly actionable by inspectors.</p></div>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.3</span> Pathogen Co-Occurrence Matrix <span class="tag">Medium effort</span></h4><p>Which pathogens appear together? A symmetric heatmap of co-occurrence counts (e.g., Salmonella + E.coli O157 co-fail rate). Data exists in <code>failed_tests</code> arrays.</p></div>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.4</span> Month-over-Month Delta KPIs <span class="tag">Medium effort</span></h4><p>Add ▲/▼ trend arrows to KPIs showing change vs. previous month. Currently they are static snapshots — deltas would make them tell a story.</p></div>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.5</span> Compliance Trajectory Sparkline <span class="tag">Low effort</span></h4><p>A 12-month inline SVG sparkline inside the "Compliance rate" KPI card showing the trend direction at a glance.</p></div>
+
+<div class="priority-card p-yellow"><h4><span class="pid">P2.6</span> "Organisms & Tests" Tab Is Thin <span class="tag">Medium-high</span></h4><p>Only 2 charts. Add: organism prevalence radar chart, pathogen seasonality small multiples, "zero-detection streak" tracker per pathogen.</p></div>
+
+<h3>🟢 Priority 3 — UX/UI Polish <span class="section-badge badge-green">UX/UI</span></h3>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.1</span> Export to PDF / Excel</h4><p>📥 "Download Report" button capturing filtered view as PDF or Excel. <strong>Critical for field inspectors</strong> who need offline printouts.</p></div>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.2</span> Dark Mode Toggle</h4><p>CSS already uses <code>--var</code> design system. A dark mode toggle is straightforward — appreciated by night-shift analysts.</p></div>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.3</span> Print Stylesheet</h4><p><code>@media print</code> rules so the dashboard prints cleanly on A4 — hide filters, one chart per page, KPIs as header.</p></div>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.5</span> Cross-Linking Standalone Interactives</h4><p>Clicking a node in the Sankey/Treemap/Network should deep-link to the main dashboard with pre-applied filters. Currently isolated.</p></div>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.6</span> Responsive Mobile Layout</h4><p>Dashboard is desktop-first (1600px max). Add responsive breakpoints for tablet use during field inspections.</p></div>
+
+<div class="priority-card p-green"><h4><span class="pid">P3.7</span> Loading Skeleton</h4><p>The 7.2 MB HTML takes time to parse. A CSS skeleton screen would show immediately while JS initializes.</p></div>
+
+<h3>🔵 Priority 4 — Advanced / Future <span class="section-badge badge-blue">STRATEGIC</span></h3>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.1</span> Predictive Time-Series Forecasting</h4><p>Seasonal decomposition (STL) on the 24-month baseline to forecast next-quarter NC rates. Surface as "Projected NC %" with confidence bands.</p></div>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.2</span> DuckDB-WASM Backend</h4><p>Replace 7.2 MB inline JSON with <code>.parquet</code> loaded via DuckDB-WASM. ~80% load-time reduction. Future-proofs for 100K+ rows.</p></div>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.3</span> Geocoded Facility Map</h4><p>Replace sector-centroid bubbles with actual lat/lon per facility. Individual restaurant pins clustered by neighborhood.</p></div>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.4</span> Automated Inspection Target List</h4><p>"Generate Top 50 Risk Facilities" button exporting a prioritized inspection schedule based on repeat offenders + pathogen severity + recency.</p></div>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.5</span> Chemistry × Microbiology Cross-Correlation</h4><p>Unified view correlating chemical hazards with microbiology failures at the same facility.</p></div>
+
+<div class="priority-card p-blue"><h4><span class="pid">P4.6</span> "What-If" Threshold Slider</h4><p>Model stricter-than-GSO limits dynamically (e.g., "what if Listeria zero-tolerance applied to cakes?").</p></div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 8 — IMPLEMENTATION ROADMAP                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s8">Implementation Roadmap</h2>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>Phase 1 — Quick Wins <span class="effort">1–2 days each</span></h4>
+    <ul>
+      <li><strong>P2.1</strong> Quarter-over-Quarter chart — data already in payload</li>
+      <li><strong>P2.5</strong> Compliance sparkline — tiny inline SVG</li>
+      <li><strong>P3.7</strong> Loading skeleton — CSS-only</li>
+      <li><strong>P3.2</strong> Dark mode toggle — CSS variable flip</li>
+    </ul>
+  </div>
+  <div class="timeline-item t2">
+    <h4>Phase 2 — Medium Effort <span class="effort">2–5 days each</span></h4>
+    <ul>
+      <li><strong>P2.2</strong> Facility-level drilldown table — high operational value</li>
+      <li><strong>P2.4</strong> MoM delta arrows on KPIs — high visual impact</li>
+      <li><strong>P3.1</strong> Export to PDF / Excel — most-requested by field users</li>
+      <li><strong>P3.5</strong> Cross-link standalone interactives — connects the ecosystem</li>
+    </ul>
+  </div>
+  <div class="timeline-item t3">
+    <h4>Phase 3 — Requires External Input</h4>
+    <ul>
+      <li><strong>P1.1</strong> 2025 test-level data — needs LIMS export from lab</li>
+      <li><strong>P1.2</strong> 2024 official numbers — confirm with lab</li>
+      <li><strong>P1.5</strong> Group B disambiguation — user manual input</li>
+    </ul>
+  </div>
+  <div class="timeline-item t4">
+    <h4>Phase 4 — Strategic / Long-Term</h4>
+    <ul>
+      <li><strong>P4.2</strong> DuckDB-WASM — future-proofs for 100K+ rows</li>
+      <li><strong>P4.1</strong> Predictive forecasting — reactive → proactive</li>
+      <li><strong>P4.3</strong> Geocoded facility map — transforms field operations</li>
+    </ul>
+  </div>
+</div>
+
+<blockquote>
+  <strong>Summary:</strong> The dashboard is already exceptionally comprehensive — 19 visualizations, 12 dynamic KPIs, 22+ audit cards, URL-serialized state, bookmarks, and 7 standalone interactives. The highest-impact enhancements are: <strong>(1)</strong> closing the 2025 test-level gap, <strong>(2)</strong> facility-level drilldown, <strong>(3)</strong> export to PDF, and <strong>(4)</strong> MoM trend arrows on KPIs.
+</blockquote>
+
+</div><!-- /.page -->
+
+<footer>أمانة منطقة الرياض · Riyadh Municipality R&D · Generated 2026-08-11 · Microbiology Pipeline Report</footer>
+
+</body>
+</html>
