@@ -949,3 +949,19 @@ Dashboard rebuilt (20,881 rows), JS `node --check` OK.
 ### Files touched
 - `microbiology/scripts/build_dashboard_combined.py`
 - `microbiology/reports/microbiology_dashboard.html` (regenerated)
+
+---
+
+## 2026-08-11 (4) — Dashboard: fix plots pinned to the left when a tab appears
+
+Charts are drawn while their tab panel is hidden (zero-width container), so
+Plotly sizes them narrow; `showTab`'s synchronous `Plotly.Plots.resize` ran
+before the browser laid out the now-visible panel, measuring the stale box
+and leaving the plot squished to the left with empty space on the right.
+The resize is now deferred with a double `requestAnimationFrame`, so it
+measures the laid-out panel and every chart fills/centres its card when the
+tab appears. Dashboard rebuilt (20,881 rows), JS `node --check` OK.
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)

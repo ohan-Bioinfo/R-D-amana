@@ -3126,7 +3126,15 @@ function showTab(name) {
   document.querySelectorAll('.tabpanel').forEach(p => {
     const on = p.dataset.tab === name;
     p.hidden = !on;
-    if (on) p.querySelectorAll('.js-plotly-plot').forEach(g => { try { Plotly.Plots.resize(g); } catch (e) {} });
+    if (on) {
+      // Defer the resize past layout: Plotly sized these graphs while the
+      // panel was hidden (zero width), so a synchronous resize here still
+      // measures the pre-layout box and leaves the plot pinned to the left.
+      // Double rAF runs after the browser has laid out the now-visible panel.
+      const graphs = p.querySelectorAll('.js-plotly-plot');
+      requestAnimationFrame(() => requestAnimationFrame(() =>
+        graphs.forEach(g => { try { Plotly.Plots.resize(g); } catch (e) {} })));
+    }
   });
 }
 document.getElementById('tabnav').addEventListener('click', e => {
