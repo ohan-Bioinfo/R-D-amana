@@ -16,16 +16,41 @@ LOGO = ROOT / "microbiology" / "assets" / "riyadh_emblem.jpg"
 OUT = ROOT / "index.html"
 
 
+def _inject(html: str, fonts: str, logo: str) -> str:
+    return (html
+            .replace("__FONTS__", f"<style>{fonts}</style>")
+            .replace("__LOGO__", logo)
+            .replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M")))
+
+
 def build():
     fonts = FONTS.read_text(encoding="utf-8") if FONTS.exists() else ""
     logo = ("data:image/jpeg;base64," +
             base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
-    html = (TEMPLATE
-            .replace("__FONTS__", f"<style>{fonts}</style>")
-            .replace("__LOGO__", logo)
-            .replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M")))
-    OUT.write_text(html, encoding="utf-8")
+
+    # 1) Root hub (index.html) — the two lab gateways.
+    OUT.write_text(_inject(TEMPLATE, fonts, logo), encoding="utf-8")
     print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB; logo={'yes' if logo else 'MISSING'})")
+
+    # 2) One landing page per lab, sharing the hub's <head> (fonts + CSS).
+    head = TEMPLATE.split("</head>", 1)[0] + "</head>"
+    for lab in LABS:
+        viz = "\n".join(
+            '        <a class="viz" href="{2}">\n'
+            '          <span class="v-ico">{0}</span>\n'
+            '          <div class="v-txt"><div class="v-lb">{1}</div>'
+            '<div class="v-sub">{3}</div></div>\n'
+            '        </a>'.format(*v) for v in lab["viz"])
+        body = (LAB_BODY
+                .replace("__ACCENT__", lab["accent"]).replace("__RING__", lab["ring"])
+                .replace("__NAME__", lab["name"]).replace("__AR__", lab["ar"])
+                .replace("__STAT_N__", lab["stat_n"]).replace("__STAT_U__", lab["stat_u"])
+                .replace("__DESC__", lab["desc"]).replace("__DASH__", lab["dash"])
+                .replace("__GSO__", lab["gso"]).replace("__REPORT__", lab["report"])
+                .replace("__VIZN__", str(len(lab["viz"]))).replace("__VIZ__", viz))
+        out = ROOT / lab["out"]
+        out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
+        print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
 
 
 TEMPLATE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -153,6 +178,75 @@ footer{border-top:1px solid var(--hair)}
 .labs>.lab:nth-child(1){animation-delay:.10s}
 .labs>.lab:nth-child(2){animation-delay:.20s}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ══ root card → gateway to the per-lab hub ══ */
+.card-dests{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+.dest{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+  background:var(--panel-2);border:1px solid var(--hair);border-radius:999px;padding:5px 11px}
+.enter{margin-top:16px;display:flex;align-items:center;gap:8px;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;color:var(--accent)}
+.enter .arrow{transition:transform .18s}
+.lab:hover .enter .arrow,.lab:focus-visible .enter .arrow{transform:translateX(5px)}
+.lab:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-line)}
+
+/* ══ per-lab landing page ══ */
+body.labpage{--accent:var(--green);--accent2:var(--green-3);--accent-line:#bcd3c7;--tint:rgba(0,96,64,.07)}
+body.labpage.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;--tint:rgba(95,112,162,.08)}
+.crumb{display:flex;align-items:center;gap:9px;margin:30px 2px 0;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
+.crumb a{color:var(--accent);font-weight:600}
+.crumb a:hover,.crumb a:focus-visible{text-decoration:underline;outline:none}
+.crumb .sep{opacity:.5}
+.lab-hero{display:flex;align-items:center;gap:22px;margin:20px 2px 0;flex-wrap:wrap}
+.lab-hero .h-txt{min-width:220px}
+.lab-hero .kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--accent);font-weight:600}
+.lab-hero h1{font-family:'Space Grotesk',sans-serif;font-weight:700;
+  font-size:clamp(30px,7vw,46px);letter-spacing:-1.5px;margin:3px 0 2px;line-height:.95}
+.lab-hero .ar{font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;
+  color:var(--muted);direction:rtl}
+.lab-hero .h-stat{margin-left:auto;text-align:right}
+.lab-hero .h-stat .n{font-family:'IBM Plex Mono',monospace;font-weight:500;
+  font-size:clamp(24px,6vw,32px);letter-spacing:-1px;color:var(--accent);display:block}
+.lab-hero .h-stat .u{font-size:12px;color:var(--muted)}
+@media(max-width:620px){.lab-hero .h-stat{margin-left:0;text-align:left;width:100%}}
+.lab-desc{color:var(--muted);font-size:14px;line-height:1.55;max-width:64ch;margin:16px 2px 0}
+.portals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+@media(max-width:820px){.portals{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.portals{grid-template-columns:1fr}}
+.portal{display:flex;flex-direction:column;gap:11px;padding:22px 22px 18px;border-radius:18px;
+  background:var(--panel);border:1px solid var(--hair);position:relative;overflow:hidden;min-height:158px;
+  transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s,border-color .22s}
+.portal::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,var(--accent),transparent 70%)}
+.portal:hover,.portal:focus-visible{transform:translateY(-4px);
+  box-shadow:0 22px 46px -30px rgba(0,50,34,.5);border-color:var(--accent-line);outline:none}
+.portal .p-ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;
+  background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
+.portal .p-lb{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.3px}
+.portal .p-sub{font-size:12.5px;color:var(--muted);line-height:1.45;flex:1}
+.portal .p-go{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);
+  letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.portal .p-go .arrow{transition:transform .18s}
+.portal:hover .p-go .arrow,.portal:focus-visible .p-go .arrow{transform:translateX(4px)}
+.section-head{display:flex;align-items:baseline;gap:12px;margin:36px 2px 0;flex-wrap:wrap}
+.section-head h3{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin:0}
+.section-head .sh-sub{font-size:12px;color:var(--muted)}
+.viz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px}
+.viz{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--hair);
+  transition:transform .16s,background .16s,border-color .16s}
+.viz:hover,.viz:focus-visible{transform:translateY(-2px);border-color:var(--accent-line);
+  background:var(--tint);outline:none}
+.viz .v-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
+  background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
+.viz .v-txt{min-width:0}
+.viz .v-lb{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px}
+.viz .v-sub{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:2px}
+body.labpage .portal,body.labpage .viz{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+body.labpage .portals>.portal:nth-child(2){animation-delay:.06s}
+body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
 </style></head>
 <body>
 <div class="wrap">
@@ -166,15 +260,15 @@ footer{border-top:1px solid var(--hair)}
       <span class="sub">Research &amp; Development — Food-Safety Lab Analytics</span>
     </div>
     <div class="rule"></div>
-    <p class="lede">Two laboratories, one 2024–2025 record. Open each lab as a
-      <b>decision dashboard</b> or an <b>interactive plate</b>.
-      <span class="ar">مختبران، سجلّ واحد ٢٠٢٤–٢٠٢٥ — لوحة قرار أو عرض تفاعلي.</span>
+    <p class="lede">Two laboratories, one 2024–2025 record. Enter each lab's hub for its
+      <b>dashboard</b>, <b>GSO &amp; quality</b>, <b>report</b>, and <b>visualisations</b>.
+      <span class="ar">مختبران، سجلّ واحد ٢٠٢٤–٢٠٢٥ — لكل مختبر لوحته وتقاريره وعروضه.</span>
     </p>
   </header>
 
   <main class="labs">
     <!-- Microbiology -->
-    <section class="lab micro">
+    <a class="lab micro" href="microbiology/index.html">
       <div class="lab-top">
         <div class="plate">
           <div class="ring micro"></div>
@@ -189,56 +283,18 @@ footer{border-top:1px solid var(--hair)}
       <div class="stat"><span class="n">20,881</span><span class="u">samples · 5 sectors · 2024–2025</span></div>
       <div class="desc">Pathogen &amp; indicator screening across Riyadh's sectors — compliance, severity, and the organism behind each failure.</div>
       <div class="entries">
-        <a class="entry" href="microbiology/reports/microbiology_dashboard.html">
-          <span class="ico">▦</span>
-          <span class="txt"><span class="lb">Dashboard</span><span class="sub">filters · Riyadh map · KPIs</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_sunburst.html">
-          <span class="ico">◎</span>
-          <span class="txt"><span class="lb">Interactive</span><span class="sub">Plotly · zoomable culture plate</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_sunburst2.html">
-          <span class="ico">◐</span>
-          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_sankey.html">
-          <span class="ico">🔀</span>
-          <span class="txt"><span class="lb">Interactive 3</span><span class="sub">Sankey · sector → food → organism → severity</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_treemap.html">
-          <span class="ico">🟦</span>
-          <span class="txt"><span class="lb">Interactive 4</span><span class="sub">Treemap · hierarchy &amp; volume</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_heatmap_matrix.html">
-          <span class="ico">🔥</span>
-          <span class="txt"><span class="lb">Interactive 5</span><span class="sub">Heatmap · sector location × pathogen matrix</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_network.html">
-          <span class="ico">🕸️</span>
-          <span class="txt"><span class="lb">Interactive 6</span><span class="sub">Network · food product ↔ microbe graph</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="microbiology/reports/microbiology_streamgraph.html">
-          <span class="ico">📈</span>
-          <span class="txt"><span class="lb">Interactive 7</span><span class="sub">Streamgraph · organism trends over time</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="Gemini-reports/Microbiology_Comprehensive_Report.html">
-          <span class="ico">📄</span>
-          <span class="txt"><span class="lb">Report</span><span class="sub">Statistics · GSO challenges · numerical ledger</span></span>
-          <span class="arrow">→</span>
-        </a>
+        <div class="card-dests">
+          <span class="dest">▦ Dashboard</span>
+          <span class="dest">📋 GSO &amp; Quality</span>
+          <span class="dest">📄 Report</span>
+          <span class="dest">◎ 7 visualisations</span>
+        </div>
+        <div class="enter">Enter lab <span class="arrow">→</span></div>
       </div>
-    </section>
+    </a>
 
     <!-- Chemistry -->
-    <section class="lab chem">
+    <a class="lab chem" href="chemistry/index.html">
       <div class="lab-top">
         <div class="plate">
           <div class="ring chem"></div>
@@ -253,28 +309,15 @@ footer{border-top:1px solid var(--hair)}
       <div class="stat"><span class="n">15,876</span><span class="u">records · 8 sections · 2024–2025</span></div>
       <div class="desc">Heavy metals, pesticides, aflatoxins, water &amp; more — limit exceedances and the analyte that failed each assay.</div>
       <div class="entries">
-        <a class="entry" href="chemistry/reports/chemistry_dashboard.html">
-          <span class="ico">▦</span>
-          <span class="txt"><span class="lb">Dashboard</span><span class="sub">filters · Riyadh map · KPIs</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="chemistry/reports/chemistry_sunburst.html">
-          <span class="ico">◎</span>
-          <span class="txt"><span class="lb">Interactive</span><span class="sub">Plotly · zoomable assay plate</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="chemistry/reports/chemistry_sunburst2.html">
-          <span class="ico">◐</span>
-          <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
-          <span class="arrow">→</span>
-        </a>
-        <a class="entry" href="Gemini-reports/Chemistry_Comprehensive_Report.html">
-          <span class="ico">📄</span>
-          <span class="txt"><span class="lb">Report</span><span class="sub">Statistics · GSO challenges · numerical ledger</span></span>
-          <span class="arrow">→</span>
-        </a>
+        <div class="card-dests">
+          <span class="dest">▦ Dashboard</span>
+          <span class="dest">📋 GSO &amp; Quality</span>
+          <span class="dest">📄 Report</span>
+          <span class="dest">◎ 2 visualisations</span>
+        </div>
+        <div class="enter">Enter lab <span class="arrow">→</span></div>
       </div>
-    </section>
+    </a>
   </main>
 </div>
 
@@ -287,6 +330,109 @@ footer{border-top:1px solid var(--hair)}
   </div>
 </footer>
 </body></html>"""
+
+
+LAB_BODY = r"""<body class="labpage__ACCENT__">
+<div class="wrap">
+  <header class="hero" style="padding-bottom:6px">
+    <div class="brandline">
+      <div class="emblem" style="background-image:url('__LOGO__')"></div>
+      <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+    </div>
+  </header>
+
+  <nav class="crumb"><a href="../index.html">← R&amp;D</a><span class="sep">/</span><span>__NAME__</span></nav>
+
+  <section class="lab-hero">
+    <div class="plate">
+      <div class="ring __RING__"></div>
+      <span class="glyph">۞</span>
+    </div>
+    <div class="h-txt">
+      <div class="kicker">Laboratory · مختبر</div>
+      <h1>__NAME__</h1>
+      <div class="ar">__AR__</div>
+    </div>
+    <div class="h-stat"><span class="n">__STAT_N__</span><span class="u">__STAT_U__</span></div>
+  </section>
+  <p class="lab-desc">__DESC__</p>
+
+  <div class="portals">
+    <a class="portal" href="__DASH__">
+      <div class="p-ico">▦</div>
+      <div class="p-lb">Dashboard</div>
+      <div class="p-sub">Interactive decision board — year/section filters, Riyadh map, KPI strips, per-tab charts.</div>
+      <div class="p-go">Open <span class="arrow">→</span></div>
+    </a>
+    <a class="portal" href="__GSO__">
+      <div class="p-ico">📋</div>
+      <div class="p-lb">GSO &amp; Quality</div>
+      <div class="p-sub">GSO 1016 mapping guideline, sortable category table, and the data-quality audit.</div>
+      <div class="p-go">Open <span class="arrow">→</span></div>
+    </a>
+    <a class="portal" href="__REPORT__">
+      <div class="p-ico">📄</div>
+      <div class="p-lb">Report</div>
+      <div class="p-sub">Statistics, GSO challenges, numerical ledger, and the enhancement roadmap.</div>
+      <div class="p-go">Open <span class="arrow">→</span></div>
+    </a>
+  </div>
+
+  <div class="section-head">
+    <h3>Visualisations</h3>
+    <span class="sh-sub">__VIZN__ interactive views · zoomable · self-contained</span>
+  </div>
+  <div class="viz-grid">
+__VIZ__
+  </div>
+</div>
+
+<footer>
+  <div class="foot-in">
+    <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
+    <span>self-contained · opens in any browser</span>
+    <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
+    <span>build __STAMP__</span>
+  </div>
+</footer>
+</body></html>"""
+
+
+LABS = [
+    dict(
+        out="microbiology/index.html", accent="", ring="micro",
+        name="Microbiology", ar="الأحياء الدقيقة",
+        stat_n="20,881", stat_u="samples · 5 sectors · 2024–2025",
+        desc="Pathogen &amp; indicator screening across Riyadh's sectors — compliance, "
+             "severity, and the organism behind each failure.",
+        dash="reports/microbiology_dashboard.html",
+        gso="reports/microbiology_dashboard.html#tab=gso",
+        report="../Gemini-reports/Microbiology_Comprehensive_Report.html",
+        viz=[
+            ("◎", "Sunburst", "reports/microbiology_sunburst.html", "Plotly · zoomable culture plate"),
+            ("◐", "Sunburst · D3", "reports/microbiology_sunburst2.html", "D3 · sunburst-chart"),
+            ("🔀", "Sankey", "reports/microbiology_sankey.html", "sector → food → organism → severity"),
+            ("🟦", "Treemap", "reports/microbiology_treemap.html", "hierarchy &amp; volume"),
+            ("🔥", "Heatmap", "reports/microbiology_heatmap_matrix.html", "sector × pathogen matrix"),
+            ("🕸️", "Network", "reports/microbiology_network.html", "food ↔ microbe graph"),
+            ("📈", "Streamgraph", "reports/microbiology_streamgraph.html", "organism trends over time"),
+        ],
+    ),
+    dict(
+        out="chemistry/index.html", accent=" chem", ring="chem",
+        name="Chemistry", ar="الكيمياء",
+        stat_n="15,876", stat_u="records · 8 sections · 2024–2025",
+        desc="Heavy metals, pesticides, aflatoxins, water &amp; more — limit exceedances "
+             "and the analyte that failed each assay.",
+        dash="reports/chemistry_dashboard.html",
+        gso="reports/chemistry_dashboard.html#tab=gso",
+        report="../Gemini-reports/Chemistry_Comprehensive_Report.html",
+        viz=[
+            ("◎", "Sunburst", "reports/chemistry_sunburst.html", "Plotly · zoomable assay plate"),
+            ("◐", "Sunburst · D3", "reports/chemistry_sunburst2.html", "D3 · sunburst-chart"),
+        ],
+    ),
+]
 
 
 if __name__ == "__main__":

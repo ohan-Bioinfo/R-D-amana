@@ -20,7 +20,9 @@ PASS = os.environ.get("AUTH_PASS", "demo")
 COOKIE = "rnd_auth"
 TOKEN = "ok"  # demo gate — the credential (demo/demo) is the only secret
 
-ALLOW_PREFIX = ("microbiology/reports/", "chemistry/reports/")
+ALLOW_PREFIX = ("microbiology/reports/", "chemistry/reports/",
+                "Gemini-reports/",
+                "microbiology/index.html", "chemistry/index.html")
 MIME = {".html": "text/html; charset=utf-8", ".css": "text/css",
         ".js": "application/javascript", ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg", ".png": "image/png", ".svg": "image/svg+xml",
