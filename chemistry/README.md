@@ -25,26 +25,34 @@ heavy_metals, honey, hormones_antibiotics, jam, pesticides, water_analysis).
 
 ### Per-section row counts
 
-| Section | 2024 | 2025 | T/F/Unknown (2024) | T/F/Unknown (2025) |
+| Section | 2024 | 2025 | V/F/Other (2024) | V/F/Other (2025) |
 |---|---:|---:|---|---|
-| aflatoxins | 1,122 | 1,157 | 891 / 12 / 219 | 1,151 / 6 / 0 |
-| food_chemistry | 2,815 | 4,230 | 2,651 / 137 / 27 | 3,881 / 19 / 330 |
-| heavy_metals | 220 | 924 | 207 / 9 / 4 | 768 / 148 / 8 |
-| honey **(new)** | — | 46 | — | 31 / 15 / 0 |
+| aflatoxins | 1,113 | 1,156 | 1,082 / 31 / 0 | 1,150 / 6 / 0 |
+| food_chemistry | 2,777 | 4,223 | 2,653 / 124 / 0 | 4,200 / 23 / 0 |
+| heavy_metals | 220 | 918 | 207 / 9 / 4 | 769 / 148 / 1 |
+| honey | 45 | 25 | 26 / 14 / 5 | 16 / 9 / 0 |
 | hormones_antibiotics | — | 9 | — | 9 / 0 / 0 |
-| pesticides | 1,957 | 2,748 | 1,788 / 163 / 6 | 2,285 / 462 / 1 |
-| water_analysis | 249 | 592 | 203 / 46 / 0 | 491 / 101 / 0 |
-| **Total** | **6,363** | **9,706** | | **grand total 16,069** |
+| jam | 83 | — | 0 / 1 / 82 | — |
+| pesticides | 1,954 | 2,747 | 1,785 / 163 / 6 | 2,284 / 463 / 0 |
+| water_analysis | 249 | 357 | 203 / 46 / 0 | 293 / 64 / 0 |
+| **Total** | **6,441** | **9,435** | | **grand total 15,876** |
+
+V/F/Other = `validity_status` counts: valid / invalid / other (`no_limit` +
+`unknown` + `rejected`). Jam 2024 is almost all `no_limit` (82 of 83) — its
+analytes carry no regulatory limit, so only 1 row can be judged.
+(Updated 2026-08-11 to match the current parquets; the previous table was
+from an older cleaning run.)
 
 ### Year-over-year invalid-rate delta (concerning trends ⚠️)
 
 | Section | 2024 fail % | 2025 fail % | Δ |
 |---|---:|---:|---:|
-| aflatoxins | 1.1% | 0.5% | −0.6 pp ✓ |
-| food_chemistry | 4.9% | 0.4% | −4.4 pp ✓ |
-| heavy_metals | 4.1% | **16.0%** | **+11.9 pp** ⚠️ |
-| pesticides | 8.3% | **16.8%** | **+8.5 pp** ⚠️ |
-| water_analysis | 18.5% | 17.1% | −1.4 pp |
+| aflatoxins | 2.8% | 0.5% | −2.3 pp ✓ |
+| food_chemistry | 4.5% | 0.5% | −3.9 pp ✓ |
+| heavy_metals | 4.1% | **16.1%** | **+12.0 pp** ⚠️ |
+| honey | 31.1% | 36.0% | +4.9 pp ⚠️ (small n) |
+| pesticides | 8.3% | **16.9%** | **+8.5 pp** ⚠️ |
+| water_analysis | 18.5% | 17.9% | −0.6 pp |
 
 Heavy metals and pesticides failure rates roughly doubled year-over-year —
 worth confirming with the lab whether this reflects (a) methodology / limit
