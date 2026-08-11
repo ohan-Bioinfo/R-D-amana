@@ -406,6 +406,21 @@ TEMPLATE = r"""<!DOCTYPE html>
   --logo: url("__LOGO_DATA_URI__");
   --najdi-pattern: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' opacity='0.06'><path d='M30 0 L60 30 L30 60 L0 30 Z M30 12 L48 30 L30 48 L12 30 Z' fill='%23faf6ee'/></svg>");
 }
+.tabnav { display:flex; gap:2px; align-items:flex-end; margin:14px 0 0;
+  border-bottom:2px solid var(--gold-700); flex-wrap:wrap; }
+.tabnav button { appearance:none; border:1px solid var(--sand-200); border-bottom:none;
+  background:var(--sand-100); color:var(--ink-500); font:600 12.5px/1 system-ui,sans-serif;
+  letter-spacing:.3px; padding:10px 16px 9px; border-radius:9px 9px 0 0; cursor:pointer;
+  display:flex; align-items:center; gap:7px; transition:.15s; margin-bottom:-2px; }
+.tabnav button .ar { font-family:'Tajawal',sans-serif; font-weight:500; font-size:11px; color:var(--ink-500); }
+.tabnav button:hover { background:var(--sand-50); color:var(--ink-900); }
+.tabnav button.active { background:var(--bg-2); color:var(--green-700); border-color:var(--gold-700);
+  border-bottom:2px solid var(--bg-2); }
+.tabnav button.active::before { content:"۞"; color:var(--gold-700); font-size:13px; }
+.tabpanel[hidden] { display:none; }
+.tabpanel { animation:tabfade .2s ease both; }
+@keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+@media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
 * { box-sizing: border-box }
 html, body { background: var(--sand-50); color: var(--ink-900); margin: 0;
   font-family: 'IBM Plex Sans Arabic', 'Tajawal', 'Tahoma', system-ui, sans-serif;
@@ -660,22 +675,37 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
      the sample-level banner above. -->
 <div class="global-banner" id="test-banner" style="margin-top:14px"></div>
 
-<!-- Year-over-year card appears only when section has both years -->
-<div class="card full" id="card-yoy" style="margin-bottom:14px;display:none">
-  <h2>Year-over-year comparison</h2>
-  <div id="yoy-grid"></div>
-</div>
-
+<nav class="tabnav" id="tabnav">
+  <button data-tab="overview" class="active">📊 Overview <span class="ar">نظرة عامة</span></button>
+  <button data-tab="location">📍 Location <span class="ar">المواقع</span></button>
+  <button data-tab="products">🧪 Products <span class="ar">المنتجات</span></button>
+  <button data-tab="sections">⚗️ Sections &amp; tests <span class="ar">الأقسام</span></button>
+  <button data-tab="gso">📋 GSO &amp; Quality <span class="ar">الجودة</span></button>
+</nav>
 <div class="grid">
+<section class="tabpanel" data-tab="overview">
+  <div class="card full"><h2>Riyadh map <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— samples by sector (marker size = volume, colour = % non-compliance)</span></h2><div id="chart-map" class="chart" style="min-height:480px"></div></div>
   <div class="card"><h2>Monthly compliance results</h2><div class="chart" id="chart-monthly"></div></div>
   <div class="card"><h2>Validity breakdown</h2><div class="chart" id="chart-validity"></div></div>
+</section>
+<section class="tabpanel" data-tab="location" hidden>
   <div class="card full"><h2>Sector breakdown</h2><div class="chart" id="chart-municipalities" style="min-height:300px"></div></div>
+  <div class="card"><h2>Top 10 repeat-offender facilities</h2><div id="tbl-facilities" style="overflow:auto;max-height:380px"></div></div>
+</section>
+<section class="tabpanel" data-tab="products" hidden>
   <div class="card full"><h2>GSO 1016 category — volume &amp; non-compliance</h2><div class="chart" id="chart-gso" style="min-height:340px"></div></div>
   <div class="card full"><h2>Top 10 most-contaminated subtypes <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— grouped by sample_name with parent GSO category. Minimum 20 samples per row.</span></h2><div id="chart-top-subtypes" style="overflow:auto"></div></div>
-  <div class="card full"><h2>Riyadh map <span class="muted" style="font-size:11px; font-weight:400; letter-spacing:0; text-transform:none">— samples by sector (marker size = volume, colour = % non-compliance)</span></h2><div id="chart-map" class="chart" style="min-height:480px"></div></div>
-  <div class="card full"><h2>Top non-compliant tests</h2><div class="chart" id="chart-fail"></div></div>
-  <div class="card"><h2>Top 10 repeat-offender facilities</h2><div id="tbl-facilities" style="overflow:auto;max-height:380px"></div></div>
   <div class="card"><h2>Sample-category breakdown</h2><div id="tbl-categories" style="overflow:auto;max-height:380px"></div></div>
+</section>
+<section class="tabpanel" data-tab="sections" hidden>
+  <div class="card full"><h2>Top non-compliant tests</h2><div class="chart" id="chart-fail"></div></div>
+  <!-- Year-over-year card appears only when section has both years -->
+  <div class="card full" id="card-yoy" style="margin-bottom:14px;display:none">
+    <h2>Year-over-year comparison</h2>
+    <div id="yoy-grid"></div>
+  </div>
+</section>
+<section class="tabpanel" data-tab="gso" hidden>
   <div class="card full">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">Drilldown · all matching samples (invalid first)</h2>
@@ -683,6 +713,7 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
     </div>
     <div id="drilldown" style="overflow:auto;max-height:600px"></div>
   </div>
+</section>
 </div>
 
 </div><!-- /.page-body -->
@@ -1768,6 +1799,20 @@ try {
       <tbody>${tr}</tbody></table>`;
   }
 
+  function showTab(name) {
+    window.__activeTab = name;
+    document.querySelectorAll('#tabnav button').forEach(b =>
+      b.classList.toggle('active', b.dataset.tab === name));
+    document.querySelectorAll('.tabpanel').forEach(p => {
+      const on = p.dataset.tab === name;
+      p.hidden = !on;
+      if (on) p.querySelectorAll('.js-plotly-plot').forEach(g => { try { Plotly.Plots.resize(g); } catch (e) {} });
+    });
+  }
+  document.getElementById('tabnav').addEventListener('click', e => {
+    const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab);
+  });
+
   function renderAll() {
     try {
       const desc = isAllSections() ? ALL_DESC : DATA.sections[currentSection].desc;
@@ -1860,6 +1905,7 @@ try {
   });
 
   renderAll();
+  showTab(window.__activeTab || 'overview');
 } catch (err) {
   console.error('Dashboard init failed:', err);
   const eb = document.getElementById('error-banner');
