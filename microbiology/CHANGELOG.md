@@ -912,3 +912,23 @@ Not a bug (verified consistent): dashboard KPIs and both sunbursts all use
 ### Files touched
 - `microbiology/scripts/build_dashboard_combined.py`
 - `microbiology/reports/microbiology_dashboard.html` (regenerated, JS `node --check` OK)
+
+---
+
+## 2026-08-11 (2) — Dashboard polish: GSO table Codes column + panel-card wording
+
+Two small accuracy enhancements to the GSO tab (user direction: dashboard only):
+
+1. **GSO categories table "Code" column was misleading** — it showed the
+   first row's code for each category, but a GSO category spans many codes.
+   The column now shows the **distinct-code count** per category (e.g.
+   "18 codes"), '—' when uncoded, and sorts numerically.
+2. **Panel-card sub-labels said "% of coded"** but the denominator is the
+   panel-*evaluated* subset (7,882 of 7,950 coded; 68 coded samples have no
+   test records). Subs now read "% of evaluated" to match the number shown.
+
+Dashboard rebuilt: 20,881 rows (9,317 + 11,564), JS `node --check` OK.
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)

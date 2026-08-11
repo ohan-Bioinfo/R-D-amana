@@ -2968,10 +2968,10 @@ function renderGsoAudit(rows) {
     card('2024 samples with GSO code', fmt(coded24),
          coded24 !== totalPanel ? `panel evaluated for ${fmt(totalPanel)} · no test records for ${fmt(coded24 - totalPanel)}` : null),
     card('2025 samples with GSO code', fmt(coded25), `${pctCoded25}% of 2025 · assigned by sample-name match`),
-    card('Full GSO panel run', fmt(complete), `${pctComplete}% of coded samples (2024)`),
-    card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of coded samples (2024)`),
-    card('↳ systematic gap', fmt(systematic), `${pctSystematic}% of coded · lab never/rarely runs the test for this code`),
-    card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of coded · test normally run, missing here`),
+    card('Full GSO panel run', fmt(complete), `${pctComplete}% of evaluated samples (2024)`),
+    card('Incomplete GSO panel', fmt(incomplete), `${pctIncomplete}% of evaluated samples (2024)`),
+    card('↳ systematic gap', fmt(systematic), `${pctSystematic}% of evaluated · lab never/rarely runs the test for this code`),
+    card('↳ sporadic gap', fmt(sporadic), `${pctSporadic}% of evaluated · test normally run, missing here`),
     card('Lab vs GSO agrees', fmt(agree), null),
     card('Lab vs GSO disagrees', fmt(disagree), `${pctDisagree}% of audited`),
     card('↳ re-coded by name rule (cooked→P / صوص→G)', fmt(ruleApplied), '2025 only · 2024 keeps its native lab codes'),
@@ -2979,19 +2979,23 @@ function renderGsoAudit(rows) {
 }
 
 function renderGsoInfoTable(rows) {
-  const agg = {};  // category -> {code, n, nc}
+  const agg = {};  // category -> {codes:Set, n, nc}
   rows.forEach(r => {
     const cat = r[COLS.gso_category] || '—';
-    const a = agg[cat] || (agg[cat] = { code: r[COLS.gso_code] || '', n: 0, nc: 0 });
+    const a = agg[cat] || (agg[cat] = { codes: new Set(), n: 0, nc: 0 });
+    if (r[COLS.gso_code]) a.codes.add(r[COLS.gso_code]);
     a.n++; if (r[COLS.failure] === 1) a.nc++;
   });
+  // "Codes" = distinct GSO codes seen in the category (a category spans many
+  // codes — showing one row's code here was misleading). Uncoded rows show '—'.
   const data = Object.entries(agg).map(([cat, a]) =>
-    ({ cat, code: a.code, n: a.n, nc: a.nc, rate: a.n ? 100 * a.nc / a.n : 0 }))
+    ({ cat, codes: a.codes.size, n: a.n, nc: a.nc, rate: a.n ? 100 * a.nc / a.n : 0 }))
     .sort((x, y) => y.n - x.n);
-  const cols = [['cat','Category'],['code','Code'],['n','Samples'],['nc','Non-compliant'],['rate','NC %']];
+  const fmtCodes = d => d.codes ? d.codes + ' codes' : '—';
+  const cols = [['cat','Category'],['codes','Codes'],['n','Samples'],['nc','Non-compliant'],['rate','NC %']];
   const th = cols.map(([k, l]) => `<th data-k="${k}" style="cursor:pointer">${l} <span class="sort-ar"></span></th>`).join('');
   const body = data.map(d =>
-    `<tr><td>${d.cat}</td><td>${d.code}</td><td>${d.n.toLocaleString()}</td>` +
+    `<tr><td>${d.cat}</td><td>${fmtCodes(d)}</td><td>${d.n.toLocaleString()}</td>` +
     `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
   const el = document.getElementById('gso_info_table');
   el.innerHTML = `<table class="gso-table"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table>`;
@@ -3001,11 +3005,11 @@ function renderGsoInfoTable(rows) {
 function sortGsoTable(k) {
   const el = document.getElementById('gso_info_table');
   const dir = el.__dir[k] = -(el.__dir[k] || 1);
-  const num = k !== 'cat' && k !== 'code';
+  const num = k !== 'cat';
   const sorted = [...el.__data].sort((a, b) => num ? dir * (a[k] - b[k]) : dir * String(a[k]).localeCompare(String(b[k])));
   el.__data = sorted;
   const body = sorted.map(d =>
-    `<tr><td>${d.cat}</td><td>${d.code}</td><td>${d.n.toLocaleString()}</td>` +
+    `<tr><td>${d.cat}</td><td>${d.codes ? d.codes + ' codes' : '—'}</td><td>${d.n.toLocaleString()}</td>` +
     `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
   el.querySelector('tbody').innerHTML = body;
   el.querySelectorAll('th').forEach(h => h.querySelector('.sort-ar').textContent =
