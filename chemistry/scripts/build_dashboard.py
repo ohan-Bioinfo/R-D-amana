@@ -696,6 +696,10 @@ try {
   const COLS = {};
   DATA.cols.forEach((c, i) => COLS[c] = i);
 
+  const PLOTLY_CONFIG = { responsive: true, scrollZoom: true, displayModeBar: 'hover',
+    displaylogo: false, doubleClick: 'reset',
+    modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d', 'toggleSpikelines'] };
+
   let currentSection = "__all__";
   let currentYear = "all";
   let searchTerm = "";
@@ -1129,7 +1133,7 @@ try {
         legend: {orientation: 'h', y: -0.28, font:{size:11}},
         bargap: 0.18,
         hovermode: 'x unified',
-       }, {responsive:true, displayModeBar:false});
+       }, PLOTLY_CONFIG);
   }
 
   function renderValidity() {
@@ -1154,7 +1158,7 @@ try {
       marker: {colors: ['#059669', '#dc2626']},
       textinfo: 'label+percent', textposition: 'outside',
     }], {paper_bgcolor:'transparent', font:{color:'#1c2742'},
-        margin:{t:10,r:10,b:10,l:10}, height:300, showlegend:false}, {responsive:true, displayModeBar:false});
+        margin:{t:10,r:10,b:10,l:10}, height:300, showlegend:false}, PLOTLY_CONFIG);
   }
 
   // Test-name normalisation: maps the cleaner's internal labels (mixed
@@ -1321,7 +1325,7 @@ try {
         xaxis: {gridcolor:'#e5e7eb', title: {text:'Non-compliance count', font:{size:12}}, range:[0, top*1.18]},
         yaxis: {automargin: true, autorange: 'reversed', tickfont:{size:12}},
         bargap: 0.25,
-       }, {responsive:true, displayModeBar:false});
+       }, PLOTLY_CONFIG);
   }
 
   // GSO category bar chart (volume stacked by year + non-compliance % line).
@@ -1373,7 +1377,7 @@ try {
       yaxis2: { overlaying: 'y', side: 'right', title: '% non-compliance', range: [0, 100], showgrid: false },
       legend: { orientation: 'h', y: -0.35 },
       hovermode: 'x unified',
-    }, { responsive: true, displayModeBar: false });
+    }, PLOTLY_CONFIG);
   }
 
   // Top 10 most-contaminated subtypes — ranked by ABSOLUTE non-conformity
@@ -1480,7 +1484,7 @@ try {
       paper_bgcolor: 'transparent', plot_bgcolor: 'transparent',
       margin: { t: 0, r: 0, b: 0, l: 0 },
       mapbox: { style: 'carto-positron', center: { lat: 24.7136, lon: 46.6753 }, zoom: 9.3 },
-    }, { responsive: true, displayModeBar: false });
+    }, PLOTLY_CONFIG);
   }
 
   function renderFacilities() {
@@ -1651,7 +1655,7 @@ try {
         legend: {orientation: 'h', y: -0.18, font:{size:11}},
         bargap: 0.30,
         hovermode: 'x unified',
-       }, {responsive:true, displayModeBar:false});
+       }, PLOTLY_CONFIG);
   }
 
   function renderCategories() {
