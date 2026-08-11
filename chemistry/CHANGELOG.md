@@ -5,6 +5,34 @@ the convention in `microbiology/CHANGELOG.md`.
 
 ---
 
+## 2026-08-11 — Dashboard standardized to the tabbed touch-first design
+
+Brought the chemistry dashboard to the **same design language** as the redesigned
+microbiology dashboard, so the two read as one R&D lab suite. The palette,
+masthead, KPI strip, and filter-chip idioms were already shared; this adds the
+structural half. Totals unchanged: **15,876 rows across 8 sections** (2024 + 2025),
+**1,133,621** distinct tests; emitted JS passes `node --check`; still self-contained
+offline HTML.
+
+- **Zoom / pinch / touch on every chart.** Introduced a shared `PLOTLY_CONFIG`
+  (`scrollZoom`, `displayModeBar:'hover'`, `doubleClick:'reset'`, lasso/select removed)
+  and applied it at all 6 `Plotly.newPlot` sites.
+- **5-tab lab-record-divider shell** (📊 Overview · 📍 Location · 🧪 Products ·
+  ⚗️ Sections & tests · 📋 GSO & Quality), matching micro's tabs with "Sections & tests"
+  in place of "Organisms". Masthead + Section bar + filter chips + KPI strips stay
+  pinned above all tabs. Charts render once and `Plotly.Plots.resize()` on tab-show.
+  The year-over-year card was relocated into the Sections & tests tab.
+- **Active tab persisted in a minimal `#tab=` hash**; old links open Overview.
+- **Click-to-drill** on the two charts with a matching filter: sector-breakdown bar →
+  toggles that sector (`activeSectors`); GSO-category bar → toggles that category
+  (`activeGso`). Charts without a filter dimension stay non-interactive (not invented).
+- **Sortable GSO 1016 categories table** in the GSO & Quality tab: Category · Samples ·
+  Non-compliant · NC % (NC = `is_valid === 0`, rate over evaluated samples),
+  header-click sort. Represents the numbers; makes no scope judgment.
+
+Spec: `docs/superpowers/specs/2026-08-11-chem-dashboard-standardize-design.md`.
+Plan: `docs/superpowers/plans/2026-08-11-chem-dashboard-standardize-design.md`.
+
 ## 2026-08-11 — Chemistry dashboard rebuilt & activated on the landing page
 
 User direction: build the chemistry dashboard (chemistry phase opens after
