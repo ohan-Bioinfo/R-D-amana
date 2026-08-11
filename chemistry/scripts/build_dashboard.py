@@ -421,6 +421,11 @@ TEMPLATE = r"""<!DOCTYPE html>
 .tabpanel { animation:tabfade .2s ease both; }
 @keyframes tabfade { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
 @media (prefers-reduced-motion:reduce){ .tabpanel{animation:none} }
+.gso-table { width:100%; border-collapse:collapse; font-size:12.5px; }
+.gso-table th, .gso-table td { text-align:left; padding:7px 12px; border-bottom:1px solid var(--sand-200); }
+.gso-table th { position:sticky; top:0; background:var(--sand-100); font:600 11px system-ui,sans-serif;
+  text-transform:uppercase; letter-spacing:.5px; color:var(--ink-500); }
+.gso-table td:nth-child(n+2) { font-variant-numeric:tabular-nums; }
 * { box-sizing: border-box }
 html, body { background: var(--sand-50); color: var(--ink-900); margin: 0;
   font-family: 'IBM Plex Sans Arabic', 'Tajawal', 'Tahoma', system-ui, sans-serif;
@@ -706,6 +711,11 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   </div>
 </section>
 <section class="tabpanel" data-tab="gso" hidden>
+  <div class="card full">
+    <h2>GSO 1016 categories — sortable table</h2>
+    <div class="muted" style="font-size:11px">Click a column header to sort. Represents the numbers; makes no scope judgment.</div>
+    <div id="gso_info_table" style="overflow-x:auto"></div>
+  </div>
   <div class="card full">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <h2 style="margin:0">Drilldown · all matching samples (invalid first)</h2>
@@ -1359,6 +1369,44 @@ try {
        }, PLOTLY_CONFIG);
   }
 
+  // Sortable GSO 1016 categories table (GSO & Quality tab).
+  function renderGsoInfoTable() {
+    const rows = filteredRows();
+    const agg = {};  // category -> {n, nc, evald}
+    rows.forEach(r => {
+      const cat = r[COLS.gso_category] || '—';
+      const a = agg[cat] || (agg[cat] = { n: 0, nc: 0, evald: 0 });
+      a.n++;
+      const v = r[COLS.is_valid];
+      if (v === 0) { a.nc++; a.evald++; } else if (v === 1) { a.evald++; }
+    });
+    const data = Object.entries(agg).map(([cat, a]) =>
+      ({ cat, n: a.n, nc: a.nc, rate: a.evald ? 100 * a.nc / a.evald : 0 }))
+      .sort((x, y) => y.n - x.n);
+    const cols = [['cat','Category'],['n','Samples'],['nc','Non-compliant'],['rate','NC %']];
+    const th = cols.map(([k, l]) => `<th data-k="${k}" style="cursor:pointer">${l} <span class="sort-ar"></span></th>`).join('');
+    const body = data.map(d =>
+      `<tr><td>${d.cat}</td><td>${d.n.toLocaleString()}</td>` +
+      `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
+    const el = document.getElementById('gso_info_table');
+    if (!el) return;
+    el.innerHTML = `<table class="gso-table"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table>`;
+    el.__data = data; el.__dir = {};
+    el.querySelectorAll('th').forEach(h => h.addEventListener('click', () => sortGsoInfoTable(h.dataset.k)));
+  }
+  function sortGsoInfoTable(k) {
+    const el = document.getElementById('gso_info_table');
+    const dir = el.__dir[k] = -(el.__dir[k] || 1);
+    const num = k !== 'cat';
+    const sorted = [...el.__data].sort((a, b) => num ? dir * (a[k] - b[k]) : dir * String(a[k]).localeCompare(String(b[k])));
+    el.__data = sorted;
+    el.querySelector('tbody').innerHTML = sorted.map(d =>
+      `<tr><td>${d.cat}</td><td>${d.n.toLocaleString()}</td>` +
+      `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
+    el.querySelectorAll('th').forEach(h => h.querySelector('.sort-ar').textContent =
+      h.dataset.k === k ? (dir < 0 ? '▾' : '▴') : '');
+  }
+
   // GSO category bar chart (volume stacked by year + non-compliance % line).
   function renderGsoCat() {
     const rows = filteredRows();
@@ -1858,6 +1906,7 @@ try {
       renderFail();
       renderFacilities();
       renderCategories();
+      renderGsoInfoTable();
       renderMunicipalities();
       renderDrilldown();
     } catch (err) {
