@@ -1409,6 +1409,14 @@ try {
       legend: { orientation: 'h', y: -0.35 },
       hovermode: 'x unified',
     }, PLOTLY_CONFIG);
+    const _gcN = document.getElementById('chart-gso');
+    _gcN.removeAllListeners && _gcN.removeAllListeners('plotly_click');
+    _gcN.on('plotly_click', e => {
+      const g = e.points[0].x;
+      if (!g) return;
+      if (activeGso.has(g)) activeGso.delete(g); else activeGso.add(g);
+      renderAll();
+    });
   }
 
   // Top 10 most-contaminated subtypes — ranked by ABSOLUTE non-conformity
@@ -1687,6 +1695,13 @@ try {
         bargap: 0.30,
         hovermode: 'x unified',
        }, PLOTLY_CONFIG);
+    const _muN = document.getElementById('chart-municipalities');
+    _muN.removeAllListeners && _muN.removeAllListeners('plotly_click');
+    _muN.on('plotly_click', e => {
+      const s = e.points[0].x;
+      if (activeSectors.has(s)) activeSectors.delete(s); else activeSectors.add(s);
+      renderAll();
+    });
   }
 
   function renderCategories() {
