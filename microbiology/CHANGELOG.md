@@ -932,3 +932,20 @@ Dashboard rebuilt: 20,881 rows (9,317 + 11,564), JS `node --check` OK.
 ### Files touched
 - `microbiology/scripts/build_dashboard_combined.py`
 - `microbiology/reports/microbiology_dashboard.html` (regenerated)
+
+---
+
+## 2026-08-11 (3) — Dashboard layout: bottom charts now full-width
+
+Two lone chart cards were missing the `full` grid class, so they rendered
+half-width on the left with dead space beside them while every other card
+spans the row:
+- Organisms tab → "Severity breakdown by month"
+- GSO tab → "Year-on-year comparison"
+
+Both are now `card full`; all 17 dashboard cards span the full row.
+Dashboard rebuilt (20,881 rows), JS `node --check` OK.
+
+### Files touched
+- `microbiology/scripts/build_dashboard_combined.py`
+- `microbiology/reports/microbiology_dashboard.html` (regenerated)

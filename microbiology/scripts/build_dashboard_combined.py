@@ -1139,7 +1139,7 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="tests_drilldown"></div>
   </div>
 
-  <div class="card">
+  <div class="card full">
     <h2>Severity breakdown by month</h2>
     <div id="chart_severity_month" class="chart"></div>
   </div>
@@ -1165,7 +1165,7 @@ tbody tr:hover { background: var(--sand-100); }
     <div id="data_quality_summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:14px; margin-top:10px"></div>
   </div>
 
-  <div class="card">
+  <div class="card full">
     <h2>Year-on-year comparison</h2>
     <div id="chart_yoy" class="chart"></div>
   </div>
