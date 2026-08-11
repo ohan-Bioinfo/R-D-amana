@@ -203,6 +203,64 @@ footer {
 .kpi:nth-child(2) { animation-delay: 0.05s; } .kpi:nth-child(3) { animation-delay: 0.1s; }
 .kpi:nth-child(4) { animation-delay: 0.15s; } .kpi:nth-child(5) { animation-delay: 0.2s; }
 .kpi:nth-child(6) { animation-delay: 0.25s; } .kpi:nth-child(7) { animation-delay: 0.3s; }
+
+/* ═══ Responsive / impeccable retrofit (2026-08-11) ═══ */
+:root { --gutter: clamp(16px, 4vw, 30px); }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+.masthead { padding: clamp(22px,5vw,32px) var(--gutter) clamp(20px,4vw,28px); }
+.masthead h1 { font-size: clamp(21px,5.2vw,28px); line-height: 1.15; }
+.masthead .subtitle { font-size: clamp(15px,3.4vw,17px); }
+.masthead .meta { font-size: clamp(10px,2.6vw,11px); line-height: 1.7; }
+.page { padding: 0 var(--gutter); }
+h2 { font-size: clamp(17px,4.4vw,20px); scroll-margin-top: 16px; }
+h3 { font-size: clamp(14px,3.6vw,15px); }
+.toc a { min-height: 44px; display: flex; align-items: center; }
+.kpi-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%,210px),1fr)); }
+.kpi .value { font-size: clamp(22px,5.5vw,26px); }
+.inv-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%,280px),1fr)); }
+/* table scroll wrapper */
+.table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border-radius: 10px; box-shadow: 0 1px 6px rgba(10,61,36,0.06); margin: 14px 0 20px; }
+.table-wrap::after { content:""; position:absolute; top:0; right:0; bottom:0; width:26px;
+  background: linear-gradient(90deg, transparent, rgba(10,61,36,0.07)); pointer-events:none;
+  opacity:0; transition:opacity .2s; }
+.table-wrap.is-scrollable::after { opacity:1; }
+.data-table { margin: 0; min-width: 460px; box-shadow: none; }
+.data-table th { position: sticky; top: 0; white-space: nowrap; }
+.data-table .num { white-space: nowrap; }
+/* back to top */
+.to-top { position: fixed; right: 18px; bottom: 18px; z-index: 20; width: 46px; height: 46px;
+  border-radius: 50%; background: var(--green-700); color: var(--gold-200);
+  border: 2px solid var(--gold-500); box-shadow: 0 4px 14px rgba(10,61,36,0.28);
+  display: grid; place-items: center; font-size: 20px; text-decoration: none;
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity .25s, transform .25s, background .15s; }
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { background: var(--green-900); }
+@media (max-width: 760px) { h2 { margin-top: 32px; } }
+@media (max-width: 480px) {
+  body { font-size: 13.5px; }
+  .data-table th, .data-table td { padding: 8px 11px; }
+  .to-top { right: 12px; bottom: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  :root { --gutter: 0; }
+  body { background:#fff; padding:0; font-size:11px; overflow:visible; }
+  .masthead::after { display:none; }
+  .to-top { display:none !important; }
+  .masthead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .kpi, .inv-card, .priority-card, .table-wrap, blockquote, .timeline-item { break-inside: avoid; box-shadow:none; }
+  .table-wrap { overflow: visible; }
+  .table-wrap::after { display:none; }
+  .data-table th { position: static; }
+  h2 { break-after: avoid; }
+}
+
 </style>
 </head>
 <body>
@@ -260,6 +318,7 @@ footer {
 <!-- SECTION 2 — PIPELINE STAGES                                    -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <h2 id="s2">Pipeline Stages</h2>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>#</th><th>Stage</th><th>Scripts</th><th>Key Operations</th></tr></thead>
   <tbody>
@@ -270,6 +329,7 @@ footer {
     <tr><td class="num">5</td><td class="bold">Dashboarding</td><td><code>build_dashboard_combined.py</code> + 7 interactive builders</td><td>Generate self-contained Plotly/D3 HTML reports</td></tr>
   </tbody>
 </table>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- SECTION 3 — GSO CHALLENGES                                     -->
@@ -290,6 +350,7 @@ footer {
 <h3>C. Placeholder Codes & 2025 Extrapolation</h3>
 <p><strong>Code "H":</strong> 36 samples used a placeholder letter — mapped by product name (e.g., Cheddar → A-13). <strong>2025:</strong> No GSO column at all. Tier 1 exact-name matching against 2024 achieved ~37% initial coverage, with strict equality to prevent false friends (<code>جبنة بيتزا</code> ≠ <code>لبنه بيتزا</code>).</p>
 
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Rule / Action</th><th>Rows Affected</th></tr></thead>
   <tbody>
@@ -301,6 +362,7 @@ footer {
     <tr><td>Placeholder 'H' code manually mapped</td><td class="num">36</td></tr>
   </tbody>
 </table>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- SECTION 4 — DATA QUALITY CHALLENGES                            -->
@@ -323,6 +385,7 @@ footer {
 <p><strong>14,120 rows</strong> in 2024 carried a <code>>10</code> prefix — confirmed as an RTL data-entry flip for <code><10</code> (below reporting limit = pass). Without this fix, thousands of compliant samples would have been falsely flagged as failures.</p>
 
 <h3>F. Panel Completeness — Systematic vs. Sporadic</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Gap Type</th><th>Definition</th><th>Count</th></tr></thead>
   <tbody>
@@ -332,8 +395,10 @@ footer {
     <tr><td class="bold" style="color:var(--green-500)">Full Panel Complete</td><td>All required GSO tests run</td><td class="num bold">3,756</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>G. Severity Tiers</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Tier</th><th>Criteria</th></tr></thead>
   <tbody>
@@ -342,6 +407,7 @@ footer {
     <tr><td class="bold" style="color:var(--gold-700)">Indicator Only</td><td>≥1 failure, all hygiene indicators (Coliforms, Yeasts)</td></tr>
   </tbody>
 </table>
+</div>
 <p><em>Note:</em> Pseudomonas was manually elevated to Pathogen tier due to drinking water implications.</p>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
@@ -350,6 +416,7 @@ footer {
 <h2 id="s5">Numerical Ledger — All Counts</h2>
 
 <h3>5.1 Master Dataset</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Metric</th><th>Count</th></tr></thead>
   <tbody>
@@ -359,8 +426,10 @@ footer {
     <tr><td>2024 Long Format Rows (Pre-Pivot)</td><td class="num">36,461</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>5.2 Official vs. Pipeline Discrepancies</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Metric</th><th>Count</th></tr></thead>
   <tbody>
@@ -372,8 +441,10 @@ footer {
     <tr><td class="indent">ID Collisions Rescued</td><td class="num">22</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>5.3 Compliance & Severities</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Metric</th><th>Count</th></tr></thead>
   <tbody>
@@ -384,8 +455,10 @@ footer {
     <tr><td>Top Contaminated Category (Sauces G-2/G-3)</td><td class="num">1,173</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>5.4 GSO 1016 Coverage</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Metric</th><th>Count</th></tr></thead>
   <tbody>
@@ -398,8 +471,10 @@ footer {
     <tr><td>2025 Missing English Categories (from 383)</td><td class="num">129</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>5.5 GSO Audits & Disagreements (2024 Only)</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Metric</th><th>Count</th></tr></thead>
   <tbody>
@@ -412,8 +487,10 @@ footer {
     <tr><td class="indent">Lab Fail → should Pass</td><td class="num">14</td></tr>
   </tbody>
 </table>
+</div>
 
 <h3>5.6 Data Quality Fixes</h3>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>Fix</th><th>Count</th></tr></thead>
   <tbody>
@@ -424,6 +501,7 @@ footer {
     <tr><td>Validity logic conflicts resolved</td><td class="num">9</td></tr>
   </tbody>
 </table>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- SECTION 6 — DASHBOARD INVENTORY                                -->
@@ -571,7 +649,29 @@ footer {
 
 </div><!-- /.page -->
 
+<a href="#" class="to-top" aria-label="Back to top" title="Back to top">↑</a>
+
 <footer>أمانة منطقة الرياض · Riyadh Municipality R&D · Generated 2026-08-11 · Microbiology Pipeline Report</footer>
+
+
+<script>
+(function () {
+  var btn = document.querySelector('.to-top');
+  if (btn) {
+    var onScroll = function () { btn.classList.toggle('show', window.scrollY > 600); };
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+  }
+  var wraps = document.querySelectorAll('.table-wrap');
+  var sync = function () {
+    wraps.forEach(function (w) {
+      var over = w.scrollWidth - w.clientWidth > 4 && w.scrollLeft < w.scrollWidth - w.clientWidth - 4;
+      w.classList.toggle('is-scrollable', over);
+    });
+  };
+  wraps.forEach(function (w) { w.addEventListener('scroll', sync, { passive: true }); });
+  window.addEventListener('resize', sync, { passive: true }); sync();
+})();
+</script>
 
 </body>
 </html>

@@ -551,6 +551,11 @@ th { color: var(--gold-700); font-size: 10px; text-transform: uppercase;
 tbody tr:hover { background: var(--sand-100) }
 td { font-variant-numeric: tabular-nums }
 .muted { color: var(--ink-500) }
+.card-sub { color: var(--ink-500); font-size: 11.5px; line-height: 1.6; margin: -4px 0 12px;
+   max-width: 92ch }
+.card-sub code { background: var(--sand-100); padding: 0 4px; border-radius: 3px;
+   font-size: 11px; color: var(--clay-700) }
+.card-sub b { color: var(--green-900) }
 .ar { font-family: 'IBM Plex Sans Arabic', 'Tajawal', sans-serif;
    direction: rtl; unicode-bidi: embed; font-weight: 500 }
 .badge { display: inline-block; padding: 3px 10px; border-radius: 2px; font-size: 11px;
@@ -712,8 +717,27 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 </section>
 <section class="tabpanel" data-tab="gso" hidden>
   <div class="card full">
+    <h2>How chemistry samples are judged &amp; classified</h2>
+    <div class="card-sub">Every sample is bridged to one of the <b>15 official GSO 1016 food categories</b>
+      (from <code>sample_category_canonical</code>; a 7-tier resolver: hand-audited
+      corrections → sample-ID prefix → 130+ name keywords → section default). Compliance is
+      analyte-level: a result is judged only when a regulatory <b>limit</b> exists for it, so
+      <code>validity_status</code> has <b>five</b> states — <b>valid</b> (14,677), <b>invalid</b>
+      (1,101, a test exceeded its limit), <b>no_limit</b> (92, result present but no limit — e.g.
+      jam analytes), <b>rejected</b> (4, lab marked <span class="ar">مرفوض</span>) and <b>unknown</b>
+      (2). A non-detect stores <code>0.0</code> with an <code>is_nd</code> flag, while an unset limit
+      stays <code>null</code> so a trace is never falsely flagged. Comparison prefixes
+      (<code>&gt;10</code>, <code>&lt;5</code>) are stripped before parsing. <b>Pesticides</b> arrive one
+      row per detected analyte (metadata forward-filled), so the table below counts <b>15,876 rows</b>
+      while the sunburst collapses pesticides to <b>15,297 unique samples</b> — read the NC rate against
+      the denominator you mean. The NC% column below uses <code>is_valid === 0</code> over evaluated
+      samples. Two sections to watch: <b>heavy metals</b> (4.1%→16.1%) and <b>pesticides</b>
+      (8.3%→16.9%) roughly doubled their 2025 fail rate — confirm with the lab before reading it as a
+      trend. Full write-up: <code>Gemini-reports/Chemistry_Comprehensive_Report.html</code>.</div>
+  </div>
+  <div class="card full">
     <h2>GSO 1016 categories — sortable table</h2>
-    <div class="muted" style="font-size:11px">Click a column header to sort. Represents the numbers; makes no scope judgment.</div>
+    <div class="muted" style="font-size:11px">Click a column header to sort. NC% = <code>is_valid === 0</code> over evaluated samples. Represents the numbers; makes no scope judgment.</div>
     <div id="gso_info_table" style="overflow-x:auto"></div>
   </div>
   <div class="card full">

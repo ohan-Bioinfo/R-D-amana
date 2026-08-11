@@ -2,432 +2,766 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>أمانة منطقة الرياض · Chemistry Pipeline — Comprehensive Statistics & Enhancement Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>أمانة منطقة الرياض · Chemistry Pipeline — Statistics, Challenges & Enhancement Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Cormorant+Garamond:ital,wght@1,500&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   Najdi Heritage Report Theme  ·  Chemistry edition
+   Shared visual system with the microbiology report + both dashboards.
+   Chemistry differs by content & iconography only — never by palette.
+   ═══════════════════════════════════════════════════════════════ */
 :root {
   --green-900:#0a3d24; --green-700:#0e5c36; --green-500:#22853f; --green-100:#dcefe1;
-  --gold-700:#9a7b2a; --gold-500:#c8a85a; --gold-200:#f0e3bf;
-  --clay-700:#7a2616; --clay-500:#a8331a; --clay-100:#f7d9d0;
-  --sand-50:#faf6ee; --sand-100:#f4ecde; --sand-200:#e8dcc4; --sand-300:#d4c5a4;
-  --ink-900:#1a1f2c; --ink-700:#3d4256; --ink-500:#6c6f7e;
-  --bg:var(--sand-50); --fg:var(--ink-900); --muted:var(--ink-500); --line:var(--sand-200);
-  --blue-700:#1d4ed8; --blue-100:#dbeafe;
-  --purple-700:#6d28d9; --purple-100:#ede9fe;
-  --teal-700:#0f766e; --teal-100:#ccfbf1;
+  --gold-700:#9a7b2a;  --gold-500:#c8a85a;  --gold-200:#f0e3bf;
+  --clay-700:#7a2616;  --clay-500:#a8331a;  --clay-100:#f7d9d0;
+  --sand-50:#faf6ee;   --sand-100:#f4ecde;  --sand-200:#e8dcc4;  --sand-300:#d4c5a4;
+  --ink-900:#1a1f2c;   --ink-700:#3d4256;   --ink-500:#6c6f7e;
+  --bg: var(--sand-50); --fg: var(--ink-900); --muted: var(--ink-500); --line: var(--sand-200);
+
+  /* fluid rhythm — one source of truth for page gutters */
+  --gutter: clamp(16px, 4vw, 30px);
 }
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);background-image:radial-gradient(ellipse 1200px 600px at 50% -200px,rgba(14,92,54,0.06),transparent 60%);color:var(--fg);font-family:'IBM Plex Sans Arabic','Tajawal',system-ui,sans-serif;font-size:14px;line-height:1.65;padding-bottom:80px}
 
-/* Masthead */
-.masthead{background:linear-gradient(180deg,#1a1040 0%,#2d1b69 50%,var(--purple-700) 100%);color:#faf6ee;border-bottom:4px solid var(--gold-500);padding:32px 40px 28px;position:relative;overflow:hidden}
-.masthead::after{content:"";position:absolute;inset:0;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' opacity='0.05'><path d='M0 20 Q15 0 30 20 T60 20 T90 20 T120 20' stroke='%23f0e3bf' stroke-width='1.5' fill='none'/></svg>") repeat-x bottom/120px 40px}
-.masthead-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1}
-.masthead h1{font-family:'Tajawal',sans-serif;font-weight:900;font-size:28px;letter-spacing:.5px;margin-bottom:6px}
-.masthead .subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:var(--gold-500);margin-bottom:10px}
-.masthead .meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold-200);letter-spacing:1px;opacity:.85}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(14,92,54,0.06), transparent 60%);
+  color: var(--fg);
+  font-family: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
+  font-size: 14px; line-height: 1.65;
+  padding-bottom: 80px;
+  overflow-x: hidden;                /* never let a wide child scroll the page */
+}
 
-.page{max-width:1200px;margin:0 auto;padding:0 30px}
+/* ─── Masthead ────────────────────────────────────────────────── */
+.masthead {
+  background: linear-gradient(180deg, var(--green-900) 0%, var(--green-700) 100%);
+  color: #faf6ee; border-bottom: 4px solid var(--gold-500);
+  padding: clamp(22px, 5vw, 32px) var(--gutter) clamp(20px, 4vw, 28px);
+  position: relative; overflow: hidden;
+}
+.masthead::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 40' opacity='0.05'><path d='M0 20 Q15 0 30 20 T60 20 T90 20 T120 20' stroke='%23f0e3bf' stroke-width='1.5' fill='none'/></svg>") repeat-x bottom/120px 40px;
+}
+.masthead-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
+.masthead h1 {
+  font-family: 'Tajawal', sans-serif; font-weight: 900;
+  font-size: clamp(21px, 5.2vw, 28px);
+  letter-spacing: 0.5px; margin-bottom: 6px; line-height: 1.15;
+}
+.masthead .subtitle {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: clamp(15px, 3.4vw, 17px);
+  color: var(--gold-500); margin-bottom: 10px;
+}
+.masthead .meta {
+  font-family: 'DM Mono', monospace; font-size: clamp(10px, 2.6vw, 11px);
+  color: var(--gold-200); letter-spacing: 1px; opacity: 0.9;
+  line-height: 1.7; word-spacing: 1px;
+}
 
-/* TOC */
-.toc{background:#fffdf8;border:1px solid var(--line);border-radius:14px;padding:22px 28px;margin:28px 0;box-shadow:0 2px 12px -4px rgba(10,61,36,0.08)}
-.toc h3{font-family:'Tajawal';font-size:13px;text-transform:uppercase;letter-spacing:2px;color:var(--gold-700);margin-bottom:12px}
-.toc ol{padding-left:22px} .toc li{margin-bottom:4px}
-.toc a{color:var(--purple-700);text-decoration:none;font-weight:500;font-size:13.5px}
-.toc a:hover{text-decoration:underline}
+/* ─── Page body ───────────────────────────────────────────────── */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter); }
 
-/* Headings */
-h2{font-family:'Tajawal',sans-serif;font-size:20px;font-weight:700;color:var(--ink-900);margin:38px 0 6px;padding-bottom:8px;border-bottom:2px solid var(--gold-500);display:flex;align-items:center;gap:10px}
-h2::before{content:"⚗️";font-size:16px}
-h3{font-family:'Tajawal';font-size:15px;font-weight:700;color:var(--purple-700);margin:22px 0 8px;letter-spacing:.3px}
-.section-badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-left:10px;vertical-align:middle}
-.badge-red{background:var(--clay-100);color:var(--clay-700)}
-.badge-yellow{background:#fef3c7;color:#92400e}
-.badge-green{background:var(--green-100);color:var(--green-900)}
-.badge-blue{background:var(--blue-100);color:var(--blue-700)}
-.badge-purple{background:var(--purple-100);color:var(--purple-700)}
+/* ─── Table of Contents ──────────────────────────────────────── */
+.toc {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 14px;
+  padding: 20px clamp(18px, 4vw, 28px); margin: 28px 0;
+  box-shadow: 0 2px 12px -4px rgba(10,61,36,0.08);
+}
+.toc h3 { font-family: 'Tajawal'; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--gold-700); margin-bottom: 12px; }
+.toc ol {
+  padding: 0; margin: 0; list-style: none;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2px 26px; counter-reset: toc;
+}
+.toc li { counter-increment: toc; }
+.toc a {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--green-700); text-decoration: none; font-weight: 500; font-size: 13.5px;
+  min-height: 44px;                 /* touch target */
+  border-bottom: 1px solid transparent;
+}
+.toc a::before {
+  content: counter(toc); font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--gold-700); background: var(--sand-100);
+  width: 22px; height: 22px; border-radius: 6px; flex: none;
+  display: grid; place-items: center;
+}
+.toc a:hover { color: var(--green-900); }
+.toc a:hover::before { background: var(--gold-200); }
 
-/* KPI Grid */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin:18px 0 24px}
-.kpi{background:#fffdf8;border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(10,61,36,0.06);transition:transform .15s,box-shadow .15s}
-.kpi:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(10,61,36,0.1)}
-.kpi .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:600;margin-bottom:4px}
-.kpi .value{font-family:'DM Mono',monospace;font-size:24px;font-weight:700;color:var(--purple-700);line-height:1.1}
-.kpi .sub{font-size:11.5px;color:var(--ink-500);margin-top:6px;line-height:1.4}
-.kpi.accent-red .value{color:var(--clay-500)} .kpi.accent-gold .value{color:var(--gold-700)}
-.kpi.accent-green .value{color:var(--green-500)} .kpi.accent-blue .value{color:var(--blue-700)}
+/* ─── Section Headings ───────────────────────────────────────── */
+h2 {
+  font-family: 'Tajawal', sans-serif; font-size: clamp(17px, 4.4vw, 20px);
+  font-weight: 700; color: var(--green-900); margin: 40px 0 6px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--gold-500);
+  display: flex; align-items: center; gap: 10px; scroll-margin-top: 16px;
+}
+h2::before { content: "۞"; color: var(--gold-500); font-size: 16px; flex: none; }
+h3 {
+  font-family: 'Tajawal'; font-size: clamp(14px, 3.6vw, 15px); font-weight: 700;
+  color: var(--green-700); margin: 24px 0 8px; letter-spacing: 0.3px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+p { max-width: 74ch; }
+.lead { font-size: 14.5px; color: var(--ink-700); max-width: 78ch; margin: 8px 0 4px; }
+code { font-family: 'DM Mono', monospace; font-size: 0.9em;
+  background: var(--sand-100); padding: 1px 5px; border-radius: 4px; color: var(--clay-700);
+  word-break: break-word; }
 
-/* Tables */
-.data-table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13px;background:#fffdf8;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(10,61,36,0.06)}
-.data-table th{background:#2d1b69;color:var(--gold-200);text-align:left;padding:10px 14px;font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;font-family:'DM Mono',monospace}
-.data-table td{padding:9px 14px;border-bottom:1px solid var(--sand-200);vertical-align:top}
-.data-table tr:last-child td{border-bottom:none}
-.data-table tr:hover td{background:var(--sand-100)}
-.data-table .num{font-family:'DM Mono',monospace;font-weight:500;text-align:right}
-.data-table .bold{font-weight:700}
-.data-table .indent{padding-left:30px;color:var(--ink-500);font-size:12.5px}
-.data-table .warn{color:var(--clay-500);font-weight:700}
-.data-table .good{color:var(--green-500);font-weight:700}
+.section-badge {
+  display: inline-block; padding: 2px 10px; border-radius: 999px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  vertical-align: middle;
+}
+.badge-red { background: var(--clay-100); color: var(--clay-700); }
+.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-green { background: var(--green-100); color: var(--green-900); }
+.badge-blue { background: #e0f2fe; color: #0c4a6e; }
 
-/* Priority Cards */
-.priority-card{background:#fffdf8;border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:12px 0;border-left:4px solid var(--gold-500);box-shadow:0 1px 6px rgba(10,61,36,0.05)}
-.priority-card.p-red{border-left-color:var(--clay-500)} .priority-card.p-yellow{border-left-color:#f59e0b}
-.priority-card.p-green{border-left-color:var(--green-500)} .priority-card.p-blue{border-left-color:#3b82f6}
-.priority-card.p-purple{border-left-color:var(--purple-700)}
-.priority-card .pid{font-family:'DM Mono';font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:8px}
-.priority-card.p-red .pid{background:var(--clay-100);color:var(--clay-700)}
-.priority-card.p-yellow .pid{background:#fef3c7;color:#92400e}
-.priority-card.p-green .pid{background:var(--green-100);color:var(--green-900)}
-.priority-card.p-blue .pid{background:var(--blue-100);color:var(--blue-700)}
-.priority-card.p-purple .pid{background:var(--purple-100);color:var(--purple-700)}
-.priority-card h4{font-family:'Tajawal';font-size:14px;font-weight:700;color:var(--ink-900);margin-bottom:6px;display:flex;align-items:center}
-.priority-card p{font-size:13px;color:var(--ink-700);line-height:1.55}
-.priority-card .tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;font-weight:600;background:var(--sand-200);color:var(--ink-700);margin-left:8px;text-transform:uppercase;letter-spacing:.5px}
+/* ─── KPI Grid ───────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  gap: 14px; margin: 18px 0 24px;
+}
+.kpi {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px 18px; box-shadow: 0 1px 4px rgba(10,61,36,0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(10,61,36,0.1); }
+.kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+.kpi .value { font-family: 'DM Mono', monospace; font-size: clamp(22px, 5.5vw, 26px);
+  font-weight: 700; color: var(--green-900); line-height: 1.1; }
+.kpi .sub { font-size: 11.5px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
+.kpi.accent-red .value { color: var(--clay-500); }
+.kpi.accent-gold .value { color: var(--gold-700); }
+.kpi.accent-green .value { color: var(--green-500); }
 
-/* Inventory Grid */
-.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:16px 0 24px}
-.inv-card{background:#fffdf8;border:1px solid var(--line);border-radius:10px;padding:14px 16px;transition:transform .12s}
-.inv-card:hover{transform:translateY(-1px);box-shadow:0 3px 12px rgba(10,61,36,0.08)}
-.inv-card .icon{font-size:22px;margin-bottom:6px} .inv-card .name{font-family:'Tajawal';font-weight:700;font-size:13.5px;color:var(--purple-700)}
-.inv-card .desc{font-size:12px;color:var(--ink-500);margin-top:3px}
+/* ─── Tables (with responsive scroll wrapper) ────────────────── */
+.table-wrap {
+  position: relative; margin: 14px 0 20px; border-radius: 10px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  box-shadow: 0 1px 6px rgba(10,61,36,0.06);
+}
+/* right-edge fade cues that more table exists off-screen */
+.table-wrap::after {
+  content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 26px;
+  background: linear-gradient(90deg, transparent, rgba(10,61,36,0.07));
+  pointer-events: none; opacity: 0; transition: opacity 0.2s;
+}
+.table-wrap.is-scrollable::after { opacity: 1; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px;
+  background: #fffdf8; min-width: 460px; }
+.data-table th {
+  background: var(--green-900); color: var(--gold-200); text-align: left;
+  padding: 10px 14px; font-size: 11px; text-transform: uppercase;
+  letter-spacing: 1px; font-weight: 600; font-family: 'DM Mono', monospace;
+  position: sticky; top: 0; white-space: nowrap;
+}
+.data-table td { padding: 9px 14px; border-bottom: 1px solid var(--sand-200); vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--sand-100); }
+.data-table .num { font-family: 'DM Mono', monospace; font-weight: 500;
+  text-align: right; white-space: nowrap; }
+.data-table .bold { font-weight: 700; }
+.data-table .indent { padding-left: 30px; color: var(--ink-500); font-size: 12.5px; }
+.data-table .warn { color: var(--clay-500); font-weight: 700; }
+.data-table .good { color: var(--green-500); font-weight: 700; }
 
-/* Exceedance Cards */
-.exceed-card{background:#fffdf8;border:1px solid var(--clay-100);border-radius:10px;padding:14px 18px;margin:8px 0;border-left:3px solid var(--clay-500)}
-.exceed-card .analyte{font-family:'Tajawal';font-weight:700;font-size:14px;color:var(--clay-700)}
-.exceed-card .detail{font-size:12.5px;color:var(--ink-700);margin-top:4px;line-height:1.5}
-.exceed-card .multiplier{font-family:'DM Mono';font-weight:700;color:var(--clay-500);font-size:13px}
+/* ─── Priority Cards ─────────────────────────────────────────── */
+.priority-card {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px clamp(16px, 4vw, 22px); margin: 12px 0;
+  border-left: 4px solid var(--gold-500);
+  box-shadow: 0 1px 6px rgba(10,61,36,0.05);
+}
+.priority-card.p-red { border-left-color: var(--clay-500); }
+.priority-card.p-yellow { border-left-color: #f59e0b; }
+.priority-card.p-green { border-left-color: var(--green-500); }
+.priority-card.p-blue { border-left-color: #3b82f6; }
+.priority-card .pid { font-family: 'DM Mono'; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-right: 8px; flex: none; }
+.priority-card.p-red .pid { background: var(--clay-100); color: var(--clay-700); }
+.priority-card.p-yellow .pid { background: #fef3c7; color: #92400e; }
+.priority-card.p-green .pid { background: var(--green-100); color: var(--green-900); }
+.priority-card.p-blue .pid { background: #e0f2fe; color: #0c4a6e; }
+.priority-card h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
+  color: var(--ink-900); margin-bottom: 6px; display: flex; align-items: center;
+  flex-wrap: wrap; gap: 4px; }
+.priority-card p { font-size: 13px; color: var(--ink-700); line-height: 1.55; max-width: none; }
+.priority-card .tag { display: inline-block; padding: 1px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; background: var(--sand-200); color: var(--ink-700);
+  text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* Timeline */
-.timeline{position:relative;padding-left:28px;margin:18px 0 30px}
-.timeline::before{content:"";position:absolute;left:10px;top:4px;bottom:4px;width:2px;background:linear-gradient(180deg,var(--purple-700),var(--gold-500),var(--clay-500))}
-.timeline-item{position:relative;margin-bottom:18px}
-.timeline-item::before{content:"";position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;border:2px solid var(--purple-700);background:#fffdf8}
-.timeline-item.t2::before{border-color:var(--gold-500)} .timeline-item.t3::before{border-color:#f59e0b} .timeline-item.t4::before{border-color:var(--clay-500)}
-.timeline-item h4{font-family:'Tajawal';font-size:14px;font-weight:700;color:var(--ink-900)}
-.timeline-item ul{margin-top:4px;padding-left:18px;font-size:13px;color:var(--ink-700)} .timeline-item li{margin-bottom:2px}
-.timeline-item .effort{font-family:'DM Mono';font-size:10.5px;color:var(--muted);margin-left:6px}
+/* ─── Inventory Grid ─────────────────────────────────────────── */
+.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: 12px; margin: 16px 0 24px; }
+.inv-card {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 10px;
+  padding: 14px 16px; transition: transform 0.12s, box-shadow 0.12s;
+}
+.inv-card:hover { transform: translateY(-1px); box-shadow: 0 3px 12px rgba(10,61,36,0.08); }
+.inv-card .icon { font-size: 22px; margin-bottom: 6px; }
+.inv-card .name { font-family: 'Tajawal'; font-weight: 700; font-size: 13.5px; color: var(--green-900); }
+.inv-card .desc { font-size: 12px; color: var(--ink-500); margin-top: 3px; }
 
-blockquote{border-left:3px solid var(--gold-500);background:var(--sand-100);padding:12px 18px;margin:14px 0;border-radius:0 8px 8px 0;font-size:13px;color:var(--ink-700)}
-blockquote strong{color:var(--purple-700)}
-footer{text-align:center;padding:20px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);margin-top:50px;font-family:'DM Mono',monospace;letter-spacing:.5px}
+/* ─── Phase Timeline ─────────────────────────────────────────── */
+.timeline { position: relative; padding-left: 28px; margin: 18px 0 30px; }
+.timeline::before { content: ""; position: absolute; left: 10px; top: 4px; bottom: 4px;
+  width: 2px; background: linear-gradient(180deg, var(--green-500), var(--gold-500), var(--clay-500)); }
+.timeline-item { position: relative; margin-bottom: 18px; }
+.timeline-item::before { content: ""; position: absolute; left: -22px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--green-500);
+  background: #fffdf8; }
+.timeline-item.t2::before { border-color: var(--gold-500); }
+.timeline-item.t3::before { border-color: #f59e0b; }
+.timeline-item.t4::before { border-color: var(--clay-500); }
+.timeline-item h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700; color: var(--green-900); }
+.timeline-item ul { margin-top: 4px; padding-left: 18px; font-size: 13px; color: var(--ink-700); }
+.timeline-item li { margin-bottom: 2px; }
 
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.kpi,.inv-card,.priority-card,.exceed-card{animation:fadeUp .4s ease both}
-.kpi:nth-child(2){animation-delay:.05s}.kpi:nth-child(3){animation-delay:.1s}.kpi:nth-child(4){animation-delay:.15s}
-.kpi:nth-child(5){animation-delay:.2s}.kpi:nth-child(6){animation-delay:.25s}.kpi:nth-child(7){animation-delay:.3s}
+/* ─── Blockquotes ────────────────────────────────────────────── */
+blockquote {
+  border-left: 3px solid var(--gold-500); background: var(--sand-100);
+  padding: 12px 18px; margin: 14px 0; border-radius: 0 8px 8px 0;
+  font-size: 13px; color: var(--ink-700); max-width: 82ch;
+}
+blockquote strong { color: var(--green-900); }
+blockquote .ar { font-family: 'Tajawal', sans-serif; direction: rtl; unicode-bidi: isolate; }
+
+/* ─── Footer ─────────────────────────────────────────────────── */
+footer {
+  text-align: center; padding: 22px var(--gutter); font-size: 12px; color: var(--muted);
+  border-top: 1px solid var(--line); margin-top: 50px;
+  font-family: 'DM Mono', monospace; letter-spacing: 0.5px; line-height: 1.8;
+}
+
+/* ─── Back to top ────────────────────────────────────────────── */
+.to-top {
+  position: fixed; right: 18px; bottom: 18px; z-index: 20;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--green-700); color: var(--gold-200);
+  border: 2px solid var(--gold-500); box-shadow: 0 4px 14px rgba(10,61,36,0.28);
+  display: grid; place-items: center; font-size: 20px; text-decoration: none;
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s, background 0.15s;
+}
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { background: var(--green-900); }
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.kpi, .inv-card, .priority-card { animation: fadeUp 0.4s ease both; }
+.kpi:nth-child(2){animation-delay:.04s}.kpi:nth-child(3){animation-delay:.08s}
+.kpi:nth-child(4){animation-delay:.12s}.kpi:nth-child(5){animation-delay:.16s}
+.kpi:nth-child(6){animation-delay:.20s}.kpi:nth-child(7){animation-delay:.24s}
+.kpi:nth-child(8){animation-delay:.28s}
+
+/* ─── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .toc { margin: 22px 0; }
+  h2 { margin-top: 32px; }
+  blockquote { padding: 11px 14px; }
+}
+@media (max-width: 480px) {
+  body { font-size: 13.5px; }
+  .kpi-grid { gap: 11px; }
+  .kpi { padding: 14px 15px; }
+  .data-table th, .data-table td { padding: 8px 11px; }
+  .to-top { right: 12px; bottom: 12px; }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ─── Print (A4-clean) ───────────────────────────────────────── */
+@media print {
+  :root { --gutter: 0; }
+  body { background: #fff; padding: 0; font-size: 11px; overflow: visible; }
+  body::before, .masthead::after { display: none; }
+  .to-top { display: none !important; }
+  .masthead { background: var(--green-900) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .kpi, .inv-card, .priority-card, .table-wrap, blockquote, .timeline-item { break-inside: avoid; box-shadow: none; }
+  .table-wrap { overflow: visible; }
+  .table-wrap::after { display: none; }
+  .data-table th { position: static; }
+  h2 { break-after: avoid; }
+  a[href^="#"] { color: inherit; text-decoration: none; }
+}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- MASTHEAD                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <header class="masthead">
   <div class="masthead-inner">
     <h1>⚗️ Chemistry Pipeline — Comprehensive Report</h1>
-    <div class="subtitle">8 Lab Sections · Statistics · Data Quality · Dashboard Inventory · Enhancement Proposal</div>
-    <div class="meta">REPORT DATE: 2026-08-11 · SCOPE: 2024–2025 · 8 SECTIONS · 15,876 ROWS · 1,133,621 TESTS · أمانة منطقة الرياض</div>
+    <div class="subtitle">Statistics · GSO Challenges · Numerical Ledger · Dashboard Enhancement Proposal</div>
+    <div class="meta">REPORT DATE: 2026-08-11 · SCOPE: 2024–2025 · 8 ANALYTICAL SECTIONS · TOTAL SAMPLES: 15,876 · أمانة منطقة الرياض</div>
   </div>
 </header>
 
 <div class="page">
 
-<nav class="toc">
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TABLE OF CONTENTS                                              -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<nav class="toc" aria-label="Contents">
   <h3>۞ Contents</h3>
   <ol>
     <li><a href="#s1">Headline Numbers — At a Glance</a></li>
-    <li><a href="#s2">Pipeline Architecture & 8 Lab Sections</a></li>
-    <li><a href="#s3">Per-Section Breakdown & Compliance</a></li>
-    <li><a href="#s4">Year-over-Year Trends (⚠️ Surges)</a></li>
-    <li><a href="#s5">Annual Report Reconciliation</a></li>
-    <li><a href="#s6">Worst Exceedances — Critical Findings</a></li>
-    <li><a href="#s7">Data Quality & Cleaning Metrics</a></li>
-    <li><a href="#s8">Current Dashboard Inventory</a></li>
-    <li><a href="#s9">Enhancement Opportunities</a></li>
-    <li><a href="#s10">Implementation Roadmap</a></li>
+    <li><a href="#s2">Pipeline Stages</a></li>
+    <li><a href="#s3">GSO Classification Challenges</a></li>
+    <li><a href="#s4">Data Quality &amp; Statistical Challenges</a></li>
+    <li><a href="#s5">Numerical Ledger — All Counts</a></li>
+    <li><a href="#s6">Current Dashboard Inventory</a></li>
+    <li><a href="#s7">Enhancement Opportunities</a></li>
+    <li><a href="#s8">Implementation Roadmap</a></li>
   </ol>
 </nav>
 
-<!-- ══════════ SECTION 1 — HEADLINE KPIs ══════════ -->
+<p class="lead">The chemistry pipeline turns eight streams of raw analytical lab
+data — aflatoxins, food chemistry, heavy metals, honey, hormones &amp; antibiotics,
+jam, pesticides, and water — into one auditable, deterministic dataset and a pair
+of interactive decision tools. This report is the chemistry sibling of the
+microbiology comprehensive report: same structure, same numerical honesty,
+chemistry-specific challenges.</p>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 1 — HEADLINE KPIs                                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <h2 id="s1">Headline Numbers — At a Glance</h2>
 <div class="kpi-grid">
-  <div class="kpi"><div class="label">Total Rows (Both Years)</div><div class="value">15,876</div><div class="sub">2024: 6,441 · 2025: 9,435</div></div>
-  <div class="kpi"><div class="label">Unique Samples</div><div class="value">15,297</div><div class="sub">Pesticides collapsed to per-sample</div></div>
-  <div class="kpi accent-green"><div class="label">Row-Level Valid</div><div class="value">92.4%</div><div class="sub">14,677 rows compliant</div></div>
-  <div class="kpi accent-red"><div class="label">Row-Level Invalid</div><div class="value">6.9%</div><div class="sub">1,101 rows non-compliant</div></div>
-  <div class="kpi accent-gold"><div class="label">Other / No Limit</div><div class="value">98</div><div class="sub">92 no_limit · 4 rejected · 2 unknown</div></div>
-  <div class="kpi"><div class="label">Total Tests Recorded</div><div class="value">1,133,621</div><div class="sub">Across all 8 sections, 2 years</div></div>
-  <div class="kpi"><div class="label">Lab Sections</div><div class="value">8</div><div class="sub">Aflatoxins · Food Chem · Heavy Metals · Honey · Hormones · Jam · Pesticides · Water</div></div>
-  <div class="kpi"><div class="label">Parquet Files</div><div class="value">14</div><div class="sub">Per section × year deliverables</div></div>
-  <div class="kpi accent-blue"><div class="label">2025 Official Samples</div><div class="value">7,287</div><div class="sub">Pipeline: 7,339 (+52 gap, 99.3%)</div></div>
-  <div class="kpi accent-blue"><div class="label">2025 Official Tests</div><div class="value">500,535</div><div class="sub">Pipeline: 498,622 (−1,913, 99.6%)</div></div>
-  <div class="kpi"><div class="label">Category Classes</div><div class="value">16</div><div class="sub">Canonical GSO vocabulary</div></div>
-  <div class="kpi accent-red"><div class="label">Worst Exceedance</div><div class="value">298×</div><div class="sub">Penconazole in parsley (pesticides)</div></div>
+  <div class="kpi"><div class="label">Cleaned Samples</div><div class="value">15,876</div><div class="sub">8 sections × 2 years · 14 parquets</div></div>
+  <div class="kpi"><div class="label">2024 Samples</div><div class="value">6,441</div><div class="sub">Row-for-row verified vs raw xlsx</div></div>
+  <div class="kpi"><div class="label">2025 Samples</div><div class="value">9,435</div><div class="sub">Grand total 15,876</div></div>
+  <div class="kpi accent-red"><div class="label">Non-Compliance Rate</div><div class="value">6.98%</div><div class="sub">1,101 invalid / 15,778 evaluated</div></div>
+  <div class="kpi accent-green"><div class="label">Valid Samples</div><div class="value">14,677</div><div class="sub">92.4% of all cleaned rows</div></div>
+  <div class="kpi accent-gold"><div class="label">No-Limit / Rejected / Unknown</div><div class="value">98</div><div class="sub">92 no_limit · 4 rejected · 2 unknown</div></div>
+  <div class="kpi"><div class="label">Distinct Test Results</div><div class="value">1,133,621</div><div class="sub">2024: 634,978 · 2025: 498,643</div></div>
+  <div class="kpi accent-red"><div class="label">Test-Level Non-Compliant</div><div class="value">1,243</div><div class="sub">746 not-evaluated (no limit)</div></div>
+  <div class="kpi accent-red"><div class="label">Heavy Metals YoY</div><div class="value">+12.0 pp</div><div class="sub">4.1% → 16.1% fail (⚠️ confirm)</div></div>
+  <div class="kpi accent-red"><div class="label">Pesticides YoY</div><div class="value">+8.5 pp</div><div class="sub">8.3% → 16.9% fail (⚠️ confirm)</div></div>
+  <div class="kpi"><div class="label">GSO 1016 Categories</div><div class="value">15</div><div class="sub">Fruit &amp; Veg largest (7,257)</div></div>
+  <div class="kpi"><div class="label">Unique Samples (sunburst)</div><div class="value">15,297</div><div class="sub">Pesticides collapsed · 5.8% NC</div></div>
 </div>
 
-<!-- ══════════ SECTION 2 — PIPELINE ══════════ -->
-<h2 id="s2">Pipeline Architecture & 8 Lab Sections</h2>
-
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 2 — PIPELINE STAGES                                    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s2">Pipeline Stages</h2>
+<p>Chemistry data flows through five deterministic stages. The entire build —
+all 14 parquets — regenerates byte-identical in about 30 seconds and runs on the
+microbiology virtual-env (there is no chemistry-local venv).</p>
+<div class="table-wrap">
 <table class="data-table">
   <thead><tr><th>#</th><th>Stage</th><th>Scripts</th><th>Key Operations</th></tr></thead>
   <tbody>
-    <tr><td class="num">1</td><td class="bold">Schema Definition</td><td><code>schemas/chem_*.yaml</code> (×8)</td><td>Header aliases, paired columns, sheet skip rules, test definitions per section</td></tr>
-    <tr><td class="num">2</td><td class="bold">Extraction & Cleaning</td><td><code>clean_chemistry.py</code></td><td>Parse Excel via openpyxl, normalize text/numbers, parse ND tokens, derive verdicts, deduplicate, write Parquet</td></tr>
-    <tr><td class="num">3</td><td class="bold">Category Classification</td><td><code>categories.py</code></td><td>5-tier fallback: corrections CSV → name overrides → ID prefix → name keywords → category keywords → default</td></tr>
-    <tr><td class="num">4</td><td class="bold">Sector Mapping</td><td><code>sectors.py</code></td><td>Map municipalities to 5 Amanah sectors (East/North/West/Central/South) with alias normalization</td></tr>
-    <tr><td class="num">5</td><td class="bold">Shared Utilities</td><td><code>_common.py</code></td><td>Unicode normalization, ND/NA parsing, date handling, workbook iteration, Parquet writer</td></tr>
-    <tr><td class="num">6</td><td class="bold">Dashboard Build</td><td><code>build_dashboard.py</code></td><td>Merge all 14 parquets, compute KPIs, generate self-contained HTML with Plotly charts</td></tr>
+    <tr><td class="num">1</td><td class="bold">Ingestion</td><td><code>raw/{2024,2025}/*.xlsx</code></td><td>Section-driven read of monthly (or single-sheet) lab workbooks; skip <code>final*</code>/<code>invalid</code>/<code>study</code> sheets and year-impure tabs</td></tr>
+    <tr><td class="num">2</td><td class="bold">Cleaning &amp; Header Mapping</td><td><code>clean_chemistry.py</code></td><td>Bilingual header alias matching, paired result/limit/QC columns, <code>parse_date()</code> anomaly guard, <code>normalise_sample_id()</code></td></tr>
+    <tr><td class="num">3</td><td class="bold">Validity Judgment</td><td><code>clean_chemistry.py</code> · <code>map_validity()</code>, <code>derive_test_result()</code></td><td>Map lab verdict → tiered derivation from exceeded-limit counts and verdict text → <code>validity_status</code></td></tr>
+    <tr><td class="num">4</td><td class="bold">Categorization &amp; GSO Mapping</td><td><code>categories.py</code>, <code>sectors.py</code></td><td>7-tier category resolution (corrections → prefix → keywords → default); 26 sub-municipalities → 5 amanah sectors</td></tr>
+    <tr><td class="num">5</td><td class="bold">Deliverables</td><td><code>build_dashboard.py</code>, <code>build_chem_sunburst.py</code></td><td>Self-contained decision dashboard (5 tabs, 6 charts) + zoomable assay-plate sunburst; per-section <code>.md</code> audit summaries</td></tr>
   </tbody>
 </table>
-
-<h3>8 Analytical Lab Sections</h3>
-<div class="inv-grid">
-  <div class="inv-card"><div class="icon">🔬</div><div class="name">Aflatoxins</div><div class="desc">Mycotoxin contamination (B1, B2, G1, G2, Total) in spices, nuts, cereals</div></div>
-  <div class="inv-card"><div class="icon">🧪</div><div class="name">Food Chemistry</div><div class="desc">pH, moisture, fat, protein, acidity, peroxide value, ash — largest section (7,000 rows)</div></div>
-  <div class="inv-card"><div class="icon">⚠️</div><div class="name">Heavy Metals</div><div class="desc">Lead, Arsenic, Cadmium, Mercury, Tin in meat, fish, produce, oils</div></div>
-  <div class="inv-card"><div class="icon">🍯</div><div class="name">Honey</div><div class="desc">Glucose+Fructose, HMF, Sucrose, Moisture, Diastase — adulteration & quality</div></div>
-  <div class="inv-card"><div class="icon">💊</div><div class="name">Hormones & Antibiotics</div><div class="desc">2025-only, 9 samples — Ractopamine, Clenbuterol, veterinary drug residues</div></div>
-  <div class="inv-card"><div class="icon">🫙</div><div class="name">Jam</div><div class="desc">2024-only, 83 rows — display-only (no GSO limits exist); TSS, acidity, HMF</div></div>
-  <div class="inv-card"><div class="icon">🌿</div><div class="name">Pesticides</div><div class="desc">Multi-residue screening (long format: one row per detected pesticide per sample)</div></div>
-  <div class="inv-card"><div class="icon">💧</div><div class="name">Water Analysis</div><div class="desc">TDS, Hardness, Chloride, Nitrate, Fluoride, Turbidity, pH — tap/filter/bottled</div></div>
 </div>
 
-<!-- ══════════ SECTION 3 — PER-SECTION BREAKDOWN ══════════ -->
-<h2 id="s3">Per-Section Breakdown & Compliance</h2>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 3 — GSO / CLASSIFICATION CHALLENGES                    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s3">GSO Classification &amp; Categorization Challenges</h2>
+<p>Mapping a free-text Arabic sample name to a strict GSO 1016 category, across
+eight chemically distinct sections, carries its own linguistic and domain traps,
+different from the microbiology sauce/swab problems.</p>
 
-<table class="data-table">
-  <thead><tr><th>Section</th><th>2024 Rows</th><th>2025 Rows</th><th>Total</th><th>2024 Valid/Invalid/Other</th><th>2025 Valid/Invalid/Other</th></tr></thead>
-  <tbody>
-    <tr><td class="bold">Aflatoxins</td><td class="num">1,113</td><td class="num">1,156</td><td class="num bold">2,269</td><td>1,082 / 31 / 0</td><td>1,150 / 6 / 0</td></tr>
-    <tr><td class="bold">Food Chemistry</td><td class="num">2,777</td><td class="num">4,223</td><td class="num bold">7,000</td><td>2,653 / 124 / 0</td><td>4,200 / 23 / 0</td></tr>
-    <tr><td class="bold">Heavy Metals</td><td class="num">220</td><td class="num">918</td><td class="num bold">1,138</td><td>207 / 9 / 4</td><td>769 / 148 / 1</td></tr>
-    <tr><td class="bold">Honey</td><td class="num">45</td><td class="num">25</td><td class="num bold">70</td><td>26 / 14 / 5</td><td>16 / 9 / 0</td></tr>
-    <tr><td class="bold">Hormones & Antibiotics</td><td class="num">—</td><td class="num">9</td><td class="num bold">9</td><td>—</td><td>9 / 0 / 0</td></tr>
-    <tr><td class="bold">Jam</td><td class="num">83</td><td class="num">—</td><td class="num bold">83</td><td>0 / 1 / 82</td><td>—</td></tr>
-    <tr><td class="bold">Pesticides</td><td class="num">1,954</td><td class="num">2,747</td><td class="num bold">4,701</td><td>1,785 / 163 / 6</td><td>2,284 / 463 / 0</td></tr>
-    <tr><td class="bold">Water Analysis</td><td class="num">249</td><td class="num">357</td><td class="num bold">606</td><td>203 / 46 / 0</td><td>293 / 64 / 0</td></tr>
-    <tr style="background:var(--sand-100)"><td class="bold" style="color:var(--purple-700)">TOTAL</td><td class="num bold">6,441</td><td class="num bold">9,435</td><td class="num bold" style="color:var(--purple-700)">15,876</td><td class="bold">5,956 / 388 / 97</td><td class="bold">8,721 / 713 / 1</td></tr>
-  </tbody>
-</table>
-
-<!-- ══════════ SECTION 4 — YOY TRENDS ══════════ -->
-<h2 id="s4">Year-over-Year Trends <span class="section-badge badge-red">⚠️ SURGES</span></h2>
-
-<table class="data-table">
-  <thead><tr><th>Section</th><th>2024 Fail Rate</th><th>2025 Fail Rate</th><th>YoY Delta</th><th>Status</th></tr></thead>
-  <tbody>
-    <tr><td>Aflatoxins</td><td class="num">2.8%</td><td class="num good">0.5%</td><td class="num good">−2.3 pp</td><td class="good">✓ Improved</td></tr>
-    <tr><td>Food Chemistry</td><td class="num">4.5%</td><td class="num good">0.5%</td><td class="num good">−3.9 pp</td><td class="good">✓ Improved</td></tr>
-    <tr><td class="warn">Heavy Metals</td><td class="num">4.1%</td><td class="num warn">16.1%</td><td class="num warn">+12.0 pp</td><td class="warn">⚠️ SURGE (Lead & Arsenic)</td></tr>
-    <tr><td class="warn">Honey</td><td class="num">31.1%</td><td class="num warn">36.0%</td><td class="num warn">+4.9 pp</td><td class="warn">⚠️ High failure (small n=70)</td></tr>
-    <tr><td class="warn">Pesticides</td><td class="num">8.3%</td><td class="num warn">16.9%</td><td class="num warn">+8.5 pp</td><td class="warn">⚠️ Doubled YoY</td></tr>
-    <tr><td>Water Analysis</td><td class="num">18.5%</td><td class="num">17.9%</td><td class="num good">−0.6 pp</td><td>Flat (~18%)</td></tr>
-  </tbody>
-</table>
-
+<h3>A. Multilingual &amp; Misspelled Raw Categories</h3>
 <blockquote>
-  <strong>Key Concern:</strong> Heavy metals failure rate surged from 4.1% to 16.1% in 2025 (+12 pp), driven primarily by Lead and Arsenic exceedances in meat and seafood. Pesticides more than doubled from 8.3% to 16.9%. These require immediate investigation.
+  The lab enters <code>sample_category</code> in Arabic with drifting spelling —
+  <span class="ar">لوز</span> vs <span class="ar">اللوز</span> (almond),
+  <span class="ar">فستق</span> vs <span class="ar">فسطق</span> (pistachio), and
+  misspelled ID prefixes (<code>uu-pe</code>, <code>oau-da</code>).
+  <code>categories.classify()</code> resolves this with a 7-tier chain: per-sample
+  corrections → product-name overrides → sample-ID prefix decode → water
+  sub-detection → 130+ name keywords → raw-category keywords → section default.
 </blockquote>
 
-<!-- ══════════ SECTION 5 — ANNUAL REPORT ══════════ -->
-<h2 id="s5">Annual Report Reconciliation (2025)</h2>
+<h3>B. Ambiguous Prefixes &amp; Hand-Audited Corrections</h3>
+<p>A prefix like <code>pe</code> could mean peanut
+(<span class="ar">فول سوداني</span>) or pepper (<span class="ar">فلفل</span>) —
+so ambiguous prefixes are deliberately omitted from the decode table and left to
+the keyword tier. Where rules cannot be trusted, Muhannad's sheet-8 audit column
+(<span class="ar">التصنيف الصحيح</span>) feeds <code>category_corrections.csv</code>
+(~2,400 rows), which <strong>wins over every rule</strong>.</p>
 
+<h3>C. Mid-Pipeline Reclassifications (2026-07)</h3>
+<p>Nine product groups were re-homed after review: <strong>nuts</strong>
+(<span class="ar">لوز/فستق/كاجو</span>) moved from cereals → sweets/chocolate;
+<strong>pepper</strong> and <strong>dried onion</strong> moved from spices → fruit
+&amp; vegetables; <strong>raisins, salad, chips</strong> → fruit &amp; veg;
+<strong>sesame</strong> isolated to "miscellaneous foods" while tahini stays a
+spice; and a new <strong>non-potable water</strong> class was created for
+<span class="ar">حوض/راكد/متحرك</span> samples.</p>
+
+<h3>D. Section-Specific Traps</h3>
+<blockquote>
+  <strong>Jam short-circuit:</strong> jam is entirely jam/jelly, so fruit-flavour
+  keywords (<span class="ar">توت/مشمش</span>) must not misroute it — the classifier
+  forces the jam section to <span class="ar">المربى والجلي</span> before any
+  keyword runs. <strong>Water collapse:</strong> every potable variant
+  (<span class="ar">مياه/مياة/موية</span>) folds to one class; only
+  <span class="ar">حوض/راكد/متحرك</span> stays non-potable.
+</blockquote>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 4 — DATA QUALITY & STATISTICAL CHALLENGES             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s4">Data Quality &amp; Statistical Challenges</h2>
+
+<h3>A. The Five Validity States</h3>
+<p>Unlike a binary pass/fail, chemistry samples land in one of five
+<code>validity_status</code> states because a result is only judgeable when a
+regulatory <em>limit</em> exists for it:</p>
+<div class="table-wrap">
 <table class="data-table">
-  <thead><tr><th>Metric</th><th>Annual Report 2025</th><th>Pipeline 2025</th><th>Delta</th><th>Accuracy</th></tr></thead>
+  <thead><tr><th>Status</th><th>Meaning</th><th>Count</th></tr></thead>
   <tbody>
-    <tr><td class="bold">Total Samples</td><td class="num">7,287</td><td class="num">7,339</td><td class="num">+52</td><td class="num bold">99.29%</td></tr>
-    <tr><td class="bold">Total Tests</td><td class="num">500,535</td><td class="num">498,622</td><td class="num">−1,913</td><td class="num bold">99.62%</td></tr>
-    <tr><td>Compliant Tests</td><td class="num">499,206</td><td class="num">497,956</td><td class="num">−1,250</td><td class="num">99.75%</td></tr>
-    <tr><td>Non-Compliant Tests</td><td class="num">763</td><td class="num">666</td><td class="num warn">−97</td><td class="num">87.29%</td></tr>
-    <tr><td>Compliance Rate</td><td class="num">99.734%</td><td class="num">99.866%</td><td class="num">—</td><td class="num">99.99% match</td></tr>
+    <tr><td class="bold good">valid</td><td><code>is_valid == True</code> — lab-entered or derived from limits/verdict text</td><td class="num bold">14,677</td></tr>
+    <tr><td class="bold warn">invalid</td><td><code>is_valid == False</code> — a test exceeded its limit</td><td class="num bold">1,101</td></tr>
+    <tr><td>no_limit</td><td>Result present but no regulatory limit → cannot be judged</td><td class="num">92</td></tr>
+    <tr><td>rejected</td><td>Lab marked <span class="ar">مرفوض</span> / unfit for analysis</td><td class="num">4</td></tr>
+    <tr><td>unknown</td><td><code>is_valid is None</code> and no actionable signal</td><td class="num">2</td></tr>
   </tbody>
 </table>
-<blockquote><strong>−97 non-compliant gap:</strong> Annual Report counts re-tests/confirmatory runs as separate failures. Pipeline deduplicates and keeps each unique failed test once per sample.</blockquote>
+</div>
 
-<!-- ══════════ SECTION 6 — WORST EXCEEDANCES ══════════ -->
-<h2 id="s6">Worst Exceedances — Critical Findings</h2>
+<h3>B. "No Limit" Semantics &amp; Non-Detects</h3>
+<blockquote>
+  In a <strong>result</strong> column, <code>N.D</code> parses to
+  <code>(0.0, is_nd=True)</code> — not detected. In a <strong>limit</strong>
+  column, <code>N.D</code> parses to <code>None</code> — the limit is
+  <em>unset</em>, never 0.0 (which would falsely flag every trace as an
+  exceedance). Jam 2024 is the extreme case: <strong>82 of 83 rows</strong> carry
+  analytes with no regulatory limit, so only one row is judgeable.
+</blockquote>
 
-<h3>Heavy Metals</h3>
-<div class="exceed-card"><div class="analyte">Lead (Pb) — Raw Indian Beef</div><div class="detail">Sample <code>raw-0237-r01</code>: <strong>5,653 ppb</strong> vs limit 100 ppb → <span class="multiplier">56.5× limit</span></div></div>
-<div class="exceed-card"><div class="analyte">Lead (Pb) — Raw Veal</div><div class="detail"><strong>4,365 ppb</strong> vs limit 100 ppb → <span class="multiplier">43.6× limit</span></div></div>
-<div class="exceed-card"><div class="analyte">Arsenic (As) — Shrimp</div><div class="detail">Sample <code>fish-0098-r01</code>: <strong>11,879 ppb</strong> vs limit 500 ppb → <span class="multiplier">23.8× limit</span></div></div>
-<div class="exceed-card"><div class="analyte">Cadmium (Cd) — Safi Fish</div><div class="detail">Sample <code>fish-0111-r01</code>: <strong>1,852.1 ppb</strong> vs limit 50 ppb → <span class="multiplier">37.0× limit</span></div></div>
+<h3>C. Pesticides Long-Format Explosion</h3>
+<p>Pesticides arrive one row <em>per detected analyte</em>: sample metadata
+appears only on the first row and is forward-filled onto continuation rows. The
+dashboard therefore counts <strong>15,876 rows</strong> while the sunburst
+collapses pesticides to <strong>15,297 unique samples</strong> — a +579-row
+difference. Confusing the two denominators is the single easiest way to misstate
+the non-compliance rate.</p>
 
-<h3>Pesticides</h3>
-<div class="exceed-card"><div class="analyte">Penconazole — Parsley</div><div class="detail">Sample <code>ou-pa-0258-r01</code>: <strong>5.968 ppm</strong> vs limit 0.02 ppm → <span class="multiplier">298.4× limit</span></div></div>
-<div class="exceed-card"><div class="analyte">Cypermethrin — Coriander</div><div class="detail">Sample <code>uo2-co-0063-r01</code>: <strong>21.770 ppm</strong> vs limit 0.10 ppm → <span class="multiplier">217.7× limit</span></div></div>
-<div class="exceed-card"><div class="analyte">Dimethoate — Green Grapes</div><div class="detail"><strong>1.240 ppm</strong> vs limit 0.01 ppm → <span class="multiplier">124.0× limit</span></div></div>
+<h3>D. Comparison Prefixes, Dates &amp; Duplicates</h3>
+<blockquote>
+  <strong>Prefixes:</strong> <code>&gt;10</code>, <code>&lt;5</code>,
+  <code>≤0.01</code> are stripped before numeric parse.
+  <strong>Year-purity guard:</strong> stray 2026 tabs inside 2025 workbooks are
+  dropped when the sampling-date year exceeds the file year.
+  <strong>Header leaks &amp; dedup:</strong> pasted header rows
+  (<span class="ar">رمز العينة</span>) are discarded and intra-sheet duplicates
+  removed — pesticides keyed on
+  <code>(sheet, sample_id, pesticide_name, conc)</code>, others on
+  <code>(sheet, sample_id)</code>.
+</blockquote>
 
-<h3>Honey (Adulteration)</h3>
-<div class="exceed-card"><div class="analyte">HMF — Natural Honey</div><div class="detail"><strong>1,912.0 mg/kg</strong> vs limit 80 mg/kg → <span class="multiplier">23.9× limit</span> (severe heat damage or age)</div></div>
-<div class="exceed-card"><div class="analyte">Sucrose — Sidr Honey</div><div class="detail"><strong>13.98%</strong> vs limit 5.0% → <span class="multiplier">2.8× limit</span> (possible adulteration)</div></div>
-
-<h3>Aflatoxins</h3>
-<div class="exceed-card"><div class="analyte">Total Aflatoxin — Cherry Red Pepper</div><div class="detail"><strong>228.28 ppb</strong> vs limit 10 ppb → <span class="multiplier">22.8× limit</span>; B1 at 218.35 ppb</div></div>
-
-<!-- ══════════ SECTION 7 — DATA QUALITY ══════════ -->
-<h2 id="s7">Data Quality & Cleaning Metrics</h2>
-
+<h3>E. Year-over-Year Failure Spikes <span class="section-badge badge-red">CONFIRM WITH LAB</span></h3>
+<p>Two sections roughly doubled their invalid rate in 2025. This may reflect (a) a
+methodology or limit change, (b) better detection, or (c) a real contamination
+spike — it should be confirmed before it is read as a trend.</p>
+<div class="table-wrap">
 <table class="data-table">
-  <thead><tr><th>Cleaning Operation</th><th>Count</th></tr></thead>
+  <thead><tr><th>Section</th><th>2024 fail %</th><th>2025 fail %</th><th>Δ</th></tr></thead>
   <tbody>
-    <tr><td>Intra-sheet duplicate rows dropped</td><td class="num bold">261</td></tr>
-    <tr><td>Header-leak guard rows dropped</td><td class="num">10</td></tr>
-    <tr><td>Empty/orphan rows dropped (water 2025)</td><td class="num">812</td></tr>
-    <tr><td>Year-purity rule (2026 tabs excluded from pesticides 2025)</td><td class="num">~554</td></tr>
-    <tr><td>Excel sheets with autofilters processed</td><td class="num">63</td></tr>
-    <tr><td>Hidden rows correctly included</td><td class="num">670</td></tr>
-    <tr><td>2024 rows missing source category</td><td class="num warn">2,519</td></tr>
-    <tr><td>Unspecified invalid pesticide samples (lab-flagged, no exceedance found)</td><td class="num warn">167</td></tr>
-    <tr><td>Junk municipality values (sample names in wrong column)</td><td class="num">21</td></tr>
-    <tr><td>Jam rows with no GSO limit (display-only)</td><td class="num">82</td></tr>
+    <tr><td class="bold">heavy_metals</td><td class="num">4.1%</td><td class="num warn">16.1%</td><td class="num warn">+12.0 pp ⚠️</td></tr>
+    <tr><td class="bold">pesticides</td><td class="num">8.3%</td><td class="num warn">16.9%</td><td class="num warn">+8.5 pp ⚠️</td></tr>
+    <tr><td>honey</td><td class="num">31.1%</td><td class="num">36.0%</td><td class="num">+4.9 pp (small n)</td></tr>
+    <tr><td>water_analysis</td><td class="num">18.5%</td><td class="num">17.9%</td><td class="num good">−0.6 pp</td></tr>
+    <tr><td>aflatoxins</td><td class="num">2.8%</td><td class="num">0.5%</td><td class="num good">−2.3 pp ✓</td></tr>
+    <tr><td>food_chemistry</td><td class="num">4.5%</td><td class="num">0.5%</td><td class="num good">−3.9 pp ✓</td></tr>
   </tbody>
 </table>
-
-<!-- ══════════ SECTION 8 — DASHBOARD INVENTORY ══════════ -->
-<h2 id="s8">Current Dashboard Inventory</h2>
-
-<h3>Main Dashboard — 5 Tabs, 8 Charts, 10 KPI Cards, 4 Tables</h3>
-<div class="inv-grid">
-  <div class="inv-card"><div class="icon">🗺️</div><div class="name">Riyadh Sector Map</div><div class="desc">Scattermapbox · 5 sectors · size=volume, color=NC%</div></div>
-  <div class="inv-card"><div class="icon">📈</div><div class="name">Monthly Compliance Bar</div><div class="desc">Stacked bar: compliant vs non-compliant by month</div></div>
-  <div class="inv-card"><div class="icon">🍩</div><div class="name">Validity Donut</div><div class="desc">Pie chart: % compliant vs non-compliant</div></div>
-  <div class="inv-card"><div class="icon">📊</div><div class="name">Sector Breakdown Bar</div><div class="desc">Stacked bar with outside NC% text labels</div></div>
-  <div class="inv-card"><div class="icon">🧪</div><div class="name">GSO Category Chart</div><div class="desc">Stacked bar by year + NC% line overlay</div></div>
-  <div class="inv-card"><div class="icon">🔬</div><div class="name">Top 25 Failed Tests Bar</div><div class="desc">Horizontal bar · analytes/pesticides · gradient coloring</div></div>
-  <div class="inv-card"><div class="icon">📊</div><div class="name">YoY Comparison</div><div class="desc">3-cell delta grid (2024 vs 2025 percentage points)</div></div>
-  <div class="inv-card"><div class="icon">📋</div><div class="name">Sample Drilldown Table</div><div class="desc">Up to 300 rows · verdict badges · CSV export</div></div>
 </div>
 
-<h3>KPI Banners (10 Cards)</h3>
-<div class="inv-grid">
-  <div class="inv-card"><div class="icon">📊</div><div class="name">Global Sample Banner (6)</div><div class="desc">Total Samples · Compliant · Non-compliant · Without Specs · Facilities · Sectors</div></div>
-  <div class="inv-card"><div class="icon">🧬</div><div class="name">Test Summary Banner (4)</div><div class="desc">Total Tests · Compliant Tests · Non-compliant Tests · Not Evaluated</div></div>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 5 — NUMERICAL LEDGER                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s5">Numerical Ledger — All Counts</h2>
+
+<h3>5.1 Master Dataset</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">Total Cleaned Samples</td><td class="num bold">15,876</td></tr>
+    <tr><td>2024 Samples</td><td class="num">6,441</td></tr>
+    <tr><td>2025 Samples</td><td class="num">9,435</td></tr>
+    <tr><td>Unique Samples (pesticides collapsed)</td><td class="num">15,297</td></tr>
+    <tr><td>Parquet Files (8 sections × 2 years − 2)</td><td class="num">14</td></tr>
+    <tr><td>Category Corrections (hand-audited)</td><td class="num">~2,400</td></tr>
+  </tbody>
+</table>
 </div>
 
-<h3>Tables (4)</h3>
-<div class="inv-grid">
-  <div class="inv-card"><div class="icon">🏪</div><div class="name">Top 10 Repeat-Offender Facilities</div><div class="desc">Ranked by NC sample count + failure rate</div></div>
-  <div class="inv-card"><div class="icon">⚠️</div><div class="name">Top 10 Contaminated Subtypes</div><div class="desc">With progress bars & GSO parent categories</div></div>
-  <div class="inv-card"><div class="icon">📑</div><div class="name">Category Breakdown Table</div><div class="desc">Total / Compliant / Non-compliant / NC%</div></div>
-  <div class="inv-card"><div class="icon">📋</div><div class="name">Sortable GSO Table</div><div class="desc">Click-to-sort GSO categories with counts</div></div>
+<h3>5.2 Per-Section Sample Counts</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>Section</th><th>Total</th><th>Years</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">food_chemistry</td><td class="num">7,000</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">pesticides</td><td class="num">4,701</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">aflatoxins</td><td class="num">2,269</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">heavy_metals</td><td class="num">1,138</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">water_analysis</td><td class="num">606</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">jam</td><td class="num">83</td><td>2024 only</td></tr>
+    <tr><td class="bold">honey</td><td class="num">70</td><td>2024 + 2025</td></tr>
+    <tr><td class="bold">hormones_antibiotics</td><td class="num">9</td><td>2025 only</td></tr>
+    <tr><td class="bold">Total</td><td class="num bold">15,876</td><td>—</td></tr>
+  </tbody>
+</table>
 </div>
 
-<h3>Filters & Controls</h3>
+<h3>5.3 Sample Validity Distribution</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold good">Valid</td><td class="num bold">14,677</td></tr>
+    <tr><td class="bold warn">Invalid</td><td class="num bold">1,101</td></tr>
+    <tr><td>No Limit</td><td class="num">92</td></tr>
+    <tr><td>Rejected</td><td class="num">4</td></tr>
+    <tr><td>Unknown</td><td class="num">2</td></tr>
+    <tr><td class="bold warn">Overall NC Rate (evaluated)</td><td class="num bold warn">6.98%</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>5.4 Test-Level Ledger</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>Metric</th><th>Count</th></tr></thead>
+  <tbody>
+    <tr><td class="bold">Distinct Test Results</td><td class="num bold">1,133,621</td></tr>
+    <tr><td class="indent">2024</td><td class="num">634,978</td></tr>
+    <tr><td class="indent">2025</td><td class="num">498,643</td></tr>
+    <tr><td>Compliant Tests</td><td class="num good">1,131,632</td></tr>
+    <tr><td>Non-Compliant Tests</td><td class="num warn">1,243</td></tr>
+    <tr><td>Not Evaluated (no limit)</td><td class="num">746</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>5.5 GSO 1016 Coverage (15 categories)</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>GSO Category</th><th>Samples</th></tr></thead>
+  <tbody>
+    <tr><td>Fruit and Vegetables</td><td class="num">7,257</td></tr>
+    <tr><td>Cereals; Legumes and their Products</td><td class="num">3,293</td></tr>
+    <tr><td>Chocolate, Sweets and their Ingredients</td><td class="num">1,601</td></tr>
+    <tr><td>Tomato Concentrates, Sauces, Vinegar, Spices &amp; Herbs</td><td class="num">1,529</td></tr>
+    <tr><td>Drinking Water</td><td class="num">1,051</td></tr>
+    <tr><td>Meat, Poultry and its Products</td><td class="num">427</td></tr>
+    <tr><td>Miscellaneous Foods</td><td class="num">273</td></tr>
+    <tr><td>Fish and Shellfish and their Products</td><td class="num">167</td></tr>
+    <tr><td>Jelly, Jam and Marmalade</td><td class="num">99</td></tr>
+    <tr><td>Dairy Products</td><td class="num">57</td></tr>
+    <tr><td>Animal Feed</td><td class="num">53</td></tr>
+    <tr><td>Beverages</td><td class="num">40</td></tr>
+    <tr><td>Non-potable Water</td><td class="num">23</td></tr>
+    <tr><td>Fats and Oils</td><td class="num">4</td></tr>
+    <tr><td>Ready to Eat Foods</td><td class="num">2</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>5.6 Data-Quality Guards</h3>
+<div class="table-wrap">
+<table class="data-table">
+  <thead><tr><th>Guard</th><th>What it catches</th></tr></thead>
+  <tbody>
+    <tr><td>Year-purity guard</td><td>Stray 2026 tabs inside 2025 workbooks (date &gt; file year)</td></tr>
+    <tr><td>Header-leak drop</td><td>Pasted header rows (<code>Sample ID</code> / <span class="ar">رمز العينة</span>)</td></tr>
+    <tr><td>Intra-sheet dedup</td><td>Repeated samples within a sheet (pesticide / general keys)</td></tr>
+    <tr><td>FALSE-token-first validity</td><td><span class="ar">غير مطابق</span> not misread as <span class="ar">مطابق</span> (substring)</td></tr>
+    <tr><td>Water red-cell recovery (2024)</td><td>Failed tests read from red cell fills when numeric basis missing</td></tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 6 — DASHBOARD INVENTORY                                -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s6">Current Dashboard Inventory</h2>
+
+<h3>Main Dashboard — 5 Tabs, 6 Charts, Sortable GSO Table</h3>
 <div class="inv-grid">
-  <div class="inv-card"><div class="icon">⚗️</div><div class="name">Section Selector (8+All)</div><div class="desc">Switch between lab sections or view combined</div></div>
-  <div class="inv-card"><div class="icon">📅</div><div class="name">Year Chips</div><div class="desc">All / 2024 / 2025</div></div>
-  <div class="inv-card"><div class="icon">✅</div><div class="name">Compliance Chips</div><div class="desc">Compliant / Non-compliant</div></div>
-  <div class="inv-card"><div class="icon">📍</div><div class="name">Sector Chips</div><div class="desc">Central / East / North / South / West / None</div></div>
-  <div class="inv-card"><div class="icon">🍱</div><div class="name">GSO Category Chips</div><div class="desc">Dynamic chips from active scope</div></div>
-  <div class="inv-card"><div class="icon">🔍</div><div class="name">Live Search</div><div class="desc">Sample ID, name, facility, test, pesticide</div></div>
-  <div class="inv-card"><div class="icon">📥</div><div class="name">CSV Export</div><div class="desc">UTF-8 BOM download of drilldown data</div></div>
-  <div class="inv-card"><div class="icon">🖱️</div><div class="name">Click-to-Filter Charts</div><div class="desc">GSO bars & Sector bars toggle filter chips</div></div>
+  <div class="inv-card"><div class="icon">📈</div><div class="name">Monthly Trend Combo</div><div class="desc">Lines + bars per month across sections</div></div>
+  <div class="inv-card"><div class="icon">📊</div><div class="name">Validity Distribution</div><div class="desc">Stacked bar: valid / invalid / other</div></div>
+  <div class="inv-card"><div class="icon">🧪</div><div class="name">Failed-Tests Breakdown</div><div class="desc">Top failing analytes bar</div></div>
+  <div class="inv-card"><div class="icon">🍱</div><div class="name">GSO Categories Bar</div><div class="desc">Stacked by year · click-to-drill</div></div>
+  <div class="inv-card"><div class="icon">🗺️</div><div class="name">Riyadh Sector Map</div><div class="desc">5 amanah sectors · click-to-drill</div></div>
+  <div class="inv-card"><div class="icon">🏛️</div><div class="name">Municipality Bar</div><div class="desc">Volume &amp; NC by sub-municipality</div></div>
+  <div class="inv-card"><div class="icon">📑</div><div class="name">Sortable GSO Table</div><div class="desc">Category · Samples · NC · NC% · click-sort</div></div>
+  <div class="inv-card"><div class="icon">📋</div><div class="name">Data-Quality Audit</div><div class="desc">Flagged-row counts, structural issues</div></div>
 </div>
 
 <h3>Standalone Interactives (2 reports)</h3>
 <div class="inv-grid">
-  <div class="inv-card"><div class="icon">🌞</div><div class="name">Chemistry Sunburst (Plotly)</div><div class="desc">Zoomable hierarchy chart</div></div>
-  <div class="inv-card"><div class="icon">🌀</div><div class="name">Chemistry Sunburst 2 (D3)</div><div class="desc">D3 radial hierarchy</div></div>
+  <div class="inv-card"><div class="icon">☀️</div><div class="name">Assay-Plate Sunburst</div><div class="desc">Year → Section → Category → failing analyte · deep-link · 15,297 samples</div></div>
+  <div class="inv-card"><div class="icon">🌀</div><div class="name">D3 Sunburst (v2)</div><div class="desc">Alternate zoomable rendering</div></div>
 </div>
+<blockquote>
+  <strong>Shared design language.</strong> The dashboard uses the same 5-tab,
+  touch-first, hash-routed shell as microbiology (📊 Overview · 📍 Location ·
+  🧪 Products · ⚗️ Sections &amp; tests · 📋 GSO &amp; Quality), so the two read as
+  one R&amp;D lab suite. Every chart supports zoom / pinch / touch via a shared
+  <code>PLOTLY_CONFIG</code>; the whole file is self-contained offline HTML.
+</blockquote>
 
-<!-- ══════════ SECTION 9 — ENHANCEMENTS ══════════ -->
-<h2 id="s9">Enhancement Opportunities</h2>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 7 — ENHANCEMENT OPPORTUNITIES                          -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s7">Enhancement Opportunities</h2>
 
-<h3>🔴 Priority 1 — Data & Coverage Gaps <span class="section-badge badge-red">BLOCKING</span></h3>
+<h3>🔴 Priority 1 — Data Gaps That Block Features <span class="section-badge badge-red">BLOCKING</span></h3>
 
-<div class="priority-card p-red"><h4><span class="pid">C1.1</span> 2,519 Uncategorized 2024 Rows</h4><p>2024 raw files lacked a Sample Category column. Currently uses regex fallback against <code>sample_name</code>. Many still fall to "Others" (أخرى) and get excluded from the pipeline output.</p></div>
+<div class="priority-card p-red"><h4><span class="pid">P1.1</span> No LOD / LOQ Columns Captured</h4><p>A non-detect stores <code>value = 0.0, is_nd = True</code>, so "below detection" is indistinguishable from a true zero. Sample validity assumes <code>0</code> passes unless another test fails. Capturing LOD/LOQ in the schema would make trace-level judgments defensible.</p></div>
 
-<div class="priority-card p-red"><h4><span class="pid">C1.2</span> 167 Unspecified Invalid Pesticide Samples</h4><p>Lab flagged <code>is_valid = False</code> but <strong>no single pesticide row exceeds limits</strong>. These appear as "Pesticide (unspecified)" in reports. Root cause unknown — may be lab-level overrides or multi-residue threshold logic.</p></div>
+<div class="priority-card p-red"><h4><span class="pid">P1.2</span> Pesticide "Invalid, No Exceedance" Rows</h4><p>A cluster of pesticide samples is lab-flagged <code>is_valid = False</code> yet has <strong>no row exceeding a limit</strong> — they surface as "unspecified" in the sunburst. The lab should clarify the failure basis.</p></div>
 
-<div class="priority-card p-red"><h4><span class="pid">C1.3</span> Jam Section — No Regulatory Limits</h4><p>82/83 jam rows are <code>no_limit</code>. Marked <code>DISPLAY_ONLY_SECTIONS</code>. Need to confirm if GSO limits exist for jam or if this section should remain informational.</p></div>
+<div class="priority-card p-red"><h4><span class="pid">P1.3</span> Heavy-Metals &amp; Pesticides YoY Spike Unexplained</h4><p>Fail rates jumped <strong>+12.0 pp</strong> and <strong>+8.5 pp</strong> in 2025. Until the lab confirms whether this is methodology, detection, or real contamination, the trend cannot be published.</p></div>
 
-<div class="priority-card p-red"><h4><span class="pid">C1.4</span> Hormones & Antibiotics — 2024 Missing</h4><p>Only 9 samples in 2025, zero in 2024. Cannot do YoY comparison. Confirm if 2024 data exists in the lab archives.</p></div>
+<div class="priority-card p-red"><h4><span class="pid">P1.4</span> Small-n &amp; Single-Year Sections</h4><p>hormones/antibiotics is <strong>2025-only (9 rows)</strong>, jam is <strong>2024-only (83 rows, 82 no_limit)</strong>. Neither supports a year-over-year read; both need either more data or an explicit "insufficient sample" guard in aggregations.</p></div>
 
-<h3>🟡 Priority 2 — Missing Analytical Features <span class="section-badge badge-yellow">ANALYTICAL</span></h3>
+<div class="priority-card p-red"><h4><span class="pid">P1.5</span> Dirty <code>analysis_section</code> Free-Text</h4><p>Spelling variants (<span class="ar">المعادن الثقيله / معادن الثقيلة</span>) exist in-column. Harmless today (the dashboard keys off filenames) but a latent integrity risk if that column is ever trusted.</p></div>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.1</span> No Standalone Interactives (vs Micro's 7) <span class="tag">High impact</span></h4><p>Microbiology has Sankey, Treemap, Heatmap Matrix, Network Graph, Streamgraph. Chemistry only has 2 Sunbursts. Missing: <strong>Sankey</strong> (section → category → analyte → verdict), <strong>Heatmap Matrix</strong> (sector × failing analyte), <strong>Network</strong> (product ↔ analyte), <strong>Treemap</strong> (category → product → exceedance).</p></div>
+<h3>🟡 Priority 2 — Missing Analytical Dimensions <span class="section-badge badge-yellow">ANALYTICAL</span></h3>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.2</span> Exceedance Magnitude Ranking <span class="tag">Medium</span></h4><p>The dashboard shows <em>which</em> tests fail but not <em>how badly</em>. Add an "Exceedance Magnitude" chart ranking the worst offenders by multiples-over-limit (e.g., the 298× Penconazole in parsley).</p></div>
+<div class="priority-card p-yellow"><h4><span class="pid">P2.1</span> Analyte Seasonality &amp; Sector Patterns <span class="tag">Medium</span></h4><p>Pivot <code>failed_tests_derived</code> by month and sector to show which analytes (lead, cadmium, specific residues) spike where and when.</p></div>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.3</span> Section-Level Trend Sparklines <span class="tag">Low</span></h4><p>Add inline sparklines to the section selector chips showing each section's monthly NC trend at a glance.</p></div>
+<div class="priority-card p-yellow"><h4><span class="pid">P2.2</span> Facility-Level Drilldown Table <span class="tag">Medium</span></h4><p>Lowest granularity today is sector/municipality. A searchable facility table (name · district · samples · NC rate) would be directly actionable by inspectors — the data already exists in the parquets.</p></div>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.4</span> Heavy Metals Surge Investigation Panel <span class="tag">Medium</span></h4><p>Given the +12 pp surge in heavy metals, a dedicated investigation panel showing: which analytes drove the increase, which product categories, which facilities, and timeline of onset.</p></div>
+<div class="priority-card p-yellow"><h4><span class="pid">P2.3</span> Pesticide Co-Occurrence Matrix <span class="tag">Medium-High</span></h4><p>Which residues appear together (e.g., Malathion + Dimethoate co-fail rate)? Compute a symmetric heatmap from per-sample <code>pesticide_name</code> arrays.</p></div>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.5</span> Analyte Co-Occurrence Matrix <span class="tag">Medium</span></h4><p>When a sample fails multiple analytes, which ones co-occur? Particularly relevant for heavy metals (Lead + Cadmium in the same fish sample).</p></div>
+<div class="priority-card p-yellow"><h4><span class="pid">P2.4</span> "Missing Limits" Audit View <span class="tag">Low</span></h4><p>List every <code>validity_status = 'no_limit'</code> sample so the lab can prioritise which GSO limits to standardise next.</p></div>
 
-<div class="priority-card p-yellow"><h4><span class="pid">C2.6</span> MoM Delta KPIs <span class="tag">Medium</span></h4><p>Add ▲/▼ trend arrows to the 10 KPI cards showing month-over-month change. Currently static snapshots.</p></div>
+<div class="priority-card p-yellow"><h4><span class="pid">P2.5</span> Corrections Audit Trail <span class="tag">Medium</span></h4><p>Visual diff of which samples were hand-corrected (<code>category_corrections.csv</code>) vs auto-classified — transparency for the ~2,400 overrides.</p></div>
 
-<h3>🟢 Priority 3 — UX/UI Parity with Microbiology <span class="section-badge badge-green">UX/UI</span></h3>
+<h3>🟢 Priority 3 — UX/UI Polish <span class="section-badge badge-green">UX/UI</span></h3>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.1</span> Date Range Picker</h4><p>Microbiology dashboard has date-from/date-to pickers. Chemistry only has year chips. Adding a date range would enable monthly/quarterly filtering.</p></div>
+<div class="priority-card p-green"><h4><span class="pid">P3.1</span> Export to PDF / Excel</h4><p>📥 "Download Report" for the filtered view — most-requested by field inspectors who need offline printouts.</p></div>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.2</span> Bookmark Presets</h4><p>Microbiology has 4 quick bookmark buttons ("2025 · pathogens only", etc.). Chemistry has none. Add: "Heavy Metals 2025", "Non-compliant only", "Pesticides surge", "Water quality".</p></div>
+<div class="priority-card p-green"><h4><span class="pid">P3.2</span> Section-Bar Deep-Linking</h4><p>Only GSO and sector charts are click-to-drill today. Make the section bar toggle its section filter for symmetry.</p></div>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.3</span> URL State Serialization</h4><p>Microbiology serializes all filter state into the URL hash for shareable links. Chemistry does not. Add <code>serializeState()</code> / <code>deserializeState()</code>.</p></div>
+<div class="priority-card p-green"><h4><span class="pid">P3.3</span> Per-Section Trend Sparklines</h4><p>Inline 12-month SVG sparklines inside the KPI cards so each section's direction reads at a glance.</p></div>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.4</span> Severity Tier System</h4><p>Microbiology has a 3-tier severity (indicator / pathogen / multi-pathogen). Chemistry has binary pass/fail. Add severity tiers based on exceedance magnitude: <strong>Minor</strong> (1–2× limit), <strong>Major</strong> (2–10× limit), <strong>Critical</strong> (>10× limit).</p></div>
+<h3>🔵 Priority 4 — Advanced / Future <span class="section-badge badge-blue">FUTURE</span></h3>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.5</span> Day-of-Week Cadence Chart</h4><p>Microbiology has a DOW chart. Chemistry does not. Useful for identifying sampling volume gaps.</p></div>
+<div class="priority-card p-blue"><h4><span class="pid">P4.1</span> DuckDB-WASM Backend</h4><p>Serve the parquets client-side instead of inlining ~4.5 MB of JSON — big first-paint win as sections grow.</p></div>
 
-<div class="priority-card p-green"><h4><span class="pid">C3.6</span> Print Stylesheet & PDF Export</h4><p>Add <code>@media print</code> and a "Download Report" button for field use.</p></div>
+<div class="priority-card p-blue"><h4><span class="pid">P4.2</span> GSO Limit Cross-Audit</h4><p>Cross-check every 2025 result against canonical GSO 1016 limits and flag mismatches — the chemistry analogue of the microbiology limit audit.</p></div>
 
-<h3>🔵 Priority 4 — Strategic / Cross-Domain <span class="section-badge badge-blue">STRATEGIC</span></h3>
+<div class="priority-card p-blue"><h4><span class="pid">P4.3</span> Geocoded Facility Map</h4><p>Replace sector bubbles with real per-facility lat/lon for true field navigation.</p></div>
 
-<div class="priority-card p-blue"><h4><span class="pid">C4.1</span> Chemistry × Microbiology Cross-Correlation</h4><p>Match facilities across both pipelines to answer: do facilities that fail chemistry also fail microbiology? Requires facility-name normalization across datasets.</p></div>
-
-<div class="priority-card p-blue"><h4><span class="pid">C4.2</span> Limit-vs-Result Scatter Plot</h4><p>For each analyte, plot (result value) vs (limit value) as a scatter — points above the y=x diagonal are exceedances. Instant visual triage of how close passing samples are to their limits.</p></div>
-
-<div class="priority-card p-blue"><h4><span class="pid">C4.3</span> Predictive Risk Scoring</h4><p>Compute a composite risk score per facility combining: number of failed sections, exceedance magnitude, recency, and repeat-offender status.</p></div>
-
-<!-- ══════════ SECTION 10 — ROADMAP ══════════ -->
-<h2 id="s10">Implementation Roadmap</h2>
-
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- SECTION 8 — IMPLEMENTATION ROADMAP                             -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<h2 id="s8">Implementation Roadmap</h2>
 <div class="timeline">
-  <div class="timeline-item">
-    <h4>Phase 1 — Quick Wins <span class="effort">1–2 days each</span></h4>
+  <div class="timeline-item t1">
+    <h4>Phase 1 — Quick Wins (in-house, days)</h4>
     <ul>
-      <li><strong>C2.3</strong> Section sparklines — tiny inline SVG</li>
-      <li><strong>C3.1</strong> Date range picker — port from microbiology</li>
-      <li><strong>C3.2</strong> Bookmark presets — 4 buttons</li>
-      <li><strong>C3.5</strong> Day-of-week cadence chart — port from microbiology</li>
+      <li><strong>P2.4</strong> "Missing limits" audit view — pure query, high clarity</li>
+      <li><strong>P3.2</strong> Section-bar deep-linking — parity with existing drill handlers</li>
+      <li><strong>P3.3</strong> KPI sparklines — monthly series already computed</li>
     </ul>
   </div>
   <div class="timeline-item t2">
-    <h4>Phase 2 — Parity & Depth <span class="effort">2–5 days each</span></h4>
+    <h4>Phase 2 — Analytical Depth (weeks)</h4>
     <ul>
-      <li><strong>C2.1</strong> Build 5 standalone interactives (Sankey, Treemap, Heatmap, Network, Streamgraph)</li>
-      <li><strong>C2.2</strong> Exceedance magnitude ranking chart</li>
-      <li><strong>C2.6</strong> MoM delta arrows on KPIs</li>
-      <li><strong>C3.3</strong> URL state serialization + copy-link</li>
-      <li><strong>C3.4</strong> Severity tier system (Minor / Major / Critical)</li>
+      <li><strong>P2.1</strong> Analyte seasonality by month × sector</li>
+      <li><strong>P2.2</strong> Facility-level drilldown table</li>
+      <li><strong>P2.3</strong> Pesticide co-occurrence matrix</li>
+      <li><strong>P2.5</strong> Corrections audit trail</li>
     </ul>
   </div>
   <div class="timeline-item t3">
-    <h4>Phase 3 — Investigations <span class="effort">Requires domain input</span></h4>
+    <h4>Phase 3 — Requires External Input (lab)</h4>
     <ul>
-      <li><strong>C1.1</strong> Resolve 2,519 uncategorized 2024 rows</li>
-      <li><strong>C1.2</strong> Investigate 167 unspecified invalid pesticide samples</li>
-      <li><strong>C2.4</strong> Heavy metals surge investigation panel</li>
+      <li><strong>P1.1</strong> LOD/LOQ capture — needs schema + lab export</li>
+      <li><strong>P1.2</strong> Pesticide "invalid, no exceedance" basis — lab clarification</li>
+      <li><strong>P1.3</strong> Heavy-metals / pesticides spike — confirm cause with lab</li>
     </ul>
   </div>
   <div class="timeline-item t4">
-    <h4>Phase 4 — Strategic <span class="effort">Long-term</span></h4>
+    <h4>Phase 4 — Strategic / Long-Term</h4>
     <ul>
-      <li><strong>C4.1</strong> Chemistry × Microbiology cross-correlation</li>
-      <li><strong>C4.2</strong> Limit-vs-Result scatter plots</li>
-      <li><strong>C4.3</strong> Predictive facility risk scoring</li>
+      <li><strong>P4.1</strong> DuckDB-WASM — scales past inline JSON</li>
+      <li><strong>P4.2</strong> GSO limit cross-audit — turns pass/fail into governed compliance</li>
+      <li><strong>P4.3</strong> Geocoded facility map — field-operations upgrade</li>
     </ul>
   </div>
 </div>
 
 <blockquote>
-  <strong>Summary:</strong> The chemistry pipeline is production-grade with 15,876 cleaned rows across 8 sections, 99.3%+ accuracy against the Annual Report, and a full-featured dashboard. The highest-impact enhancements are: <strong>(1)</strong> building 5 standalone interactives to match microbiology's ecosystem, <strong>(2)</strong> adding an exceedance magnitude ranking to surface the 298× parsley and 56× beef findings, <strong>(3)</strong> implementing severity tiers (Minor / Major / Critical), and <strong>(4)</strong> investigating the heavy metals +12 pp surge.
+  <strong>Summary.</strong> The chemistry dataset is deterministic, row-for-row
+  verified, and already shares the microbiology dashboard's design language. Its
+  distinctive challenges are chemical, not microbial: the five-way validity model,
+  the meaning of "no limit", the pesticide long-format explosion, and two
+  year-over-year spikes that need the lab's read. The highest-impact next steps
+  are <strong>(1)</strong> LOD/LOQ capture, <strong>(2)</strong> facility-level
+  drilldown, <strong>(3)</strong> resolving the heavy-metals/pesticides spike, and
+  <strong>(4)</strong> a "missing limits" audit view.
 </blockquote>
 
-</div>
+</div><!-- /.page -->
 
-<footer>أمانة منطقة الرياض · Riyadh Municipality R&D · Generated 2026-08-11 · Chemistry Pipeline Report</footer>
+<a href="#" class="to-top" aria-label="Back to top" title="Back to top">↑</a>
+
+<footer>أمانة منطقة الرياض · Riyadh Municipality R&amp;D · Generated 2026-08-11 · Chemistry Pipeline Report</footer>
+
+<script>
+// Progressive enhancement only — the report is fully readable without JS.
+(function () {
+  // Back-to-top visibility
+  var btn = document.querySelector('.to-top');
+  if (btn) {
+    var onScroll = function () {
+      if (window.scrollY > 600) btn.classList.add('show');
+      else btn.classList.remove('show');
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+  // Flag horizontally-scrollable tables so the edge-fade only shows when needed
+  var wraps = document.querySelectorAll('.table-wrap');
+  var sync = function () {
+    wraps.forEach(function (w) {
+      var over = w.scrollWidth - w.clientWidth > 4 && w.scrollLeft < w.scrollWidth - w.clientWidth - 4;
+      w.classList.toggle('is-scrollable', over);
+    });
+  };
+  wraps.forEach(function (w) { w.addEventListener('scroll', function () { sync(); }, { passive: true }); });
+  window.addEventListener('resize', sync, { passive: true });
+  sync();
+})();
+</script>
+
 </body>
 </html>

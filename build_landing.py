@@ -229,6 +229,11 @@ footer{border-top:1px solid var(--hair)}
           <span class="txt"><span class="lb">Interactive 7</span><span class="sub">Streamgraph · organism trends over time</span></span>
           <span class="arrow">→</span>
         </a>
+        <a class="entry" href="Gemini-reports/Microbiology_Comprehensive_Report.html">
+          <span class="ico">📄</span>
+          <span class="txt"><span class="lb">Report</span><span class="sub">Statistics · GSO challenges · numerical ledger</span></span>
+          <span class="arrow">→</span>
+        </a>
       </div>
     </section>
 
@@ -261,6 +266,11 @@ footer{border-top:1px solid var(--hair)}
         <a class="entry" href="chemistry/reports/chemistry_sunburst2.html">
           <span class="ico">◐</span>
           <span class="txt"><span class="lb">Interactive 2</span><span class="sub">D3 · sunburst-chart</span></span>
+          <span class="arrow">→</span>
+        </a>
+        <a class="entry" href="Gemini-reports/Chemistry_Comprehensive_Report.html">
+          <span class="ico">📄</span>
+          <span class="txt"><span class="lb">Report</span><span class="sub">Statistics · GSO challenges · numerical ledger</span></span>
           <span class="arrow">→</span>
         </a>
       </div>

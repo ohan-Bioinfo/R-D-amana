@@ -5,6 +5,38 @@ the convention in `microbiology/CHANGELOG.md`.
 
 ---
 
+## 2026-08-11 — Comprehensive report + GSO guideline (responsive/impeccable)
+
+Gave chemistry the same reporting set microbiology already had under
+`Gemini-reports/`, and raised the whole report family to a genuinely responsive
+bar. No data or parquet changes — figures below are read from the current
+dashboard payload and README (15,876 rows unchanged).
+
+- **New `Gemini-reports/Chemistry_Comprehensive_Report.html`** — standalone,
+  bilingual, Najdi-Heritage-themed report mirroring micro's 8 sections (headline
+  KPIs → pipeline stages → GSO classification challenges → data-quality challenges
+  → numerical ledger → dashboard inventory → enhancement roadmap → timeline) with
+  real figures (valid 14,677 · invalid 1,101 · no_limit 92 · rejected 4 · unknown
+  2; 1,133,621 tests; 15 GSO categories).
+- **Responsive/impeccable upgrade** (new report + retrofitted onto
+  `Microbiology_Comprehensive_Report.html`): `clamp()` fluid type, 760/480px
+  breakpoints, every table wrapped in `.table-wrap{overflow-x:auto}` with an
+  edge-fade scroll cue, `prefers-reduced-motion` guard, A4 `@media print`, and a
+  back-to-top affordance. The incumbent report had zero max-width breakpoints and
+  overflowing tables on mobile; both now hold 390px cleanly (verified via headless
+  screenshots, desktop + mobile).
+- **New `.md` companions:** `Chemistry_Statistics_and_GSO_Challenges.md` and
+  `Chemistry_Dashboard_Enhancement_Proposal.md`.
+- **GSO & Quality tab guideline** enriched in `build_dashboard.py`: a `card-sub`
+  prose card explaining the 7-tier GSO bridge, the five `validity_status` states,
+  no-limit/non-detect semantics, the pesticide row-vs-sample denominator, and the
+  heavy-metals/pesticides YoY spikes. Dashboard rebuilt; emitted JS passes
+  `node --check`; totals unchanged.
+- **Landing page:** a "Report" entry added to both lab cards in `build_landing.py`
+  (→ each `*_Comprehensive_Report.html`); `index.html` rebuilt.
+
+Spec: `docs/superpowers/specs/2026-08-11-chem-comprehensive-report-design.md`.
+
 ## 2026-08-11 — Dashboard standardized to the tabbed touch-first design
 
 Brought the chemistry dashboard to the **same design language** as the redesigned
