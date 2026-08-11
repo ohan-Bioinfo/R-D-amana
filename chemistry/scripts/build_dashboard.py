@@ -1375,18 +1375,19 @@ try {
     const agg = {};  // category -> {n, nc, evald}
     rows.forEach(r => {
       const cat = r[COLS.gso_category] || '—';
-      const a = agg[cat] || (agg[cat] = { n: 0, nc: 0, evald: 0 });
+      const a = agg[cat] || (agg[cat] = { n: 0, nc: 0 });
       a.n++;
-      const v = r[COLS.is_valid];
-      if (v === 0) { a.nc++; a.evald++; } else if (v === 1) { a.evald++; }
+      if (r[COLS.is_valid] === 0) a.nc++;
     });
+    // NC% over ALL rows in the category (nc/total) — same denominator as the
+    // GSO-category chart's rate line, so the two figures agree per category.
     const data = Object.entries(agg).map(([cat, a]) =>
-      ({ cat, n: a.n, nc: a.nc, rate: a.evald ? 100 * a.nc / a.evald : 0 }))
+      ({ cat, n: a.n, nc: a.nc, rate: a.n ? 100 * a.nc / a.n : 0 }))
       .sort((x, y) => y.n - x.n);
     const cols = [['cat','Category'],['n','Samples'],['nc','Non-compliant'],['rate','NC %']];
     const th = cols.map(([k, l]) => `<th data-k="${k}" style="cursor:pointer">${l} <span class="sort-ar"></span></th>`).join('');
     const body = data.map(d =>
-      `<tr><td>${d.cat}</td><td>${d.n.toLocaleString()}</td>` +
+      `<tr><td>${escapeHtml(d.cat)}</td><td>${d.n.toLocaleString()}</td>` +
       `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
     const el = document.getElementById('gso_info_table');
     if (!el) return;
@@ -1401,7 +1402,7 @@ try {
     const sorted = [...el.__data].sort((a, b) => num ? dir * (a[k] - b[k]) : dir * String(a[k]).localeCompare(String(b[k])));
     el.__data = sorted;
     el.querySelector('tbody').innerHTML = sorted.map(d =>
-      `<tr><td>${d.cat}</td><td>${d.n.toLocaleString()}</td>` +
+      `<tr><td>${escapeHtml(d.cat)}</td><td>${d.n.toLocaleString()}</td>` +
       `<td>${d.nc.toLocaleString()}</td><td>${d.rate.toFixed(1)}%</td></tr>`).join('');
     el.querySelectorAll('th').forEach(h => h.querySelector('.sort-ar').textContent =
       h.dataset.k === k ? (dir < 0 ? '▾' : '▴') : '');
