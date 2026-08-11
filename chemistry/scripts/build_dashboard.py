@@ -1810,7 +1810,13 @@ try {
     });
   }
   document.getElementById('tabnav').addEventListener('click', e => {
-    const b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab);
+    const b = e.target.closest('button[data-tab]');
+    if (b) {
+      showTab(b.dataset.tab);
+      history.replaceState(null, '', b.dataset.tab === 'overview'
+        ? location.pathname + location.search
+        : '#tab=' + b.dataset.tab);
+    }
   });
 
   function renderAll() {
@@ -1905,6 +1911,8 @@ try {
   });
 
   renderAll();
+  const _m = (location.hash || '').match(/tab=([a-z]+)/);
+  if (_m && document.querySelector('.tabpanel[data-tab="' + _m[1] + '"]')) window.__activeTab = _m[1];
   showTab(window.__activeTab || 'overview');
 } catch (err) {
   console.error('Dashboard init failed:', err);
