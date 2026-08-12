@@ -514,7 +514,7 @@ header.hero{padding:44px 4px 26px;position:relative}
   font-size:15px;display:block;margin-top:4px}
 
 /* ── the two labs ─────────────────────────────────────── */
-.labs{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+.labs{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:22px;margin-top:34px}
 @media(max-width:760px){.labs{grid-template-columns:1fr}
   .wordmark h1{font-size:58px}}
 
@@ -530,6 +530,8 @@ header.hero{padding:44px 4px 26px;position:relative}
   --tint:rgba(0,96,64,.07)}
 .lab.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;
   --tint:rgba(95,112,162,.08)}
+.lab.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;
+  --tint:rgba(176,138,46,.08)}
 
 .lab-top{display:flex;align-items:center;gap:18px}
 /* the plate ring — a preview of that lab's sunburst */
@@ -540,6 +542,8 @@ header.hero{padding:44px 4px 26px;position:relative}
   #1f9d63,#5aa84f,#8fb24a,#e0a53a,#e07b2f,#c0392b,#1f9d63)}
 .ring.chem{background:conic-gradient(from -90deg,
   #eceef6,#8e9fc7,#5f70a2,#7f97c4,#1f9d63,#8e9fc7,#eceef6)}
+.ring.genome{background:conic-gradient(from -90deg,
+  #b08a2e,#e6d5a1,#b08a2e,#e6d5a1,#b08a2e)}
 .plate{width:96px;height:96px;flex:0 0 auto;position:relative;display:grid;place-items:center}
 .plate .hole{position:absolute;font-family:'IBM Plex Mono',monospace;font-size:11px;
   color:var(--muted);letter-spacing:.5px}
@@ -605,6 +609,7 @@ footer{border-top:1px solid var(--hair)}
 /* ══ per-lab landing page ══ */
 body.labpage{--accent:var(--green);--accent2:var(--green-3);--accent-line:#bcd3c7;--tint:rgba(0,96,64,.07)}
 body.labpage.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;--tint:rgba(95,112,162,.08)}
+body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;--tint:rgba(176,138,46,.08)}
 .crumb{display:flex;align-items:center;gap:9px;margin:30px 2px 0;
   font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
 .crumb a{color:var(--accent);font-weight:600}
@@ -727,7 +732,7 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
     <span>self-contained · opens in any browser</span>
     <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
-    <span>build 12 Aug 2026 · 15:01</span>
+    <span>build 12 Aug 2026 · 23:19</span>
   </div>
 </footer>
 </body></html>

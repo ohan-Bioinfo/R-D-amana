@@ -35,6 +35,13 @@ def build():
     # 2) One landing page per lab, sharing the hub's <head> (fonts + CSS).
     head = TEMPLATE.split("</head>", 1)[0] + "</head>"
     for lab in LABS:
+        if lab["name"] == "Genome":
+            body = GENOME_BODY.replace("__LOGO__", logo)
+            out = ROOT / lab["out"]
+            out.parent.mkdir(exist_ok=True)
+            out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
+            print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
+            continue
         viz = "\n".join(
             '        <a class="viz" href="{2}">\n'
             '          <span class="v-ico">{0}</span>\n'
@@ -49,6 +56,7 @@ def build():
                 .replace("__GSO__", lab["gso"]).replace("__REPORT__", lab["report"])
                 .replace("__VIZN__", str(len(lab["viz"]))).replace("__VIZ__", viz))
         out = ROOT / lab["out"]
+        out.parent.mkdir(exist_ok=True)
         out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
         print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
 
@@ -101,7 +109,7 @@ header.hero{padding:44px 4px 26px;position:relative}
   font-size:15px;display:block;margin-top:4px}
 
 /* ── the two labs ─────────────────────────────────────── */
-.labs{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:34px}
+.labs{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:22px;margin-top:34px}
 @media(max-width:760px){.labs{grid-template-columns:1fr}
   .wordmark h1{font-size:58px}}
 
@@ -117,6 +125,8 @@ header.hero{padding:44px 4px 26px;position:relative}
   --tint:rgba(0,96,64,.07)}
 .lab.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;
   --tint:rgba(95,112,162,.08)}
+.lab.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;
+  --tint:rgba(176,138,46,.08)}
 
 .lab-top{display:flex;align-items:center;gap:18px}
 /* the plate ring — a preview of that lab's sunburst */
@@ -127,6 +137,8 @@ header.hero{padding:44px 4px 26px;position:relative}
   #1f9d63,#5aa84f,#8fb24a,#e0a53a,#e07b2f,#c0392b,#1f9d63)}
 .ring.chem{background:conic-gradient(from -90deg,
   #eceef6,#8e9fc7,#5f70a2,#7f97c4,#1f9d63,#8e9fc7,#eceef6)}
+.ring.genome{background:conic-gradient(from -90deg,
+  #b08a2e,#e6d5a1,#b08a2e,#e6d5a1,#b08a2e)}
 .plate{width:96px;height:96px;flex:0 0 auto;position:relative;display:grid;place-items:center}
 .plate .hole{position:absolute;font-family:'IBM Plex Mono',monospace;font-size:11px;
   color:var(--muted);letter-spacing:.5px}
@@ -192,6 +204,7 @@ footer{border-top:1px solid var(--hair)}
 /* ══ per-lab landing page ══ */
 body.labpage{--accent:var(--green);--accent2:var(--green-3);--accent-line:#bcd3c7;--tint:rgba(0,96,64,.07)}
 body.labpage.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;--tint:rgba(95,112,162,.08)}
+body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;--tint:rgba(176,138,46,.08)}
 .crumb{display:flex;align-items:center;gap:9px;margin:30px 2px 0;
   font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
 .crumb a{color:var(--accent);font-weight:600}
@@ -318,7 +331,35 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
         <div class="enter">Enter lab <span class="arrow">→</span></div>
       </div>
     </a>
+
+    <!-- Genome -->
+    <a class="lab genome" href="genome/index.html">
+      <div class="lab-top">
+        <div class="plate">
+          <div class="ring genome"></div>
+          <span class="glyph">۞</span>
+        </div>
+        <div class="names">
+          <div class="kicker">Laboratory</div>
+          <h2>Genome</h2>
+          <div class="ar">الجينوم</div>
+        </div>
+      </div>
+      <div class="stat"><span class="n">0</span><span class="u">records · Under Construction</span></div>
+      <div class="desc">Pipeline construction flow — from raw data and trimming to assembly, annotation, and metagenomics.</div>
+      <div class="entries">
+        <div class="card-dests">
+          <span class="dest">🧬 Raw Data</span>
+          <span class="dest">✂️ Trimming</span>
+          <span class="dest">🧩 Assembly</span>
+          <span class="dest">🏷️ Annotation</span>
+          <span class="dest">🔬 Metagenomics</span>
+        </div>
+        <div class="enter">Enter lab <span class="arrow">→</span></div>
+      </div>
+    </a>
   </main>
+
 </div>
 
 <footer>
@@ -398,7 +439,94 @@ __VIZ__
 </body></html>"""
 
 
+
+GENOME_BODY = r"""<body class="labpage genome">
+<div class="wrap">
+  <header class="hero" style="padding-bottom:6px">
+    <div class="brandline">
+      <div class="emblem" style="background-image:url('__LOGO__')"></div>
+      <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+    </div>
+  </header>
+  <nav class="crumb"><a href="../index.html">← R&amp;D</a><span class="sep">/</span><span>Genome</span></nav>
+  <section class="lab-hero">
+    <div class="plate">
+      <div class="ring genome"></div>
+      <span class="glyph">۞</span>
+    </div>
+    <div class="h-txt">
+      <div class="kicker">Laboratory · مختبر</div>
+      <h1>Genome</h1>
+      <div class="ar">الجينوم</div>
+    </div>
+    <div class="h-stat"><span class="n">Pipeline</span><span class="u">Under Construction</span></div>
+  </section>
+  <p class="lab-desc">Pipeline construction flow — from raw data to metagenomics.</p>
+  
+  <div class="section-head">
+    <h3>Pipeline Construction Flow</h3>
+    <span class="sh-sub">Analysis stages</span>
+  </div>
+  
+  <div class="viz-grid">
+      <div class="viz" style="grid-column: 1 / -1; display:flex; justify-content:center; padding: 26px; overflow-x: auto;">
+         <pre style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5; color: var(--accent); text-align:center; margin:0;">
+[ Raw Data ] ──► [ Trimming ] ──► [ Assembly ] ──► [ Annotation ] ──► [ Metagenomics ]
+         </pre>
+      </div>
+  </div>
+
+  <div class="portals" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr))">
+    <div class="portal" style="opacity:0.6; min-height:120px;">
+      <div class="p-ico">🧬</div>
+      <div class="p-lb" style="font-size:16px;">Raw Data</div>
+      <div class="p-sub">Initial sequencing reads and quality assessment.</div>
+      <div class="p-go">Under construction</div>
+    </div>
+    <div class="portal" style="opacity:0.6; min-height:120px;">
+      <div class="p-ico">✂️</div>
+      <div class="p-lb" style="font-size:16px;">Trimming</div>
+      <div class="p-sub">Adapter removal and read filtering for high quality.</div>
+      <div class="p-go">Under construction</div>
+    </div>
+    <div class="portal" style="opacity:0.6; min-height:120px;">
+      <div class="p-ico">🧩</div>
+      <div class="p-lb" style="font-size:16px;">Assembly</div>
+      <div class="p-sub">De novo contig generation and scaffolding.</div>
+      <div class="p-go">Under construction</div>
+    </div>
+    <div class="portal" style="opacity:0.6; min-height:120px;">
+      <div class="p-ico">🏷️</div>
+      <div class="p-lb" style="font-size:16px;">Annotation</div>
+      <div class="p-sub">Gene prediction and functional assignment.</div>
+      <div class="p-go">Under construction</div>
+    </div>
+    <div class="portal" style="opacity:0.6; min-height:120px;">
+      <div class="p-ico">🔬</div>
+      <div class="p-lb" style="font-size:16px;">Metagenomics</div>
+      <div class="p-sub">Taxonomic profiling and community analysis.</div>
+      <div class="p-go">Under construction</div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="foot-in">
+    <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
+    <span>self-contained · opens in any browser</span>
+    <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
+    <span>build __STAMP__</span>
+  </div>
+</footer>
+</body></html>"""
+
+
 LABS = [
+    dict(
+        out="genome/index.html", accent=" genome", ring="genome",
+        name="Genome", ar="الجينوم",
+        stat_n="", stat_u="", desc="", dash="", gso="", report="", viz=[]
+    ),
+
     dict(
         out="microbiology/index.html", accent="", ring="micro",
         name="Microbiology", ar="الأحياء الدقيقة",
