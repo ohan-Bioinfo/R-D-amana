@@ -43,8 +43,8 @@ _RULES = [
     (("acidity", "حموضة"), "Acidity"), (("sucrose", "سكروز"), "Sucrose"),
     (("glucose", "fructose"), "Glucose+Fructose"), (("sensory", "حسي"), "Sensory"), (("ph",), "pH"),
 ]
-CULT = [(0.0, (31, 157, 99)), (0.35, (143, 178, 74)), (0.6, (224, 165, 58)),
-        (0.8, (224, 123, 47)), (1.0, (192, 57, 43))]
+CULT = [(0.0, (14, 165, 233)), (0.25, (99, 102, 241)), (0.5, (168, 85, 247)),
+        (0.75, (236, 72, 153)), (1.0, (225, 29, 72))]
 
 
 def cult_hex(rate: float) -> str:
@@ -57,7 +57,7 @@ def cult_hex(rate: float) -> str:
             return "#%02x%02x%02x" % (int(round(c0[0] + (c1[0]-c0[0])*f)),
                                       int(round(c0[1] + (c1[1]-c0[1])*f)),
                                       int(round(c0[2] + (c1[2]-c0[2])*f)))
-    return "#c0392b"
+    return "#e11d48"
 
 
 def normalize_analyte(raw) -> str:
@@ -215,7 +215,9 @@ __LIB__
 :root{
   --green:#006040; --green-2:#004d33; --green-tint:#e4ede9; --green-line:#bcd3c7;
   --peri:#8e9fc7; --peri-2:#5f70a2; --white:#f7f8f5; --field:#e7e8e0; --panel:#fbfcfa;
-  --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2; --gold:#b08a2e; --c4:#c0392b;
+  --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2; --gold:#b08a2e;
+  /* data (contamination) scale anchors - Clinical Tune */
+  --c0:#0ea5e9; --c1:#6366f1; --c2:#a855f7; --c3:#ec4899; --c4:#e11d48;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--field);color:var(--ink);
@@ -243,7 +245,7 @@ header.mast::after{content:"";position:absolute;left:0;bottom:-2px;width:130px;h
 .hint{text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);padding:6px 6px 2px}
 .cbar{display:flex;align-items:center;gap:10px;margin:8px 8px 2px}
 .cbar .lab{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);min-width:110px}
-.cbar .grad{flex:1;height:10px;border-radius:6px;border:1px solid var(--hair);background:linear-gradient(90deg,#1f9d63,#8fb24a,#e0a53a,#e07b2f,#c0392b)}
+.cbar .grad{flex:1;height:10px;border-radius:6px;border:1px solid var(--hair);background:linear-gradient(90deg,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4))}
 .cbar .ends{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--muted)}
 .slip{background:var(--panel);border:1px solid var(--hair);border-radius:14px;overflow:hidden;position:sticky;top:16px}
 .slip .head{padding:14px 16px 12px;border-bottom:1px dashed var(--hair);background:linear-gradient(180deg,var(--green-tint),var(--panel))}

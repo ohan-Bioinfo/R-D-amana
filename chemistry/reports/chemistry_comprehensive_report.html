@@ -22,6 +22,9 @@
   --ink-900:#1a1f2c;   --ink-700:#3d4256;   --ink-500:#6c6f7e;
   --bg: var(--sand-50); --fg: var(--ink-900); --muted: var(--ink-500); --line: var(--sand-200);
 
+  --amber-500:#f59e0b; --amber-100:#fef3c7; --amber-700:#92400e;
+  --blue-500:#3b82f6; --blue-100:#e0f2fe; --blue-700:#0c4a6e;
+
   /* fluid rhythm — one source of truth for page gutters */
   --gutter: clamp(16px, 4vw, 30px);
 }
@@ -123,9 +126,9 @@ code { font-family: 'DM Mono', monospace; font-size: 0.9em;
   vertical-align: middle;
 }
 .badge-red { background: var(--clay-100); color: var(--clay-700); }
-.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-yellow { background: var(--amber-100); color: var(--amber-700); }
 .badge-green { background: var(--green-100); color: var(--green-900); }
-.badge-blue { background: #e0f2fe; color: #0c4a6e; }
+.badge-blue { background: var(--blue-100); color: var(--blue-700); }
 
 /* ─── KPI Grid ───────────────────────────────────────────────── */
 .kpi-grid {
@@ -142,7 +145,7 @@ code { font-family: 'DM Mono', monospace; font-size: 0.9em;
   color: var(--muted); font-weight: 600; margin-bottom: 4px; }
 .kpi .value { font-family: 'DM Mono', monospace; font-size: clamp(22px, 5.5vw, 26px);
   font-weight: 700; color: var(--green-900); line-height: 1.1; }
-.kpi .sub { font-size: 11.5px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
+.kpi .sub { font-size: 12px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
 .kpi.accent-red .value { color: var(--clay-500); }
 .kpi.accent-gold .value { color: var(--gold-700); }
 .kpi.accent-green .value { color: var(--green-500); }
@@ -186,15 +189,15 @@ code { font-family: 'DM Mono', monospace; font-size: 0.9em;
   box-shadow: 0 1px 6px rgba(10,61,36,0.05);
 }
 .priority-card.p-red { border-left-color: var(--clay-500); }
-.priority-card.p-yellow { border-left-color: #f59e0b; }
+.priority-card.p-yellow { border-left-color: var(--amber-500); }
 .priority-card.p-green { border-left-color: var(--green-500); }
-.priority-card.p-blue { border-left-color: #3b82f6; }
+.priority-card.p-blue { border-left-color: var(--blue-500); }
 .priority-card .pid { font-family: 'DM Mono'; font-size: 11px; font-weight: 700;
   padding: 2px 8px; border-radius: 4px; margin-right: 8px; flex: none; }
 .priority-card.p-red .pid { background: var(--clay-100); color: var(--clay-700); }
-.priority-card.p-yellow .pid { background: #fef3c7; color: #92400e; }
+.priority-card.p-yellow .pid { background: var(--amber-100); color: var(--amber-700); }
 .priority-card.p-green .pid { background: var(--green-100); color: var(--green-900); }
-.priority-card.p-blue .pid { background: #e0f2fe; color: #0c4a6e; }
+.priority-card.p-blue .pid { background: var(--blue-100); color: var(--blue-700); }
 .priority-card h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
   color: var(--ink-900); margin-bottom: 6px; display: flex; align-items: center;
   flex-wrap: wrap; gap: 4px; }
@@ -224,7 +227,7 @@ code { font-family: 'DM Mono', monospace; font-size: 0.9em;
   width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--green-500);
   background: #fffdf8; }
 .timeline-item.t2::before { border-color: var(--gold-500); }
-.timeline-item.t3::before { border-color: #f59e0b; }
+.timeline-item.t3::before { border-color: var(--amber-500); }
 .timeline-item.t4::before { border-color: var(--clay-500); }
 .timeline-item h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700; color: var(--green-900); }
 .timeline-item ul { margin-top: 4px; padding-left: 18px; font-size: 13px; color: var(--ink-700); }
@@ -247,6 +250,9 @@ footer {
 }
 
 /* ─── Back to top ────────────────────────────────────────────── */
+.toc a:focus-visible, .to-top:focus-visible {
+  outline: 2px solid var(--gold-500); outline-offset: 2px; border-radius: 4px;
+}
 .to-top {
   position: fixed; right: 18px; bottom: 18px; z-index: 20;
   width: 46px; height: 46px; border-radius: 50%;

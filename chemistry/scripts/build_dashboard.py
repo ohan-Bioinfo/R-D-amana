@@ -490,32 +490,35 @@ h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   font-size: 14px; opacity: 0.6; }
 .subtitle { color: var(--ink-500); font-size: 13px; margin: 0;
   font-family: 'Cormorant Garamond', serif; font-style: italic; }
+.filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.control-panel { background: var(--bg-2); border: 1px solid var(--sand-200); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; }
+.control-panel .panel-head { padding: 10px 18px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; color: var(--muted); background: var(--sand-100); border-bottom: 1px solid var(--sand-200); }
+.control-panel .panel-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+.control-group { display: flex; flex-direction: column; gap: 6px; }
 .control-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
-   padding: 14px 22px; min-height: 52px;
-   background: var(--bg-2); border: 1px solid var(--sand-200);
-   border-radius: 4px; margin-bottom: 18px; box-shadow: var(--shadow) }
+   padding: 14px 22px; background: var(--bg-2); border: 1px solid var(--sand-200);
+   border-radius: 8px; margin-bottom: 14px; box-shadow: var(--shadow); }
 .control-row::before { content: ""; display: block; width: 3px; height: 24px;
    background: var(--gold-500); margin-right: 8px; align-self: center; }
 .control-label { font-size: 10px; color: var(--gold-700); text-transform: uppercase;
-   letter-spacing: 2.5px; font-weight: 600; margin-right: 6px;
-   font-family: 'Tajawal', sans-serif }
+   letter-spacing: 2.5px; font-weight: 600; font-family: 'Tajawal', sans-serif }
 .chip { padding: 7px 16px; background: var(--sand-100); border: 1px solid var(--sand-200);
-   border-radius: 2px; font-size: 12px; cursor: pointer; user-select: none;
+   border-radius: 4px; font-size: 12px; cursor: pointer; user-select: none;
    white-space: nowrap; font-family: 'Tajawal', sans-serif; font-weight: 500;
    color: var(--ink-700); transition: all 0.12s ease }
 .chip:hover { border-color: var(--green-700); background: #fffdf8; color: var(--green-900) }
 .chip.active { background: var(--green-700); border-color: var(--green-700);
    color: #faf6ee; font-weight: 600; box-shadow: 0 2px 4px rgba(14,92,54,0.25) }
 .sec-chip { padding: 10px 18px; background: var(--bg-2); border: 1px solid var(--sand-200);
-   border-radius: 2px; cursor: pointer; font-size: 13px; user-select: none;
+   border-radius: 4px; cursor: pointer; font-size: 13px; user-select: none;
    white-space: nowrap; color: var(--ink-700); font-family: 'Tajawal', sans-serif;
    font-weight: 500; transition: all 0.12s ease; border-left: 3px solid var(--sand-200); }
 .sec-chip:hover { border-color: var(--green-700); border-left-color: var(--gold-500); color: var(--green-900) }
 .sec-chip.active { background: var(--green-900); border-color: var(--green-900);
    border-left-color: var(--gold-500); color: #faf6ee; font-weight: 600 }
-.search { flex: 1; min-width: 200px; padding: 7px 12px; background: #fffdf8;
-   border: 1px solid var(--sand-200); border-radius: 2px; color: var(--ink-900);
-   font-size: 13px; font-family: 'IBM Plex Sans Arabic', sans-serif }
+.search { width: 100%; padding: 8px 12px; background: #fffdf8;
+   border: 1px solid var(--sand-200); border-radius: 4px; color: var(--ink-900);
+   font-size: 13px; font-family: 'IBM Plex Sans Arabic', sans-serif; transition: 0.2s }
 .search:focus { outline: none; border-color: var(--green-700);
    box-shadow: 0 0 0 3px rgba(14,92,54,0.12) }
 
@@ -665,28 +668,56 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 
 
 <!-- Section selector -->
-<div class="control-row" id="section-bar">
-  <span class="control-label">Section</span>
+<div class="control-row">
+  <span class="control-label" style="margin-right:8px">Section</span>
+  <div id="section-bar" style="display:flex;gap:8px;flex-wrap:wrap"></div>
 </div>
 
-<!-- Year + Compliance + Sector + Search -->
-<div class="control-row">
-  <span class="control-label">Year</span>
-  <div id="year-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-  <span class="control-label" style="margin-left:18px">Compliance</span>
-  <div id="compliance-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-  <span class="control-label" style="margin-left:18px">Sector</span>
-  <div id="sector-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-  <span class="control-label" style="margin-left:18px">Search</span>
-  <input type="text" class="search" id="search" placeholder="Filter by sample ID, name, facility…" autocomplete="off">
-  <span class="muted" id="filter-status" style="font-size:11px"></span>
-  <button class="btn" id="btn-reset">Reset filters</button>
-</div>
+<div class="filter-grid">
+  <!-- Time & Compliance -->
+  <div class="control-panel">
+    <div class="panel-head">Time & Compliance</div>
+    <div class="panel-body">
+      <div class="control-group">
+        <span class="control-label">Year</span>
+        <div id="year-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="control-group" style="margin-top:4px">
+        <span class="control-label">Compliance</span>
+        <div id="compliance-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+  </div>
 
-<!-- GSO 1016 category chips (bridge from chem sample_category_canonical) -->
-<div class="control-row">
-  <span class="control-label">GSO 1016 category</span>
-  <div id="gso-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+  <!-- Location & Search -->
+  <div class="control-panel">
+    <div class="panel-head">Location & Search</div>
+    <div class="panel-body">
+      <div class="control-group">
+        <span class="control-label">Sector</span>
+        <div id="sector-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="control-group" style="margin-top:4px">
+        <span class="control-label">Search</span>
+        <input type="text" class="search" id="search" placeholder="Filter by sample ID, name, facility…" autocomplete="off">
+      </div>
+    </div>
+  </div>
+
+  <!-- Product & Reset -->
+  <div class="control-panel">
+    <div class="panel-head">Sample Product & Actions</div>
+    <div class="panel-body">
+      <div class="control-group">
+        <span class="control-label">GSO 1016 Category</span>
+        <div id="gso-chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+      <div class="control-group" style="margin-top:auto; flex-direction:row; align-items:center; justify-content:space-between">
+        <button class="btn" id="btn-reset" style="padding: 7px 16px; background: var(--accent); color: #fff; border: none; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; border-radius: 4px; font-size: 12px; transition: all 0.15s;">Reset filters</button>
+        <span class="muted" id="filter-status" style="font-size:11px"></span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="section-desc" id="section-desc"></div>

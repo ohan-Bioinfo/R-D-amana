@@ -2,7 +2,8 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
 <title>أمانة منطقة الرياض · Microbiology Pipeline — Statistics, Challenges & Enhancement Report</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,11 +18,14 @@
   --clay-700:#7a2616;  --clay-500:#a8331a;  --clay-100:#f7d9d0;
   --sand-50:#faf6ee;   --sand-100:#f4ecde;  --sand-200:#e8dcc4;  --sand-300:#d4c5a4;
   --ink-900:#1a1f2c;   --ink-700:#3d4256;   --ink-500:#6c6f7e;
+  --amber-500:#f59e0b; --amber-100:#fef3c7; --amber-700:#92400e;
+  --blue-500:#3b82f6; --blue-100:#e0f2fe; --blue-700:#0c4a6e;
   --bg: var(--sand-50); --fg: var(--ink-900); --muted: var(--ink-500); --line: var(--sand-200);
+  --gutter: clamp(16px, 4vw, 30px);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 body {
   background: var(--bg);
   background-image: radial-gradient(ellipse 1200px 600px at 50% -200px, rgba(14,92,54,0.06), transparent 60%);
@@ -29,13 +33,14 @@ body {
   font-family: 'IBM Plex Sans Arabic', 'Tajawal', system-ui, sans-serif;
   font-size: 14px; line-height: 1.65;
   padding-bottom: 80px;
+  overflow-x: hidden;
 }
 
 /* ─── Masthead ────────────────────────────────────────────────── */
 .masthead {
   background: linear-gradient(180deg, var(--green-900) 0%, var(--green-700) 100%);
   color: #faf6ee; border-bottom: 4px solid var(--gold-500);
-  padding: 32px 40px 28px; position: relative; overflow: hidden;
+  padding: clamp(22px,5vw,32px) var(--gutter) clamp(20px,4vw,28px); position: relative; overflow: hidden;
 }
 .masthead::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
@@ -43,20 +48,20 @@ body {
 }
 .masthead-inner { max-width: 1200px; margin: 0 auto; position: relative; z-index: 1; }
 .masthead h1 {
-  font-family: 'Tajawal', sans-serif; font-weight: 900; font-size: 28px;
-  letter-spacing: 0.5px; margin-bottom: 6px;
+  font-family: 'Tajawal', sans-serif; font-weight: 900; font-size: clamp(21px,5.2vw,28px);
+  line-height: 1.15; letter-spacing: 0.5px; margin-bottom: 6px;
 }
 .masthead .subtitle {
-  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px;
+  font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: clamp(15px,3.4vw,17px);
   color: var(--gold-500); margin-bottom: 10px;
 }
 .masthead .meta {
-  font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold-200);
-  letter-spacing: 1px; opacity: 0.85;
+  font-family: 'DM Mono', monospace; font-size: clamp(10px,2.6vw,11px); color: var(--gold-200);
+  letter-spacing: 1px; opacity: 0.85; line-height: 1.7;
 }
 
 /* ─── Page body ───────────────────────────────────────────────── */
-.page { max-width: 1200px; margin: 0 auto; padding: 0 30px; }
+.page { max-width: 1200px; margin: 0 auto; padding: 0 var(--gutter); }
 
 /* ─── Table of Contents ──────────────────────────────────────── */
 .toc {
@@ -65,35 +70,47 @@ body {
 }
 .toc h3 { font-family: 'Tajawal'; font-size: 13px; text-transform: uppercase;
   letter-spacing: 2px; color: var(--gold-700); margin-bottom: 12px; }
-.toc ol { padding-left: 22px; }
-.toc li { margin-bottom: 4px; }
-.toc a { color: var(--green-700); text-decoration: none; font-weight: 500; font-size: 13.5px; }
+.toc ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 2px 26px; counter-reset: toc; list-style: none; padding: 0; margin: 0; }
+.toc li { counter-increment: toc; }
+.toc a { display: flex; align-items: center; gap: 10px; min-height: 44px; border-bottom: 1px solid transparent; color: var(--green-700); text-decoration: none; font-weight: 500; font-size: 13.5px; }
 .toc a:hover { text-decoration: underline; }
+.toc a::before {
+  content: counter(toc); font-family: 'DM Mono', monospace; font-size: 11px;
+  color: var(--gold-700); background: var(--sand-100);
+  width: 22px; height: 22px; border-radius: 6px; flex: none;
+  display: grid; place-items: center;
+}
+.toc a:focus-visible, .to-top:focus-visible {
+  outline: 2px solid var(--gold-500); outline-offset: 2px; border-radius: 4px;
+}
 
 /* ─── Section Headings ───────────────────────────────────────── */
 h2 {
-  font-family: 'Tajawal', sans-serif; font-size: 20px; font-weight: 700;
+  font-family: 'Tajawal', sans-serif; font-size: clamp(17px,4.4vw,20px); font-weight: 700;
   color: var(--green-900); margin: 38px 0 6px; padding-bottom: 8px;
-  border-bottom: 2px solid var(--gold-500); display: flex; align-items: center; gap: 10px;
+  border-bottom: 2px solid var(--gold-500); display: flex; align-items: center; gap: 10px; scroll-margin-top: 16px;
 }
-h2::before { content: "۞"; color: var(--gold-500); font-size: 16px; }
+h2::before { content: "۞"; color: var(--gold-500); font-size: 16px; flex: none; }
 h3 {
-  font-family: 'Tajawal'; font-size: 15px; font-weight: 700; color: var(--green-700);
-  margin: 22px 0 8px; letter-spacing: 0.3px;
+  font-family: 'Tajawal'; font-size: clamp(14px,3.6vw,15px); font-weight: 700; color: var(--green-700);
+  margin: 22px 0 8px; letter-spacing: 0.3px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
 }
+p { max-width: 74ch; }
+.lead { font-size: 14.5px; color: var(--ink-700); max-width: 78ch; margin: 8px 0 4px; }
+code { font-family: 'DM Mono', monospace; font-size: 0.9em; background: var(--sand-100); padding: 1px 5px; border-radius: 4px; color: var(--clay-700); word-break: break-word; }
 .section-badge {
   display: inline-block; padding: 2px 10px; border-radius: 999px;
   font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
   margin-left: 10px; vertical-align: middle;
 }
 .badge-red { background: var(--clay-100); color: var(--clay-700); }
-.badge-yellow { background: #fef3c7; color: #92400e; }
+.badge-yellow { background: var(--amber-100); color: var(--amber-700); }
 .badge-green { background: var(--green-100); color: var(--green-900); }
-.badge-blue { background: #e0f2fe; color: #0c4a6e; }
+.badge-blue { background: var(--blue-100); color: var(--blue-700); }
 
 /* ─── KPI Grid ───────────────────────────────────────────────── */
 .kpi-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%,210px),1fr));
   gap: 14px; margin: 18px 0 24px;
 }
 .kpi {
@@ -104,28 +121,36 @@ h3 {
 .kpi:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(10,61,36,0.1); }
 .kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px;
   color: var(--muted); font-weight: 600; margin-bottom: 4px; }
-.kpi .value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 700;
+.kpi .value { font-family: 'DM Mono', monospace; font-size: clamp(22px,5.5vw,26px); font-weight: 700;
   color: var(--green-900); line-height: 1.1; }
-.kpi .sub { font-size: 11.5px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
+.kpi .sub { font-size: 12px; color: var(--ink-500); margin-top: 6px; line-height: 1.4; }
 .kpi.accent-red .value { color: var(--clay-500); }
 .kpi.accent-gold .value { color: var(--gold-700); }
 .kpi.accent-green .value { color: var(--green-500); }
 
 /* ─── Tables ─────────────────────────────────────────────────── */
-.data-table { width: 100%; border-collapse: collapse; margin: 14px 0 20px;
-  font-size: 13px; background: #fffdf8; border-radius: 10px; overflow: hidden;
-  box-shadow: 0 1px 6px rgba(10,61,36,0.06); }
+.table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  border-radius: 10px; box-shadow: 0 1px 6px rgba(10,61,36,0.06); margin: 14px 0 20px; }
+.table-wrap::after { content:""; position:absolute; top:0; right:0; bottom:0; width:26px;
+  background: linear-gradient(90deg, transparent, rgba(10,61,36,0.07)); pointer-events:none;
+  opacity:0; transition:opacity .2s; }
+.table-wrap.is-scrollable::after { opacity:1; }
+.data-table { width: 100%; border-collapse: collapse; margin: 0;
+  font-size: 13px; background: #fffdf8; min-width: 460px; box-shadow: none; }
 .data-table th {
   background: var(--green-900); color: var(--gold-200); text-align: left;
   padding: 10px 14px; font-size: 11px; text-transform: uppercase;
   letter-spacing: 1px; font-weight: 600; font-family: 'DM Mono', monospace;
+  position: sticky; top: 0; white-space: nowrap;
 }
 .data-table td { padding: 9px 14px; border-bottom: 1px solid var(--sand-200); vertical-align: top; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: var(--sand-100); }
-.data-table .num { font-family: 'DM Mono', monospace; font-weight: 500; text-align: right; }
+.data-table .num { font-family: 'DM Mono', monospace; font-weight: 500; text-align: right; white-space: nowrap; }
 .data-table .bold { font-weight: 700; }
 .data-table .indent { padding-left: 30px; color: var(--ink-500); font-size: 12.5px; }
+.data-table .warn { color: var(--clay-500); font-weight: 700; }
+.data-table .good { color: var(--green-500); font-weight: 700; }
 
 /* ─── Priority Cards ─────────────────────────────────────────── */
 .priority-card {
@@ -135,15 +160,15 @@ h3 {
   box-shadow: 0 1px 6px rgba(10,61,36,0.05);
 }
 .priority-card.p-red { border-left-color: var(--clay-500); }
-.priority-card.p-yellow { border-left-color: #f59e0b; }
+.priority-card.p-yellow { border-left-color: var(--amber-500); }
 .priority-card.p-green { border-left-color: var(--green-500); }
-.priority-card.p-blue { border-left-color: #3b82f6; }
+.priority-card.p-blue { border-left-color: var(--blue-500); }
 .priority-card .pid { font-family: 'DM Mono'; font-size: 11px; font-weight: 700;
   padding: 2px 8px; border-radius: 4px; margin-right: 8px; }
 .priority-card.p-red .pid { background: var(--clay-100); color: var(--clay-700); }
-.priority-card.p-yellow .pid { background: #fef3c7; color: #92400e; }
+.priority-card.p-yellow .pid { background: var(--amber-100); color: var(--amber-700); }
 .priority-card.p-green .pid { background: var(--green-100); color: var(--green-900); }
-.priority-card.p-blue .pid { background: #e0f2fe; color: #0c4a6e; }
+.priority-card.p-blue .pid { background: var(--blue-100); color: var(--blue-700); }
 .priority-card h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
   color: var(--ink-900); margin-bottom: 6px; display: flex; align-items: center; }
 .priority-card p { font-size: 13px; color: var(--ink-700); line-height: 1.55; }
@@ -152,7 +177,7 @@ h3 {
   margin-left: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* ─── Inventory Grid ─────────────────────────────────────────── */
-.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+.inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%,280px),1fr));
   gap: 12px; margin: 16px 0 24px; }
 .inv-card {
   background: #fffdf8; border: 1px solid var(--line); border-radius: 10px;
@@ -173,7 +198,7 @@ h3 {
   width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--green-500);
   background: #fffdf8; }
 .timeline-item.t2::before { border-color: var(--gold-500); }
-.timeline-item.t3::before { border-color: #f59e0b; }
+.timeline-item.t3::before { border-color: var(--amber-500); }
 .timeline-item.t4::before { border-color: var(--clay-500); }
 .timeline-item h4 { font-family: 'Tajawal'; font-size: 14px; font-weight: 700;
   color: var(--green-900); }
@@ -189,6 +214,8 @@ blockquote {
   font-size: 13px; color: var(--ink-700);
 }
 blockquote strong { color: var(--green-900); }
+.ar { font-family: 'Tajawal', sans-serif; direction: rtl; unicode-bidi: isolate; }
+blockquote .ar { font-family: 'Tajawal', sans-serif; direction: rtl; unicode-bidi: isolate; }
 
 /* ─── Footer ─────────────────────────────────────────────────── */
 footer {
@@ -197,38 +224,6 @@ footer {
   font-family: 'DM Mono', monospace; letter-spacing: 0.5px;
 }
 
-/* ─── Animations ─────────────────────────────────────────────── */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-.kpi, .inv-card, .priority-card { animation: fadeUp 0.4s ease both; }
-.kpi:nth-child(2) { animation-delay: 0.05s; } .kpi:nth-child(3) { animation-delay: 0.1s; }
-.kpi:nth-child(4) { animation-delay: 0.15s; } .kpi:nth-child(5) { animation-delay: 0.2s; }
-.kpi:nth-child(6) { animation-delay: 0.25s; } .kpi:nth-child(7) { animation-delay: 0.3s; }
-
-/* ═══ Responsive / impeccable retrofit (2026-08-11) ═══ */
-:root { --gutter: clamp(16px, 4vw, 30px); }
-html { -webkit-text-size-adjust: 100%; }
-body { overflow-x: hidden; }
-.masthead { padding: clamp(22px,5vw,32px) var(--gutter) clamp(20px,4vw,28px); }
-.masthead h1 { font-size: clamp(21px,5.2vw,28px); line-height: 1.15; }
-.masthead .subtitle { font-size: clamp(15px,3.4vw,17px); }
-.masthead .meta { font-size: clamp(10px,2.6vw,11px); line-height: 1.7; }
-.page { padding: 0 var(--gutter); }
-h2 { font-size: clamp(17px,4.4vw,20px); scroll-margin-top: 16px; }
-h3 { font-size: clamp(14px,3.6vw,15px); }
-.toc a { min-height: 44px; display: flex; align-items: center; }
-.kpi-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%,210px),1fr)); }
-.kpi .value { font-size: clamp(22px,5.5vw,26px); }
-.inv-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%,280px),1fr)); }
-/* table scroll wrapper */
-.table-wrap { position: relative; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  border-radius: 10px; box-shadow: 0 1px 6px rgba(10,61,36,0.06); margin: 14px 0 20px; }
-.table-wrap::after { content:""; position:absolute; top:0; right:0; bottom:0; width:26px;
-  background: linear-gradient(90deg, transparent, rgba(10,61,36,0.07)); pointer-events:none;
-  opacity:0; transition:opacity .2s; }
-.table-wrap.is-scrollable::after { opacity:1; }
-.data-table { margin: 0; min-width: 460px; box-shadow: none; }
-.data-table th { position: sticky; top: 0; white-space: nowrap; }
-.data-table .num { white-space: nowrap; }
 /* back to top */
 .to-top { position: fixed; right: 18px; bottom: 18px; z-index: 20; width: 46px; height: 46px;
   border-radius: 50%; background: var(--green-700); color: var(--gold-200);
@@ -238,6 +233,16 @@ h3 { font-size: clamp(14px,3.6vw,15px); }
   transition: opacity .25s, transform .25s, background .15s; }
 .to-top.show { opacity: 1; transform: none; pointer-events: auto; }
 .to-top:hover { background: var(--green-900); }
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.kpi, .inv-card, .priority-card { animation: fadeUp 0.4s ease both; }
+.kpi:nth-child(2) { animation-delay: 0.05s; } .kpi:nth-child(3) { animation-delay: 0.1s; }
+.kpi:nth-child(4) { animation-delay: 0.15s; } .kpi:nth-child(5) { animation-delay: 0.2s; }
+.kpi:nth-child(6) { animation-delay: 0.25s; } .kpi:nth-child(7) { animation-delay: 0.3s; }
+.kpi:nth-child(8) { animation-delay: 0.35s; }
+
+/* ─── Responsive / Print ─────────────────────────────────────── */
 @media (max-width: 760px) { h2 { margin-top: 32px; } }
 @media (max-width: 480px) {
   body { font-size: 13.5px; }
@@ -260,7 +265,6 @@ h3 { font-size: clamp(14px,3.6vw,15px); }
   .data-table th { position: static; }
   h2 { break-after: avoid; }
 }
-
 </style>
 </head>
 <body>
@@ -281,7 +285,7 @@ h3 { font-size: clamp(14px,3.6vw,15px); }
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- TABLE OF CONTENTS                                              -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<nav class="toc">
+<nav class="toc" aria-label="Contents">
   <h3>۞ Contents</h3>
   <ol>
     <li><a href="#s1">Headline Numbers — At a Glance</a></li>
@@ -294,6 +298,12 @@ h3 { font-size: clamp(14px,3.6vw,15px); }
     <li><a href="#s8">Implementation Roadmap</a></li>
   </ol>
 </nav>
+
+<p class="lead">The microbiology pipeline processes 20,881 food-safety samples
+across 2024–2025, applying tiered GSO 1016 classification, multi-organism
+verdict enrichment, and panel completeness auditing. This report is the
+microbiology sibling of the chemistry comprehensive report: same structure,
+same numerical honesty, microbiology-specific challenges.</p>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- SECTION 1 — HEADLINE KPIs                                      -->
