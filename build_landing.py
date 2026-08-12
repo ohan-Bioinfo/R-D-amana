@@ -16,10 +16,11 @@ LOGO = ROOT / "microbiology" / "assets" / "riyadh_emblem.jpg"
 OUT = ROOT / "index.html"
 
 
-def _inject(html: str, fonts: str, logo: str) -> str:
+def _inject(html: str, fonts: str, logo: str, vision: str) -> str:
     return (html
             .replace("__FONTS__", f"<style>{fonts}</style>")
             .replace("__LOGO__", logo)
+            .replace("__VISION__", vision)
             .replace("__STAMP__", datetime.now().strftime("%d %b %Y · %H:%M")))
 
 
@@ -27,12 +28,16 @@ def build():
     fonts = FONTS.read_text(encoding="utf-8") if FONTS.exists() else ""
     logo = ("data:image/jpeg;base64," +
             base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
+            
+    vision_file = ROOT / "vision2030.png"
+    vision = ("data:image/png;base64," +
+              base64.b64encode(vision_file.read_bytes()).decode("ascii")) if vision_file.exists() else ""
 
     pipeline_img = ("data:image/jpeg;base64," +
                     base64.b64encode((ROOT / "genome/pipeline_3d.jpg").read_bytes()).decode("ascii")) if (ROOT / "genome/pipeline_3d.jpg").exists() else ""
 
     # 1) Root hub (index.html) — the two lab gateways.
-    OUT.write_text(_inject(TEMPLATE, fonts, logo), encoding="utf-8")
+    OUT.write_text(_inject(TEMPLATE, fonts, logo, vision), encoding="utf-8")
     print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB; logo={'yes' if logo else 'MISSING'})")
 
     # 2) One landing page per lab, sharing the hub's <head> (fonts + CSS).
@@ -42,7 +47,7 @@ def build():
             body = GENOME_BODY.replace("__LOGO__", logo).replace("__PIPELINE_IMG__", pipeline_img)
             out = ROOT / lab["out"]
             out.parent.mkdir(exist_ok=True)
-            out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
+            out.write_text(_inject(head + body, fonts, logo, vision), encoding="utf-8")
             print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
             continue
         viz = "\n".join(
@@ -60,7 +65,7 @@ def build():
                 .replace("__VIZN__", str(len(lab["viz"]))).replace("__VIZ__", viz))
         out = ROOT / lab["out"]
         out.parent.mkdir(exist_ok=True)
-        out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
+        out.write_text(_inject(head + body, fonts, logo, vision), encoding="utf-8")
         print(f"wrote {out}  ({out.stat().st_size/1024:.0f} KB)")
 
 
@@ -370,6 +375,7 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
     <span>self-contained · opens in any browser</span>
     <a class="sp signout" href="/logout">Sign out →</a>
+    <img src="__VISION__" alt="Saudi Vision 2030" style="height:32px; object-fit:contain; opacity:0.85;" />
     <span>build __STAMP__</span>
   </div>
 </footer>
@@ -436,6 +442,7 @@ __VIZ__
     <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
     <span>self-contained · opens in any browser</span>
     <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
+    <img src="__VISION__" alt="Saudi Vision 2030" style="height:32px; object-fit:contain; opacity:0.85;" />
     <span>build __STAMP__</span>
   </div>
 </footer>
@@ -625,6 +632,7 @@ GENOME_BODY = r"""<body class="labpage genome">
     <span class="ar">أمانة منطقة الرياض · البحث والتطوير</span>
     <span>self-contained · opens in any browser</span>
     <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
+    <img src="__VISION__" alt="Saudi Vision 2030" style="height:32px; object-fit:contain; opacity:0.85;" />
     <span>build __STAMP__</span>
   </div>
 </footer>
