@@ -797,9 +797,9 @@ h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   background: #ede9fe; color: #5b21b6; border-radius: 999px;
   font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 
-.filter-section { margin-bottom: 0; background: var(--bg-2);
+.filter-section { margin-bottom: 14px; background: var(--bg-2);
   border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
-  box-shadow: var(--shadow); display: flex; flex-direction: column; }
+  box-shadow: var(--shadow); }
 .filter-section .section-title { padding: 10px 18px; font-size: 11px;
   text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;
   color: var(--muted); background: var(--bg-3);
@@ -807,17 +807,15 @@ h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 .filter-section .section-title .section-note { font-weight: 400; letter-spacing: 0.5px;
   text-transform: none; color: var(--muted); opacity: 0.7; margin-left: 6px; }
 .filter-section .filters { margin-bottom: 0; padding: 14px 18px;
-  border: none; background: transparent; flex: 1; }
-
-.filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 14px; margin-bottom: 22px; }
+  border: none; background: transparent; }
 
 .badge-count { display: inline-block; margin-left: 6px; padding: 1px 7px;
   background: var(--bg-3); border-radius: 10px; font-size: 11px;
   font-weight: 500; color: var(--fg); }
 .toggle.active .badge-count { background: rgba(255,255,255,0.3); color:#fff; }
 .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px; }
+  gap: 14px; padding: 16px; background: var(--bg-2); border: 1px solid var(--line);
+  border-radius: 12px; margin-bottom: 22px; box-shadow: var(--shadow); }
 .filter-group label { display: block; font-size: 11px; color: var(--muted);
   text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-weight: 500; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -981,7 +979,6 @@ tbody tr:hover { background: var(--sand-100); }
   <button class="btn" id="btn_copy_link" style="margin-left:auto">🔗 Copy view link</button>
 </div>
 
-<div class="filter-grid">
 <div class="filter-section">
   <div class="section-title">Time & Compliance</div>
   <div class="filters">
