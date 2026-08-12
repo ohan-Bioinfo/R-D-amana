@@ -28,6 +28,9 @@ def build():
     logo = ("data:image/jpeg;base64," +
             base64.b64encode(LOGO.read_bytes()).decode("ascii")) if LOGO.exists() else ""
 
+    pipeline_img = ("data:image/jpeg;base64," +
+                    base64.b64encode((ROOT / "genome/pipeline_3d.jpg").read_bytes()).decode("ascii")) if (ROOT / "genome/pipeline_3d.jpg").exists() else ""
+
     # 1) Root hub (index.html) — the two lab gateways.
     OUT.write_text(_inject(TEMPLATE, fonts, logo), encoding="utf-8")
     print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB; logo={'yes' if logo else 'MISSING'})")
@@ -36,7 +39,7 @@ def build():
     head = TEMPLATE.split("</head>", 1)[0] + "</head>"
     for lab in LABS:
         if lab["name"] == "Genome":
-            body = GENOME_BODY.replace("__LOGO__", logo)
+            body = GENOME_BODY.replace("__LOGO__", logo).replace("__PIPELINE_IMG__", pipeline_img)
             out = ROOT / lab["out"]
             out.parent.mkdir(exist_ok=True)
             out.write_text(_inject(head + body, fonts, logo), encoding="utf-8")
@@ -579,33 +582,8 @@ GENOME_BODY = r"""<body class="labpage genome">
   </div>
   
   <div class="viz-grid" style="margin-top:16px; margin-bottom:32px;">
-      <div class="viz" style="grid-column: 1 / -1; display:flex; justify-content:center; padding: 24px; overflow-x: auto; background: var(--panel); border-radius: 20px; box-shadow: 0 8px 30px -12px rgba(0,0,0,0.06); border-color: transparent;">
-         <div class="pipeline">
-            <div class="pipe-node">
-               <div class="icon-wrap">🧬</div>
-               <div class="label">Raw Data</div>
-            </div>
-            <div class="pipe-edge"></div>
-            <div class="pipe-node">
-               <div class="icon-wrap">✂️</div>
-               <div class="label">Trimming</div>
-            </div>
-            <div class="pipe-edge"></div>
-            <div class="pipe-node">
-               <div class="icon-wrap">🧩</div>
-               <div class="label">Assembly</div>
-            </div>
-            <div class="pipe-edge"></div>
-            <div class="pipe-node">
-               <div class="icon-wrap">🏷️</div>
-               <div class="label">Annotation</div>
-            </div>
-            <div class="pipe-edge"></div>
-            <div class="pipe-node">
-               <div class="icon-wrap">🔬</div>
-               <div class="label">Metagenomics</div>
-            </div>
-         </div>
+      <div class="viz" style="grid-column: 1 / -1; display:flex; justify-content:center; align-items:center; padding: 24px; overflow: hidden; background: var(--panel); border-radius: 20px; box-shadow: 0 8px 30px -12px rgba(0,0,0,0.06); border-color: transparent;">
+         <img src="__PIPELINE_IMG__" alt="Genome Pipeline 3D Graphic" style="width:100%; max-width:800px; height:auto; border-radius: 12px;" />
       </div>
   </div>
 
