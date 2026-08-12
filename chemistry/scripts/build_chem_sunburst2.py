@@ -43,8 +43,8 @@ _RULES = [
     (("acidity", "حموضة"), "Acidity"), (("sucrose", "سكروز"), "Sucrose"),
     (("glucose", "fructose"), "Glucose+Fructose"), (("sensory", "حسي"), "Sensory"), (("ph",), "pH"),
 ]
-CULT = [(0.0, (14, 165, 233)), (0.25, (99, 102, 241)), (0.5, (168, 85, 247)),
-        (0.75, (236, 72, 153)), (1.0, (225, 29, 72))]
+CULT = [(0.0, (34, 133, 63)), (0.25, (123, 145, 68)), (0.5, (200, 168, 90)),
+        (0.75, (168, 106, 52)), (1.0, (122, 38, 22))]
 
 
 def cult_hex(rate: float) -> str:
@@ -57,7 +57,7 @@ def cult_hex(rate: float) -> str:
             return "#%02x%02x%02x" % (int(round(c0[0] + (c1[0]-c0[0])*f)),
                                       int(round(c0[1] + (c1[1]-c0[1])*f)),
                                       int(round(c0[2] + (c1[2]-c0[2])*f)))
-    return "#e11d48"
+    return "#7a2616"
 
 
 def normalize_analyte(raw) -> str:
@@ -217,7 +217,7 @@ __LIB__
   --peri:#8e9fc7; --peri-2:#5f70a2; --white:#f7f8f5; --field:#e7e8e0; --panel:#fbfcfa;
   --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2; --gold:#b08a2e;
   /* data (contamination) scale anchors - Clinical Tune */
-  --c0:#0ea5e9; --c1:#6366f1; --c2:#a855f7; --c3:#ec4899; --c4:#e11d48;
+  --c0:#22853f; --c1:#7b9144; --c2:#c8a85a; --c3:#a86a34; --c4:#7a2616;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--field);color:var(--ink);

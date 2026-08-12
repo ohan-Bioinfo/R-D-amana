@@ -163,8 +163,8 @@ __LIB__
   --green:#006040; --green-2:#004d33; --green-tint:#e4ede9; --green-line:#bcd3c7;
   --peri:#8e9fc7; --peri-2:#5f70a2; --white:#f7f8f5; --field:#e7e8e0; --panel:#fbfcfa; --panel-2:#f4f6f1;
   --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2; --gold:#b08a2e;
-  /* data (contamination) scale anchors - Clinical Tune */
-  --c0:#0ea5e9; --c1:#6366f1; --c2:#a855f7; --c3:#ec4899; --c4:#e11d48;
+  /* data (contamination) scale anchors - Najdi Heritage */
+  --c0:#22853f; --c1:#7b9144; --c2:#c8a85a; --c3:#a86a34; --c4:#7a2616;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--field);color:var(--ink);
@@ -330,17 +330,17 @@ footer a{color:var(--peri-2)}
 const DATA=__DATA__, MONTHS=__MONTHS__, VOLMAX=__VOLMAX__;
 const fmt=n=>Number(n).toLocaleString();
 let metric='nc', focus=null;
-const CULT=[[0,[14,165,233]],[0.25,[99,102,241]],[0.5,[168,85,247]],[0.75,[236,72,153]],[1,[225,29,72]]];
+const CULT=[[0,[34,133,63]],[0.25,[123,145,68]],[0.5,[200,168,90]],[0.75,[168,106,52]],[1,[122,38,22]]];
 const VOL=[[0,[236,238,246]],[0.5,[127,151,196]],[1,[0,96,64]]];
 function interp(stops,t){t=Math.max(0,Math.min(1,t));
   for(let i=0;i<stops.length-1;i++){const [t0,c0]=stops[i],[t1,c1]=stops[i+1];
-    if(t<=t1){const f=t1==t0?0:(t-t0)/(t1-t0);
+    if(t>=t0&&t<=t1){const f=(t-t0)/(t1-t0);
       return `rgb(${Math.round(c0[0]+(c1[0]-c0[0])*f)},${Math.round(c0[1]+(c1[1]-c0[1])*f)},${Math.round(c0[2]+(c1[2]-c0[2])*f)})`;}}
-  return 'rgb(225,29,72)';}
+  return 'rgb(122,38,22)';}
 function mconf(){
-  if(metric==='path') return {cmax:30,lab:'% pathogen',grad:'linear-gradient(90deg,#0ea5e9,#6366f1,#a855f7,#ec4899,#e11d48)',ticks:['0','','15','','30%']};
+  if(metric==='path') return {cmax:30,lab:'% pathogen',grad:'linear-gradient(90deg,#22853f,#7b9144,#c8a85a,#a86a34,#7a2616)',ticks:['0','','15','','30%']};
   if(metric==='vol')  return {cmax:VOLMAX,lab:'samples (volume)',grad:'linear-gradient(90deg,#eceef6,#7f97c4,#006040)',ticks:['0','','','',(VOLMAX>=1000?(VOLMAX/1000).toFixed(1)+'k':''+VOLMAX)]};
-  return {cmax:60,lab:'% contaminated',grad:'linear-gradient(90deg,#0ea5e9,#6366f1,#a855f7,#ec4899,#e11d48)',ticks:['0','','30','','60%']};
+  return {cmax:60,lab:'% contaminated',grad:'linear-gradient(90deg,#22853f,#7b9144,#c8a85a,#a86a34,#7a2616)',ticks:['0','','30','','60%']};
 }
 function nodeColor(o){o=o.data||o;const n=o.n||1,nu=o.nu||0,known=Math.max(n-nu,1),c=mconf();
   if(metric==='vol') return interp(VOL,(o.n||0)/c.cmax);

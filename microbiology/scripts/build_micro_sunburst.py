@@ -174,8 +174,8 @@ __PLOTLY__
   --peri:#8e9fc7; --peri-2:#5f70a2; --peri-tint:#eceef6;
   --white:#f7f8f5; --field:#e7e8e0; --panel:#fbfcfa;
   --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2; --gold:#b08a2e;
-  /* data (contamination) scale anchors - Clinical Tune */
-  --c0:#0ea5e9; --c1:#6366f1; --c2:#a855f7; --c3:#ec4899; --c4:#e11d48;
+  /* data (contamination) scale anchors - Najdi Heritage */
+  --c0:#22853f; --c1:#7b9144; --c2:#c8a85a; --c3:#a86a34; --c4:#7a2616;
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--field);color:var(--ink);
@@ -398,7 +398,7 @@ footer{margin-top:24px;display:flex;gap:16px;align-items:center;color:var(--mute
 </div>
 <script>
 const NODES=__NODES__, STATS=__STATS__, MONTHS=__MONTHS__, VOLMAX=__VOLMAX__;
-const CULTURE=[[0,'#0ea5e9'],[0.35,'#6366f1'],[0.6,'#a855f7'],[0.8,'#ec4899'],[1,'#e11d48']];
+const CULTURE=[[0,'#22853f'],[0.35,'#7b9144'],[0.6,'#c8a85a'],[0.8,'#a86a34'],[1,'#7a2616']];
 const VOLSCALE=[[0,'#eceef6'],[0.5,'#7f97c4'],[1,'#006040']];  // periwinkle → municipal green
 const PARENT={}; NODES.ids.forEach((id,i)=>PARENT[id]=NODES.parents[i]);
 let metric='nc', focus='ALL';
@@ -406,13 +406,13 @@ let metric='nc', focus='ALL';
 // metric config: scale, cap, colorbar label + gradient CSS + tick labels
 function mconf(){
   if(metric==='path') return {scale:CULTURE,cmax:30,lab:'% pathogen',
-    grad:'linear-gradient(90deg,#0ea5e9,#6366f1,#a855f7,#ec4899,#e11d48)',
+    grad:'linear-gradient(90deg,#22853f,#7b9144,#c8a85a,#a86a34,#7a2616)',
     ticks:['0','','15','','30%']};
   if(metric==='vol') return {scale:VOLSCALE,cmax:VOLMAX,lab:'samples (volume)',
     grad:'linear-gradient(90deg,#eceef6,#7f97c4,#006040)',
     ticks:['0','','','', (VOLMAX>=1000?(VOLMAX/1000).toFixed(1)+'k':''+VOLMAX)]};
   return {scale:CULTURE,cmax:60,lab:'% contaminated',
-    grad:'linear-gradient(90deg,#0ea5e9,#6366f1,#a855f7,#ec4899,#e11d48)',
+    grad:'linear-gradient(90deg,#22853f,#7b9144,#c8a85a,#a86a34,#7a2616)',
     ticks:['0','','30','','60%']};
 }
 function colorVals(){
@@ -427,7 +427,7 @@ function colorVals(){
 }
 const layout={margin:{l:6,r:6,t:6,b:6},paper_bgcolor:'rgba(0,0,0,0)',
   font:{family:"'IBM Plex Sans Arabic','Space Grotesk',sans-serif",color:'#1b2320',size:11},
-  sunburstcolorway:['#0ea5e9'],extendsunburstcolorway:true};
+  sunburstcolorway:['#22853f'],extendsunburstcolorway:true};
 const config={displayModeBar:false,responsive:true};
 
 function draw(){
