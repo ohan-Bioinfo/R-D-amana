@@ -639,6 +639,20 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 .section-desc { color: var(--ink-500); font-size: 14px; margin: 4px 0 22px;
    font-family: 'Cormorant Garamond', serif; font-style: italic;
    border-left: 2px solid var(--gold-500); padding: 4px 0 4px 14px; line-height: 1.5 }
+
+@media (max-width: 768px) {
+  body { padding: 8px; }
+  .grid, .filter-grid, .kpis, .global-banner, .portals, .labs { grid-template-columns: 1fr !important; }
+  .card, .tabpanel, .global-banner { overflow-x: auto; padding: 12px; }
+  table { min-width: 600px; }
+  .top-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .global-banner .gb-item { border-right: none; border-bottom: 1px solid var(--line, var(--sand-200)); padding-bottom: 12px; margin-bottom: 12px; }
+  .global-banner .gb-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .wordmark h1 { font-size: 42px !important; }
+  .stat .n, .lab-hero .h-stat .n { font-size: 20px !important; }
+  .card .chart { min-height: 250px; }
+}
+
 </style>
 </head>
 <body>
