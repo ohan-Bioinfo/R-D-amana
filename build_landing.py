@@ -441,6 +441,116 @@ __VIZ__
 
 
 GENOME_BODY = r"""<body class="labpage genome">
+<style>
+/* Modern Pipeline & Under Construction */
+.pipeline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 8px;
+  overflow-x: auto;
+  gap: 8px;
+}
+.pipe-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  flex: 1;
+  text-align: center;
+  min-width: 100px;
+}
+.pipe-node .icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--accent-line);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  color: var(--accent);
+  box-shadow: 0 12px 24px -8px rgba(176,138,46,0.3);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.pipe-node:hover .icon-wrap {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 16px 32px -8px rgba(176,138,46,0.4);
+  border-color: var(--accent);
+}
+.pipe-node .label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+.pipe-edge {
+  flex: 0 0 auto;
+  width: clamp(20px, 4vw, 50px);
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-line), var(--accent));
+  border-radius: 2px;
+  position: relative;
+  opacity: 0.8;
+  margin-top: -34px;
+}
+.pipe-edge::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -3px;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid var(--accent);
+}
+
+.portal.uc {
+  position: relative;
+  border-style: dashed;
+}
+.uc-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(176,138,46,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(176,138,46,0.25);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.uc-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(176,138,46,0.6); }
+  70% { box-shadow: 0 0 0 6px rgba(176,138,46,0); }
+  100% { box-shadow: 0 0 0 0 rgba(176,138,46,0); }
+}
+.portal.uc .p-ico {
+  background: transparent;
+  border-color: transparent;
+  font-size: 32px;
+  margin-bottom: -4px;
+}
+</style>
 <div class="wrap">
   <header class="hero" style="padding-bottom:6px">
     <div class="brandline">
@@ -459,7 +569,7 @@ GENOME_BODY = r"""<body class="labpage genome">
       <h1>Genome</h1>
       <div class="ar">الجينوم</div>
     </div>
-    <div class="h-stat"><span class="n">Pipeline</span><span class="u">Under Construction</span></div>
+    <div class="h-stat"><span class="n" style="font-size:24px">Building Pipeline</span></div>
   </section>
   <p class="lab-desc">Pipeline construction flow — from raw data to metagenomics.</p>
   
@@ -468,44 +578,67 @@ GENOME_BODY = r"""<body class="labpage genome">
     <span class="sh-sub">Analysis stages</span>
   </div>
   
-  <div class="viz-grid">
-      <div class="viz" style="grid-column: 1 / -1; display:flex; justify-content:center; padding: 26px; overflow-x: auto;">
-         <pre style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; line-height: 1.5; color: var(--accent); text-align:center; margin:0;">
-[ Raw Data ] ──► [ Trimming ] ──► [ Assembly ] ──► [ Annotation ] ──► [ Metagenomics ]
-         </pre>
+  <div class="viz-grid" style="margin-top:16px; margin-bottom:32px;">
+      <div class="viz" style="grid-column: 1 / -1; display:flex; justify-content:center; padding: 24px; overflow-x: auto; background: var(--panel); border-radius: 20px; box-shadow: 0 8px 30px -12px rgba(0,0,0,0.06); border-color: transparent;">
+         <div class="pipeline">
+            <div class="pipe-node">
+               <div class="icon-wrap">🧬</div>
+               <div class="label">Raw Data</div>
+            </div>
+            <div class="pipe-edge"></div>
+            <div class="pipe-node">
+               <div class="icon-wrap">✂️</div>
+               <div class="label">Trimming</div>
+            </div>
+            <div class="pipe-edge"></div>
+            <div class="pipe-node">
+               <div class="icon-wrap">🧩</div>
+               <div class="label">Assembly</div>
+            </div>
+            <div class="pipe-edge"></div>
+            <div class="pipe-node">
+               <div class="icon-wrap">🏷️</div>
+               <div class="label">Annotation</div>
+            </div>
+            <div class="pipe-edge"></div>
+            <div class="pipe-node">
+               <div class="icon-wrap">🔬</div>
+               <div class="label">Metagenomics</div>
+            </div>
+         </div>
       </div>
   </div>
 
-  <div class="portals" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr))">
-    <div class="portal" style="opacity:0.6; min-height:120px;">
+  <div class="portals" style="grid-template-columns:repeat(auto-fit, minmax(260px, 1fr))">
+    <div class="portal uc">
+      <div class="uc-badge">Building</div>
       <div class="p-ico">🧬</div>
-      <div class="p-lb" style="font-size:16px;">Raw Data</div>
-      <div class="p-sub">Initial sequencing reads and quality assessment.</div>
-      <div class="p-go">Under construction</div>
+      <div class="p-lb">Raw Data</div>
+      <div class="p-sub">Initial sequencing reads, FASTQC quality assessment, and error profiling.</div>
     </div>
-    <div class="portal" style="opacity:0.6; min-height:120px;">
+    <div class="portal uc">
+      <div class="uc-badge">Building</div>
       <div class="p-ico">✂️</div>
-      <div class="p-lb" style="font-size:16px;">Trimming</div>
-      <div class="p-sub">Adapter removal and read filtering for high quality.</div>
-      <div class="p-go">Under construction</div>
+      <div class="p-lb">Trimming</div>
+      <div class="p-sub">Adapter removal, sliding-window read filtering, and sequence stabilization.</div>
     </div>
-    <div class="portal" style="opacity:0.6; min-height:120px;">
+    <div class="portal uc">
+      <div class="uc-badge">Building</div>
       <div class="p-ico">🧩</div>
-      <div class="p-lb" style="font-size:16px;">Assembly</div>
-      <div class="p-sub">De novo contig generation and scaffolding.</div>
-      <div class="p-go">Under construction</div>
+      <div class="p-lb">Assembly</div>
+      <div class="p-sub">De novo contig generation, scaffolding, and genome reconstruction metrics.</div>
     </div>
-    <div class="portal" style="opacity:0.6; min-height:120px;">
+    <div class="portal uc">
+      <div class="uc-badge">Building</div>
       <div class="p-ico">🏷️</div>
-      <div class="p-lb" style="font-size:16px;">Annotation</div>
-      <div class="p-sub">Gene prediction and functional assignment.</div>
-      <div class="p-go">Under construction</div>
+      <div class="p-lb">Annotation</div>
+      <div class="p-sub">Gene prediction, functional assignment, and pathway mapping workflows.</div>
     </div>
-    <div class="portal" style="opacity:0.6; min-height:120px;">
+    <div class="portal uc">
+      <div class="uc-badge">Building</div>
       <div class="p-ico">🔬</div>
-      <div class="p-lb" style="font-size:16px;">Metagenomics</div>
-      <div class="p-sub">Taxonomic profiling and community analysis.</div>
-      <div class="p-go">Under construction</div>
+      <div class="p-lb">Metagenomics</div>
+      <div class="p-sub">Taxonomic profiling, community composition, and strain-level analysis.</div>
     </div>
   </div>
 </div>
