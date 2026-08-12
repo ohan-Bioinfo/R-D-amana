@@ -643,9 +643,18 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 
 
 @media (max-width: 768px) {
-  body { padding: 4px; }
+  body { padding: 0; }
+  .page-body { padding: 12px 12px 60px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
+  
+  .masthead-inner { flex-direction: column; align-items: flex-start; gap: 12px; padding: 16px; }
+  .masthead .logo { width: 48px; height: 48px; }
+  .masthead .title-ar { font-size: 18px; }
+  .masthead .title-en { font-size: 11px; white-space: normal; line-height: 1.4; }
+  .masthead .subtitle-block { font-size: 14px; }
+  .masthead .meta-strip { text-align: left; border-left: none; padding-left: 0; padding-top: 10px; border-top: 1px solid rgba(200,168,90,0.3); margin-top: 4px; width: 100%; }
+  
   .wrap, .container { padding: 8px; width: 100%; box-sizing: border-box; }
-  .grid, .filter-grid, .kpis, .global-banner, .portals, .labs { 
+  .grid, .filter-grid, .kpis, .global-banner, .portals, .labs, .yoy { 
     display: grid !important; 
     grid-template-columns: 1fr !important; 
     width: 100%; 
@@ -659,14 +668,14 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
     min-width: 0; 
   }
   table { min-width: max-content; }
-  .top-bar { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; height: auto; }
+  .control-row { flex-direction: column; align-items: flex-start; padding: 12px; height: auto; }
   .year-bar { position: static !important; }
   .global-banner .gb-item { border-right: none; border-bottom: 1px solid var(--line, var(--sand-200)); padding-bottom: 12px; margin-bottom: 12px; }
   .global-banner .gb-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-  .wordmark h1 { font-size: 32px !important; }
-  .stat .n, .lab-hero .h-stat .n { font-size: 20px !important; }
   .card .chart { min-height: 250px; }
   .filters { display: grid !important; grid-template-columns: 1fr !important; }
+  .card-sub, .section-desc { font-size: 11px; word-wrap: break-word; }
+  .chip, .sec-chip, .toggle { font-size: 11px; padding: 6px 10px; white-space: normal; text-align: center; }
 }
 
 </style>
