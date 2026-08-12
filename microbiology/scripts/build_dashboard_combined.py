@@ -941,17 +941,32 @@ tbody tr:hover { background: var(--sand-100); }
    font-family: 'Tajawal', sans-serif; letter-spacing: 2px;
    border-bottom-color: var(--sand-200); }
 
+
+
 @media (max-width: 768px) {
-  body { padding: 8px; }
-  .grid, .filter-grid, .kpis, .global-banner, .portals, .labs { grid-template-columns: 1fr !important; }
-  .card, .tabpanel, .global-banner { overflow-x: auto; padding: 12px; }
-  table { min-width: 600px; }
-  .top-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  body { padding: 4px; overflow-x: hidden; width: 100vw; }
+  .wrap, .container { padding: 8px; width: 100%; box-sizing: border-box; overflow-x: hidden; }
+  .grid, .filter-grid, .kpis, .global-banner, .portals, .labs { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    width: 100%; 
+  }
+  .card, .tabpanel, .global-banner, .filter-section { 
+    width: 100%; 
+    box-sizing: border-box; 
+    overflow-x: auto; 
+    padding: 12px; 
+    min-width: 0; 
+  }
+  table { min-width: max-content; }
+  .top-bar { flex-direction: column; align-items: flex-start; gap: 12px; height: auto; }
+  .year-bar { position: relative !important; top: 0 !important; }
   .global-banner .gb-item { border-right: none; border-bottom: 1px solid var(--line, var(--sand-200)); padding-bottom: 12px; margin-bottom: 12px; }
   .global-banner .gb-item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-  .wordmark h1 { font-size: 42px !important; }
+  .wordmark h1 { font-size: 32px !important; }
   .stat .n, .lab-hero .h-stat .n { font-size: 20px !important; }
-  .card .chart { min-height: 250px; }
+  .card .chart { min-height: 250px; width: 100% !important; }
+  .filters { display: flex !important; flex-direction: column !important; }
 }
 
 </style>
