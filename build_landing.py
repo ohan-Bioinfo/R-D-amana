@@ -33,11 +33,16 @@ def build():
     vision = ("data:image/png;base64," +
               base64.b64encode(vision_file.read_bytes()).decode("ascii")) if vision_file.exists() else ""
 
+    rnd_file = ROOT / "rnd_header.jpg"
+    rnd_img = ("data:image/jpeg;base64," +
+               base64.b64encode(rnd_file.read_bytes()).decode("ascii")) if rnd_file.exists() else ""
+
     pipeline_img = ("data:image/jpeg;base64," +
                     base64.b64encode((ROOT / "genome/pipeline_3d.jpg").read_bytes()).decode("ascii")) if (ROOT / "genome/pipeline_3d.jpg").exists() else ""
 
     # 1) Root hub (index.html) — the two lab gateways.
-    OUT.write_text(_inject(TEMPLATE, fonts, logo, vision), encoding="utf-8")
+    root_html = TEMPLATE.replace("__RND_HEADER_IMG__", rnd_img)
+    OUT.write_text(_inject(root_html, fonts, logo, vision), encoding="utf-8")
     print(f"wrote {OUT}  ({OUT.stat().st_size/1024:.0f} KB; logo={'yes' if logo else 'MISSING'})")
 
     # 2) One landing page per lab, sharing the hub's <head> (fonts + CSS).
@@ -116,10 +121,20 @@ header.hero{padding:44px 4px 26px;position:relative}
 .lede .ar{font-family:'Tajawal',sans-serif;direction:rtl;color:var(--muted);
   font-size:15px;display:block;margin-top:4px}
 
-/* ── the two labs ─────────────────────────────────────── */
-.labs{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:22px;margin-top:34px}
-@media(max-width:760px){.labs{grid-template-columns:1fr}
-  .wordmark h1{font-size:58px}}
+    /* ── the two labs ─────────────────────────────────────── */
+    .hero { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+    .hero-content { flex: 1 1 400px; }
+    .hero-image { flex: 1 1 400px; text-align: center; }
+    .hero-image img { width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 16px 50px -12px rgba(0,50,34,0.15); }
+    @media(max-width:760px){.labs{grid-template-columns:1fr}
+      .wordmark h1{font-size:58px}
+      .hero { flex-direction: column; text-align: center; gap: 24px; }
+      .brandline { justify-content: center; }
+      .wordmark { justify-content: center; }
+      .rule { margin: 20px auto 0; }
+      .lede { margin: 18px auto 0; }
+    }
+
 
 .lab{position:relative;background:var(--panel);border:1px solid var(--hair);
   border-radius:20px;padding:26px 26px 20px;overflow:hidden;
@@ -272,19 +287,24 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="brandline">
-      <div class="emblem" style="background-image:url('__LOGO__')"></div>
-      <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+    <div class="hero-content">
+      <div class="brandline">
+        <div class="emblem" style="background-image:url('__LOGO__')"></div>
+        <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+      </div>
+      <div class="wordmark">
+        <h1>R<span class="amp">&amp;</span>D</h1>
+        <span class="sub">Research &amp; Development — Food-Safety Lab Analytics</span>
+      </div>
+      <div class="rule"></div>
+      <p class="lede">Two laboratories, one 2024–2025 record. Enter each lab's hub for its
+        <b>dashboard</b>, <b>GSO &amp; quality</b>, <b>report</b>, and <b>visualisations</b>.
+        <span class="ar">مختبران، سجلّ واحد ٢٠٢٤–٢٠٢٥ — لكل مختبر لوحته وتقاريره وعروضه.</span>
+      </p>
     </div>
-    <div class="wordmark">
-      <h1>R<span class="amp">&amp;</span>D</h1>
-      <span class="sub">Research &amp; Development — Food-Safety Lab Analytics</span>
+    <div class="hero-image">
+      <img src="__RND_HEADER_IMG__" alt="Nano Banana R&D Food Safety Labs" />
     </div>
-    <div class="rule"></div>
-    <p class="lede">Two laboratories, one 2024–2025 record. Enter each lab's hub for its
-      <b>dashboard</b>, <b>GSO &amp; quality</b>, <b>report</b>, and <b>visualisations</b>.
-      <span class="ar">مختبران، سجلّ واحد ٢٠٢٤–٢٠٢٥ — لكل مختبر لوحته وتقاريره وعروضه.</span>
-    </p>
   </header>
 
   <main class="labs">
