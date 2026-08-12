@@ -20,9 +20,9 @@ PASS = os.environ.get("AUTH_PASS", "demo")
 COOKIE = "rnd_auth"
 TOKEN = "ok"  # demo gate — the credential (demo/demo) is the only secret
 
-ALLOW_PREFIX = ("microbiology/reports/", "chemistry/reports/",
+ALLOW_PREFIX = ("microbiology/reports/", "chemistry/reports/", "genome/reports/",
                 "Gemini-reports/",
-                "microbiology/index.html", "chemistry/index.html")
+                "microbiology/index.html", "chemistry/index.html", "genome/index.html")
 # Deliverable HTML (dashboards, sunbursts, reports) has no built-in nav — the
 # server injects a floating Hub/Sign-out control so viewers are never stranded.
 # The lab hub + lab index pages have their own nav, so they are excluded.
