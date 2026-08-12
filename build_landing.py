@@ -426,7 +426,7 @@ LABS = [
              "and the analyte that failed each assay.",
         dash="reports/chemistry_dashboard.html",
         gso="reports/chemistry_dashboard.html#tab=gso&focus=1",
-        report="../Gemini-reports/Chemistry_Comprehensive_Report.html",
+        report="reports/chemistry_comprehensive_report.html",
         viz=[
             ("◎", "Sunburst", "reports/chemistry_sunburst.html", "Plotly · zoomable assay plate"),
             ("◐", "Sunburst · D3", "reports/chemistry_sunburst2.html", "D3 · sunburst-chart"),

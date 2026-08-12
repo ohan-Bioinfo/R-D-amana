@@ -743,7 +743,9 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
       the denominator you mean. The NC% column below uses <code>is_valid === 0</code> over evaluated
       samples. Two sections to watch: <b>heavy metals</b> (4.1%→16.1%) and <b>pesticides</b>
       (8.3%→16.9%) roughly doubled their 2025 fail rate — confirm with the lab before reading it as a
-      trend. Full write-up: <code>Gemini-reports/Chemistry_Comprehensive_Report.html</code>.</div>
+      trend. <b>Full write-up:</b> <a href="chemistry_comprehensive_report.html" target="_blank"
+      rel="noopener" style="color:var(--green-700);font-weight:600;text-decoration:underline">📄 Chemistry
+      Comprehensive Report ↗</a> — statistics, GSO challenges, numerical ledger &amp; roadmap.</div>
   </div>
   <div class="card full">
     <h2>GSO 1016 categories — sortable table</h2>

@@ -5,6 +5,32 @@ the convention in `microbiology/CHANGELOG.md`.
 
 ---
 
+## 2026-08-12 — Comprehensive report relocated into chemistry/reports/
+
+Moved the standalone HTML report next to the dashboard it documents, and made it
+reachable from the places a reader actually is.
+
+- `Gemini-reports/Chemistry_Comprehensive_Report.html` →
+  **`chemistry/reports/chemistry_comprehensive_report.html`** (co-located with the
+  dashboard + sunbursts; already inside the server allowlist). The file is
+  self-contained, so the move needs no asset fixups.
+- **Lab hub Report tile** (`chemistry/index.html`) now points at
+  `reports/chemistry_comprehensive_report.html`.
+- **Dashboard GSO & Quality view** guideline card now carries a real clickable
+  link (opens in a new tab) to the report, so it's one click from the GSO focus
+  view.
+- The two `.md` companions stay in `Gemini-reports/`. (Microbiology's report is
+  unchanged in `Gemini-reports/` — can be mirrored on request.)
+
+## 2026-08-12 — GSO focus view + floating Hub/Sign-out nav
+
+- The lab hub's **GSO & Quality** tile opens the dashboard with `#tab=gso&focus=1`,
+  which hides the tab nav, KPI banners, and filter chrome and shows only the GSO
+  categorisation (guideline + sortable GSO 1016 table + drilldown). Wired in both
+  dashboards.
+- `server.py` injects a small floating **⌂ Hub / Sign out** control on every served
+  deliverable (dashboards, sunbursts, reports) so viewers are never stranded.
+
 ## 2026-08-11 — Comprehensive report + GSO guideline (responsive/impeccable)
 
 Gave chemistry the same reporting set microbiology already had under
