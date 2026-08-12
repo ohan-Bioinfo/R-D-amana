@@ -122,6 +122,7 @@ header.hero{padding:44px 4px 26px;position:relative}
   font-size:15px;display:block;margin-top:4px}
 
     /* ── the two labs ─────────────────────────────────────── */
+    .labs { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; margin-top: 34px; }
     .hero { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
     .hero-content { flex: 1 1 400px; }
     .hero-image { flex: 1 1 400px; text-align: center; }
