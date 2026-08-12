@@ -407,7 +407,7 @@ LABS = [
              "severity, and the organism behind each failure.",
         dash="reports/microbiology_dashboard.html",
         gso="reports/microbiology_dashboard.html#tab=gso&focus=1",
-        report="../Gemini-reports/Microbiology_Comprehensive_Report.html",
+        report="reports/microbiology_comprehensive_report.html",
         viz=[
             ("◎", "Sunburst", "reports/microbiology_sunburst.html", "Plotly · zoomable culture plate"),
             ("◐", "Sunburst · D3", "reports/microbiology_sunburst2.html", "D3 · sunburst-chart"),

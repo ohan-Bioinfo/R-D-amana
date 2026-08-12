@@ -19,8 +19,10 @@ reachable from the places a reader actually is.
 - **Dashboard GSO & Quality view** guideline card now carries a real clickable
   link (opens in a new tab) to the report, so it's one click from the GSO focus
   view.
-- The two `.md` companions stay in `Gemini-reports/`. (Microbiology's report is
-  unchanged in `Gemini-reports/` — can be mirrored on request.)
+- The two `.md` companions stay in `Gemini-reports/`. Microbiology's report was
+  mirrored the same way (→ `microbiology/reports/microbiology_comprehensive_report.html`,
+  linked from its hub tile + GSO view), so `Gemini-reports/` now holds only the
+  four `.md` companions.
 
 ## 2026-08-12 — GSO focus view + floating Hub/Sign-out nav
 
