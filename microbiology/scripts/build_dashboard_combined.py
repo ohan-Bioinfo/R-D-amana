@@ -918,6 +918,15 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
 .chip[data-value="2023"].active { background: var(--year23); border-color: var(--year23); }
 .chip[data-value="2024"].active { background: var(--year24); border-color: var(--year24); color: var(--ink-900); }
 .chip[data-value="2025"].active { background: var(--year25); border-color: var(--year25); }
+
+/* Modal Drawer for Sample Records Inspection */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(10, 25, 18, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.modal-content { background: #fffdf8; border: 1px solid var(--sand-200); border-radius: 14px; width: 100%; max-width: 1150px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: modalIn 0.18s ease-out; }
+@keyframes modalIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.modal-header { padding: 16px 22px; border-bottom: 1px solid var(--sand-200); display: flex; justify-content: space-between; align-items: center; background: var(--sand-50); border-radius: 14px 14px 0 0; }
+.modal-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+.badge-red { background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+.badge-green { background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 11px; }
 .btn-reset { font-family: 'Tajawal', sans-serif; background: var(--green-700);
    border-radius: 2px; }
 .btn-reset:hover { background: var(--green-900); }
@@ -1077,6 +1086,7 @@ tbody tr:hover { background: var(--sand-100); }
         <div class="toggle" id="t_pathogen">Pathogen only <span class="section-note">(any year)</span></div>
         <div class="toggle" id="t_repeat">Repeat offender (≥2 non-compliant in 90d) <span class="section-note">(any year)</span></div>
         <div class="toggle" id="x_raw_meat">Exclude meat &amp; poultry <span class="section-note">(reduces noise on Salmonella etc.)</span></div>
+        <div class="toggle" id="btn_inspect_records" onclick="openRecordsModal()" style="background:var(--green-700); color:#fff; font-weight:600; border-color:var(--green-700); cursor:pointer">🔍 Inspect Sample Records (<span id="modal_record_count">0</span>)</div>
       </div>
     </div>
   </div>
@@ -3236,12 +3246,155 @@ function renderAll(rows) {
   renderSeverityMonth(rowsActive);   // intrinsically severity-event
   renderHeatmap(rowsActive);         // intrinsically severity-event
   renderTests(rows);
+  const cnt = document.getElementById('modal_record_count'); if (cnt) cnt.textContent = rows.length.toLocaleString();
 }
+
+let modalPage = 1;
+const modalPageSize = 50;
+let modalRows = [];
+
+function openRecordsModal(customRows, title) {
+  modalRows = customRows || window.__mapRows || ROWS || [];
+  modalPage = 1;
+  const modal = document.getElementById('records_modal');
+  if (modal) modal.style.display = 'flex';
+  if (title) document.getElementById('modal_subtitle').textContent = title;
+  else document.getElementById('modal_subtitle').textContent = 'Showing ' + modalRows.length.toLocaleString() + ' matching sample records';
+  renderModalTable();
+}
+
+function closeRecordsModal() {
+  const modal = document.getElementById('records_modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderModalTable() {
+  const query = (document.getElementById('modal_search')?.value || '').toLowerCase().trim();
+  const verdict = document.getElementById('modal_verdict_filter')?.value || 'ALL';
+  
+  let filtered = modalRows.filter(r => {
+    if (verdict === 'FAIL' && r[COLS.failure] !== 1) return false;
+    if (verdict === 'PASS' && r[COLS.failure] !== 0) return false;
+    if (!query) return true;
+    const sId = String(r[COLS.sample_id] || '').toLowerCase();
+    const sNm = String(r[COLS.sample_name] || '').toLowerCase();
+    const fac = String(r[COLS.facility] || '').toLowerCase();
+    const chn = String(r[COLS.chain] || '').toLowerCase();
+    return sId.includes(query) || sNm.includes(query) || fac.includes(query) || chn.includes(query);
+  });
+
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / modalPageSize) || 1;
+  if (modalPage > totalPages) modalPage = totalPages;
+  if (modalPage < 1) modalPage = 1;
+
+  const start = (modalPage - 1) * modalPageSize;
+  const end = Math.min(start + modalPageSize, total);
+  const pageRows = filtered.slice(start, end);
+
+  const tbody = document.getElementById('modal_tbody');
+  if (!tbody) return;
+  
+  if (pageRows.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px" class="muted">No matching records found.</td></tr>';
+  } else {
+    tbody.innerHTML = pageRows.map(r => {
+      const yr = r[COLS.year];
+      const dt = r[COLS.date] || '—';
+      const sId = r[COLS.sample_id] || '—';
+      const sNm = r[COLS.sample_name] || '—';
+      const fac = (r[COLS.chain] ? `<b>${r[COLS.chain]}</b> · ` : '') + (r[COLS.facility] || '—');
+      const sec = r[COLS.sector] || '—';
+      const cat = r[COLS.gso_category] || '—';
+      const isFail = r[COLS.failure] === 1;
+      const tests = (r[COLS.failed_tests] || []).join(', ');
+      const badge = isFail ? `<span class="badge-red">Non-compliant (${tests || 'Failed'})</span>` : `<span class="badge-green">Compliant</span>`;
+      return `<tr><td>${yr}</td><td>${dt}</td><td><code>${escapeHtml(sId)}</code></td><td class="ar">${escapeHtml(sNm)}</td><td>${escapeHtml(fac)}</td><td>${sec}</td><td>${cat}</td><td>${badge}</td></tr>`;
+    }).join('');
+  }
+
+  document.getElementById('modal_pagination_label').textContent = total > 0 ? `Showing ${start + 1}-${end} of ${total.toLocaleString()}` : '0 records';
+  document.getElementById('modal_page_info').textContent = `Page ${modalPage} of ${totalPages}`;
+  document.getElementById('modal_prev_btn').disabled = modalPage <= 1;
+  document.getElementById('modal_next_btn').disabled = modalPage >= totalPages;
+}
+
+function prevModalPage() { modalPage--; renderModalTable(); }
+function nextModalPage() { modalPage++; renderModalTable(); }
+
+function exportModalCSV() {
+  const rows = modalRows || [];
+  if (!rows.length) return alert('No data to export.');
+  let csv = 'Year,Date,Sample ID,Sample Name,Facility,Sector,Category,Failure,Failed Tests\n';
+  rows.forEach(r => {
+    const tests = (r[COLS.failed_tests] || []).join(';');
+    csv += `"${r[COLS.year]}","${r[COLS.date] || ''}","${r[COLS.sample_id] || ''}","${(r[COLS.sample_name] || '').replace(/"/g, '""')}","${(r[COLS.facility] || '').replace(/"/g, '""')}","${r[COLS.sector] || ''}","${r[COLS.gso_category] || ''}","${r[COLS.failure]}","${tests}"\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'microbiology_sample_records.csv';
+  a.click();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRecordsModal(); });
 
 deserializeState(location.hash);
 applyFilters();
 </script>
 </div><!-- /.page-body -->
+
+<!-- Interactive Raw Sample Records Modal -->
+<div id="records_modal" class="modal-backdrop" style="display:none" onclick="if(event.target===this)closeRecordsModal()">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h3 style="margin:0; font-family:'Tajawal',sans-serif; color:var(--green-900)">🔍 Sample Records Inspection</h3>
+        <div class="muted" style="font-size:12px" id="modal_subtitle">Showing matching rows for active filters</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center">
+        <button class="btn" onclick="exportModalCSV()" style="background:var(--gold-500); color:#fff; border:none; font-weight:600">📥 Export CSV</button>
+        <button class="btn" onclick="closeRecordsModal()" style="font-size:16px; font-weight:bold; cursor:pointer">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex; gap:12px; margin-bottom:14px; align-items:center; flex-wrap:wrap">
+        <input type="text" id="modal_search" oninput="renderModalTable()" placeholder="Search by Sample ID, Facility, Sample Name..." style="flex:1; min-width:240px; padding:8px 12px; border:1px solid var(--sand-200); border-radius:6px; font-size:13px">
+        <select id="modal_verdict_filter" onchange="renderModalTable()" style="padding:8px 12px; border:1px solid var(--sand-200); border-radius:6px; font-size:13px">
+          <option value="ALL">All Verdicts</option>
+          <option value="FAIL">Non-compliant Only</option>
+          <option value="PASS">Compliant Only</option>
+        </select>
+        <div class="badge" id="modal_page_info" style="font-family:'DM Mono',monospace; font-size:11px">Page 1</div>
+      </div>
+      <div class="modal-table-wrap" style="max-height:55vh; overflow-y:auto; border:1px solid var(--sand-200); border-radius:6px">
+        <table class="data-table" id="modal_table" style="width:100%; font-size:12.5px">
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Date</th>
+              <th>Sample ID</th>
+              <th>Sample Name</th>
+              <th>Facility / Chain</th>
+              <th>Sector</th>
+              <th>Category</th>
+              <th>Verdict / Tests</th>
+            </tr>
+          </thead>
+          <tbody id="modal_tbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px">
+        <div class="muted" style="font-size:12px" id="modal_pagination_label">Showing 0-0 of 0</div>
+        <div style="display:flex; gap:6px">
+          <button class="btn" id="modal_prev_btn" onclick="prevModalPage()">← Prev</button>
+          <button class="btn" id="modal_next_btn" onclick="nextModalPage()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <footer>أمانة منطقة الرياض · Riyadh Municipality Research &amp; Development</footer>
 </body>
 </html>

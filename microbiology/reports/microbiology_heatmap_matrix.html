@@ -57,7 +57,7 @@ function render() {
   filtered.forEach(r => r.failed.forEach(t => orgCounts.set(t, (orgCounts.get(t) || 0) + 1)));
 
   const topOrgs = Array.from(orgCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 12).map(e => e[0]);
-  const sectors = ['Riyadh East', 'Riyadh North', 'Riyadh West', 'Riyadh Central', 'Riyadh South'];
+  const sectors = ['East', 'North', 'West', 'Central', 'South'];
   const z = sectors.map(() => topOrgs.map(() => 0));
 
   filtered.forEach(r => {
