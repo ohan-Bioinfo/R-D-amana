@@ -955,14 +955,12 @@ try {
     if (activeCompliance.size > 0) {
       const wantC = activeCompliance.has('Compliant');
       const wantN = activeCompliance.has('Non-compliant');
-      if (!(wantC && wantN)) {
-        rows = rows.filter(r => {
-          const v = r[COLS.is_valid];
-          if (wantC) return v === 1;
-          if (wantN) return v === 0;
-          return true;
-        });
-      }
+      rows = rows.filter(r => {
+        const v = r[COLS.is_valid];
+        if (wantC && v === 1) return true;
+        if (wantN && v === 0) return true;
+        return false;
+      });
     }
     if (activeSectors.size > 0) {
       rows = rows.filter(r => r[COLS.municipality] && activeSectors.has(r[COLS.municipality]));

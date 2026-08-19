@@ -1700,9 +1700,7 @@ function applyFilters() {
     if (r[cD] && (r[cD] < dFrom || r[cD] > dTo)) return false;
     if (complianceActive) {
       const status = r[cF] === 1 ? 'Non-compliant' : r[cF] === 0 ? 'Compliant' : 'Unknown';
-      if (wantCompliant && status !== 'Compliant') return false;
-      if (wantNoncompliant && status !== 'Non-compliant') return false;
-      if (wantUnknown && status !== 'Unknown') return false;
+      if (!fCo.has(status)) return false;
     }
     for (const f of activeChips) if (!f.set.has(r[f.col])) return false;
     for (const e of activeExcludes) if (e.test(r)) return false;
