@@ -5,6 +5,11 @@ the convention in `microbiology/CHANGELOG.md`.
 
 ---
 
+## 2026-08-20 — Compliance Filter Scope Refactor
+
+- **Fixed Multi-Select Compliance Filter Scope (`applyScopeFilters`):**
+  - Refactored compliance filtering to evaluate `v === 1` (Compliant) and `v === 0` (Non-compliant) with exact OR logic, preventing `Unknown / No Limit` samples from being improperly included when both toggles are selected.
+
 ## 2026-08-12 — Comprehensive report relocated into chemistry/reports/
 
 Moved the standalone HTML report next to the dashboard it documents, and made it

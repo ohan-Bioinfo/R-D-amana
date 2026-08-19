@@ -1,5 +1,19 @@
 # Microbiology Changelog
 
+## 2026-08-20 — Core Filter Refactor, Heatmap Sector Fix, and Interactive Sample Records Drawer
+
+- **Fixed Multi-Select Compliance Filter Logic (`applyFilters`):**
+  - Replaced strict `AND` evaluation with `OR` Set lookup (`!fCo.has(status)`). Selecting multiple chips (e.g. `Compliant` + `Non-compliant`) now correctly accumulates sample rows instead of returning 0 rows.
+- **Fixed Standalone Risk Heatmap Matrix (`build_micro_heatmap_matrix.py`):**
+  - Updated sector array labels from `'Riyadh East'` to `'East'` to match the Python payload output, restoring data mapping across all 5,852 failure records.
+- **Interactive Sample Records Inspection Drawer:**
+  - Added a prominent `🔍 Inspect Sample Records (X,XXX)` button in the master filter toolbar with live matching record count.
+  - Opens a paginated, searchable modal table allowing real-time search across Sample ID, Facility, Sample Name, Sector, and GSO Category.
+  - Added a verdict filter dropdown (`All Verdicts`, `Non-compliant Only`, `Compliant Only`) and a one-click `📥 Export CSV` button.
+- **Interactive Deep-Dive Suite Toolbar & Abundance Threshold Slider:**
+  - Added a navigation toolbar linking directly to all 6 specialized interactive modules (`Sankey`, `Risk Matrix`, `Treemap`, `Sunburst`, `Network`, `Streamgraph`).
+  - Added a dynamic `Min Facility/Chain Volume` slider (`1` to `25+`) in the Time & Compliance section to filter out low-sample noise on the fly.
+
 ## 2026-08-11 — Core dashboard: tabbed, touch-first redesign
 
 Restructured `microbiology_dashboard.html` (via `scripts/build_dashboard_combined.py`)
