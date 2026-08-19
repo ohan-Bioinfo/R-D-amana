@@ -1027,6 +1027,16 @@ tbody tr:hover { background: var(--sand-100); }
   <button class="btn" id="btn_copy_link" style="margin-left:auto">🔗 Copy view link</button>
 </div>
 
+<div class="year-bar" id="suite_bar" style="gap:8px; background:linear-gradient(135deg, var(--green-900), var(--green-700)); color:#faf6ee; padding:10px 14px; border-radius:6px; margin-bottom:14px">
+  <span class="year-bar-label" style="color:var(--gold-200); font-weight:700">🔬 Deep-Dive Modules</span>
+  <a class="btn" href="microbiology_sankey.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🌊 Sankey Flow</a>
+  <a class="btn" href="microbiology_heatmap_matrix.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🗺️ Risk Matrix</a>
+  <a class="btn" href="microbiology_treemap.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🌳 Treemap</a>
+  <a class="btn" href="microbiology_sunburst.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">☀️ Sunburst D3</a>
+  <a class="btn" href="microbiology_network.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🕸️ Taxa Network</a>
+  <a class="btn" href="microbiology_streamgraph.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">📈 Streamgraph</a>
+</div>
+
 <div class="filter-section">
   <div class="section-title">Time & Compliance</div>
   <div class="filters">
@@ -1044,6 +1054,10 @@ tbody tr:hover { background: var(--sand-100); }
     <div class="filter-group">
       <label>Severity tier</label>
       <div class="chips" id="f_severity"></div>
+    </div>
+    <div class="filter-group" style="min-width: 200px;">
+      <label>Min Facility/Chain Volume: <b id="val_min_vol">1</b> sample(s)</label>
+      <input type="range" id="f_min_vol" min="1" max="25" value="1" style="width:100%; accent-color:var(--green-700); cursor:pointer" oninput="document.getElementById('val_min_vol').textContent = this.value; applyFilters();">
     </div>
   </div>
 </div>
@@ -1727,7 +1741,20 @@ function applyFilters() {
     return true;
   }
 
-  const rowsFiltered = ROWS.filter(isPass);
+  let rowsFiltered = ROWS.filter(isPass);
+  const minVolEl = document.getElementById('f_min_vol');
+  const minVol = minVolEl ? parseInt(minVolEl.value, 10) : 1;
+  if (minVol > 1) {
+    const facCounts = new Map();
+    for (const r of rowsFiltered) {
+      const f = r[COLS.facility] || r[COLS.chain] || 'other';
+      facCounts.set(f, (facCounts.get(f) || 0) + 1);
+    }
+    rowsFiltered = rowsFiltered.filter(r => {
+      const f = r[COLS.facility] || r[COLS.chain] || 'other';
+      return (facCounts.get(f) || 0) >= minVol;
+    });
+  }
 
   // Filter banner: show whenever any filter is active.
   const anyActive = activeChips.length > 0 || complianceActive || microActive
