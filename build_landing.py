@@ -76,14 +76,16 @@ def build():
 
 TEMPLATE = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>R&amp;D · أمانة منطقة الرياض — Food-Safety Lab Analytics</title>
+<title>R&amp;D · أمانة منطقة الرياض — مختبرات أمانة منطقة الرياض</title>
 __FONTS__
 <style>
 :root{
   --green:#006040; --green-2:#004d33; --green-3:#1f9d63;
   --peri:#5f70a2; --peri-2:#8e9fc7;
-  --gold:#b08a2e; --field:#e7e8e0; --panel:#fbfcfa; --panel-2:#f4f6f1;
-  --ink:#1b2320; --muted:#6a736d; --hair:#d5dbd2;
+  --gold:#c5a059; --gold-light:#e6d5a1;
+  --field:#032018; --panel:rgba(8, 44, 33, 0.85); --panel-2:rgba(4, 26, 19, 0.9);
+  --ink:#f0f7f4; --muted:#a0c2b2; --hair:rgba(197, 160, 89, 0.28);
+  --accent:#c5a059; --accent-line:rgba(197, 160, 89, 0.4); --tint:rgba(197, 160, 89, 0.12);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--field);color:var(--ink);
@@ -91,42 +93,42 @@ html,body{margin:0;background:var(--field);color:var(--ink);
   -webkit-font-smoothing:antialiased}
 body{min-height:100vh;display:flex;flex-direction:column;
   background-image:
-    radial-gradient(130% 90% at 50% -20%, #eef1ea 0%, var(--field) 60%),
-    radial-gradient(60% 50% at 100% 0%, rgba(95,112,162,.06), transparent 60%);}
+    radial-gradient(140% 100% at 50% -20%, #094a37 0%, var(--field) 70%),
+    radial-gradient(50% 50% at 100% 0%, rgba(197,160,89,.12), transparent 60%);}
 .wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 28px 40px;flex:1}
 a{color:inherit;text-decoration:none}
 
 /* ── hero ─────────────────────────────────────────────── */
 header.hero{padding:44px 4px 26px;position:relative}
 .brandline{display:flex;align-items:center;gap:16px}
-.emblem{width:60px;height:60px;border-radius:50%;flex:0 0 auto;
-  background:#fff center/90% no-repeat;
-  box-shadow:0 3px 12px -4px rgba(0,60,40,.45),inset 0 0 0 1px #bcd3c7}
-.brandline .ar{font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;
-  color:var(--green);direction:rtl;line-height:1.3}
-.brandline .ar small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.emblem{width:64px;height:64px;border-radius:50%;flex:0 0 auto;
+  background:#fff center/92% no-repeat;
+  box-shadow:0 0 20px rgba(197,160,89,0.35), 0 3px 12px -4px rgba(0,60,40,.6), inset 0 0 0 2px var(--gold)}
+.brandline .ar{font-family:'Tajawal',sans-serif;font-weight:700;font-size:17px;
+  color:var(--gold);direction:rtl;line-height:1.3}
+.brandline .ar small{display:block;font-weight:500;color:var(--muted);font-size:13px}
 .wordmark{margin:22px 0 0;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap}
 .wordmark h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:76px;
   letter-spacing:-2px;margin:0;line-height:.9;
-  background:linear-gradient(180deg,var(--ink),#2f3a34);-webkit-background-clip:text;
-  background-clip:text}
+  background:linear-gradient(180deg,#ffffff,#c5a059);-webkit-background-clip:text;
+  background-clip:text;-webkit-text-fill-color:transparent}
 .wordmark .amp{color:var(--gold)}
 .wordmark .sub{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;
   letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding-bottom:9px}
 .rule{height:2px;width:130px;margin:20px 0 0;
-  background:linear-gradient(90deg,var(--green),var(--gold) 60%,transparent)}
+  background:linear-gradient(90deg,var(--gold),var(--green-3) 60%,transparent)}
 .lede{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:500;line-height:1.4;
-  max-width:56ch;margin:18px 2px 0;letter-spacing:-.2px}
-.lede b{color:var(--green)}
+  max-width:56ch;margin:18px 2px 0;letter-spacing:-.2px;color:var(--ink)}
+.lede b{color:var(--gold)}
 .lede .ar{font-family:'Tajawal',sans-serif;direction:rtl;color:var(--muted);
-  font-size:15px;display:block;margin-top:4px}
+  font-size:15.5px;display:block;margin-top:6px}
 
     /* ── the two labs ─────────────────────────────────────── */
     .labs { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; margin-top: 34px; }
     .hero { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
     .hero-content { flex: 1 1 400px; }
     .hero-image { flex: 1 1 400px; text-align: center; }
-    .hero-image img { width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 16px 50px -12px rgba(0,50,34,0.15); }
+    .hero-image img { width: 100%; max-width: 500px; border-radius: 24px; box-shadow: 0 16px 50px -12px rgba(0,0,0,0.5); border:1px solid var(--hair); }
     @media(max-width:760px){.labs{grid-template-columns:1fr}
       .wordmark h1{font-size:58px}
       .hero { flex-direction: column; text-align: center; gap: 24px; }
@@ -139,40 +141,35 @@ header.hero{padding:44px 4px 26px;position:relative}
 
 .lab{position:relative;background:var(--panel);border:1px solid var(--hair);
   border-radius:20px;padding:26px 26px 20px;overflow:hidden;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   transition:transform .25s cubic-bezier(.2,.7,.2,1),box-shadow .25s,border-color .25s;
   will-change:transform}
 .lab::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
   background:linear-gradient(90deg,var(--accent),transparent 70%)}
-.lab:hover{transform:translateY(-4px);box-shadow:0 24px 50px -30px rgba(0,50,34,.5);
+.lab:hover{transform:translateY(-4px);box-shadow:0 24px 50px -20px rgba(0,0,0,.7);
   border-color:var(--accent-line)}
-.lab.micro{--accent:var(--green);--accent2:var(--green-3);--accent-line:#bcd3c7;
-  --tint:rgba(0,96,64,.07)}
-.lab.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;
-  --tint:rgba(95,112,162,.08)}
-.lab.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;
-  --tint:rgba(176,138,46,.08)}
+.lab.micro{--accent:var(--gold);--accent2:var(--green-3);--accent-line:rgba(197,160,89,0.5);
+  --tint:rgba(197,160,89,.12)}
+.lab.chem{--accent:var(--peri-2);--accent2:var(--peri);--accent-line:rgba(142,159,199,0.5);
+  --tint:rgba(95,112,162,.15)}
+.lab.genome{--accent:var(--gold-light);--accent2:var(--gold);--accent-line:rgba(230,213,161,0.5);
+  --tint:rgba(176,138,46,.15)}
 
 .lab-top{display:flex;align-items:center;gap:18px}
-/* the plate ring — a preview of that lab's sunburst */
-.ring{width:96px;height:96px;border-radius:50%;flex:0 0 auto;position:relative;
-  -webkit-mask:radial-gradient(circle,transparent 30px,#000 31px);
-          mask:radial-gradient(circle,transparent 30px,#000 31px)}
-.ring.micro{background:conic-gradient(from -90deg,
-  #1f9d63,#5aa84f,#8fb24a,#e0a53a,#e07b2f,#c0392b,#1f9d63)}
-.ring.chem{background:conic-gradient(from -90deg,
-  #eceef6,#8e9fc7,#5f70a2,#7f97c4,#1f9d63,#8e9fc7,#eceef6)}
-.ring.genome{background:conic-gradient(from -90deg,
-  #b08a2e,#e6d5a1,#b08a2e,#e6d5a1,#b08a2e)}
-.plate{width:96px;height:96px;flex:0 0 auto;position:relative;display:grid;place-items:center}
-.plate .hole{position:absolute;font-family:'IBM Plex Mono',monospace;font-size:11px;
-  color:var(--muted);letter-spacing:.5px}
-.plate .glyph{position:absolute;color:var(--gold);font-size:15px;opacity:.9}
-.lab:hover .ring{animation:spin 9s linear infinite}
+.emblem-shield{width:76px;height:76px;border-radius:20px;flex:0 0 auto;position:relative;
+  background:linear-gradient(135deg, rgba(0,96,64,0.4), rgba(197,160,89,0.25));
+  border:1px solid var(--hair);display:grid;place-items:center;
+  box-shadow:0 8px 24px -6px rgba(0,0,0,0.4);transition:transform .3s, box-shadow .3s}
+.lab:hover .emblem-shield{transform:scale(1.05);box-shadow:0 12px 30px -4px rgba(197,160,89,0.3)}
+.emblem-shield .emblem-img{width:46px;height:46px;border-radius:50%;background:#fff center/90% no-repeat;
+  box-shadow:0 0 10px rgba(0,0,0,0.3);border:1px solid var(--gold)}
+.emblem-shield .badge-ico{position:absolute;bottom:-4px;right:-4px;font-size:16px;background:var(--field);
+  border:1px solid var(--hair);border-radius:50%;padding:2px 4px}
 
 .names .kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
   text-transform:uppercase;color:var(--accent);font-weight:600}
 .names h2{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:23px;
-  margin:3px 0 1px;letter-spacing:-.4px}
+  margin:3px 0 1px;letter-spacing:-.4px;color:#fff}
 .names .ar{font-family:'Tajawal',sans-serif;font-weight:700;font-size:15px;
   color:var(--muted);direction:rtl}
 
@@ -192,23 +189,22 @@ header.hero{padding:44px 4px 26px;position:relative}
 .entry .ico{width:34px;height:34px;border-radius:9px;flex:0 0 auto;display:grid;place-items:center;
   background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
 .entry .txt{flex:1;min-width:0}
-.entry .lb{display:block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px}
+.entry .lb{display:block;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;color:#fff}
 .entry .sub{display:block;margin-top:2px;font-size:11.5px;color:var(--muted);
   font-family:'IBM Plex Mono',monospace;letter-spacing:.2px}
 .entry .arrow{color:var(--accent);font-size:16px;transition:transform .18s;opacity:.55}
 .entry:hover .arrow{transform:translateX(4px);opacity:1}
 
-footer{border-top:1px solid var(--hair)}
+footer{border-top:1px solid var(--hair);background:rgba(0,0,0,0.2)}
 .foot-in{max-width:1080px;margin:0 auto;padding:16px 28px;display:flex;gap:16px;
   align-items:center;flex-wrap:wrap;color:var(--muted);
   font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.4px}
-.foot-in .ar{font-family:'Tajawal',sans-serif;direction:rtl}
+.foot-in .ar{font-family:'Tajawal',sans-serif;direction:rtl;color:var(--gold)}
 .foot-in .sp{margin-inline-start:auto}
-.foot-in .signout{color:var(--green);transition:color .15s}
-.foot-in .signout:hover,.foot-in .signout:focus-visible{color:var(--green-2);outline:none;text-decoration:underline}
+.foot-in .signout{color:var(--gold);transition:color .15s}
+.foot-in .signout:hover,.foot-in .signout:focus-visible{color:#fff;outline:none;text-decoration:underline}
 
 /* motion */
-@keyframes spin{to{transform:rotate(360deg)}}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .hero,.labs>.lab{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
 .labs>.lab:nth-child(1){animation-delay:.10s}
@@ -226,9 +222,9 @@ footer{border-top:1px solid var(--hair)}
 .lab:focus-visible{outline:none;box-shadow:0 0 0 3px var(--accent-line)}
 
 /* ══ per-lab landing page ══ */
-body.labpage{--accent:var(--green);--accent2:var(--green-3);--accent-line:#bcd3c7;--tint:rgba(0,96,64,.07)}
-body.labpage.chem{--accent:var(--peri);--accent2:var(--peri-2);--accent-line:#c3c9e0;--tint:rgba(95,112,162,.08)}
-body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6d5a1;--tint:rgba(176,138,46,.08)}
+body.labpage{--accent:var(--gold);--accent2:var(--green-3);--accent-line:rgba(197,160,89,0.5);--tint:rgba(197,160,89,.12)}
+body.labpage.chem{--accent:var(--peri-2);--accent2:var(--peri);--accent-line:rgba(142,159,199,0.5);--tint:rgba(95,112,162,.15)}
+body.labpage.genome{--accent:var(--gold-light);--accent2:var(--gold);--accent-line:rgba(230,213,161,0.5);--tint:rgba(176,138,46,.15)}
 .crumb{display:flex;align-items:center;gap:9px;margin:30px 2px 0;
   font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted)}
 .crumb a{color:var(--accent);font-weight:600}
@@ -239,7 +235,7 @@ body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6
 .lab-hero .kicker{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
   text-transform:uppercase;color:var(--accent);font-weight:600}
 .lab-hero h1{font-family:'Space Grotesk',sans-serif;font-weight:700;
-  font-size:clamp(30px,7vw,46px);letter-spacing:-1.5px;margin:3px 0 2px;line-height:.95}
+  font-size:clamp(30px,7vw,46px);letter-spacing:-1.5px;margin:3px 0 2px;line-height:.95;color:#fff}
 .lab-hero .ar{font-family:'Tajawal',sans-serif;font-weight:700;font-size:16px;
   color:var(--muted);direction:rtl}
 .lab-hero .h-stat{margin-left:auto;text-align:right}
@@ -253,14 +249,15 @@ body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6
 @media(max-width:520px){.portals{grid-template-columns:1fr}}
 .portal{display:flex;flex-direction:column;gap:11px;padding:22px 22px 18px;border-radius:18px;
   background:var(--panel);border:1px solid var(--hair);position:relative;overflow:hidden;min-height:158px;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   transition:transform .22s cubic-bezier(.2,.7,.2,1),box-shadow .22s,border-color .22s}
 .portal::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
   background:linear-gradient(90deg,var(--accent),transparent 70%)}
 .portal:hover,.portal:focus-visible{transform:translateY(-4px);
-  box-shadow:0 22px 46px -30px rgba(0,50,34,.5);border-color:var(--accent-line);outline:none}
+  box-shadow:0 22px 46px -20px rgba(0,0,0,.7);border-color:var(--accent-line);outline:none}
 .portal .p-ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;
   background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
-.portal .p-lb{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.3px}
+.portal .p-lb{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;letter-spacing:-.3px;color:#fff}
 .portal .p-sub{font-size:12.5px;color:var(--muted);line-height:1.45;flex:1}
 .portal .p-go{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);
   letter-spacing:.5px;display:flex;align-items:center;gap:6px}
@@ -272,14 +269,14 @@ body.labpage.genome{--accent:var(--gold);--accent2:var(--gold);--accent-line:#e6
 .section-head .sh-sub{font-size:12px;color:var(--muted)}
 .viz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:14px}
 .viz{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:12px;
-  background:var(--panel);border:1px solid var(--hair);
+  background:var(--panel);border:1px solid var(--hair);backdrop-filter:blur(10px);
   transition:transform .16s,background .16s,border-color .16s}
 .viz:hover,.viz:focus-visible{transform:translateY(-2px);border-color:var(--accent-line);
   background:var(--tint);outline:none}
 .viz .v-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;
   background:var(--panel-2);border:1px solid var(--hair);color:var(--accent)}
 .viz .v-txt{min-width:0}
-.viz .v-lb{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px}
+.viz .v-lb{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13.5px;color:#fff}
 .viz .v-sub{font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace;margin-top:2px}
 body.labpage .portal,body.labpage .viz{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
 body.labpage .portals>.portal:nth-child(2){animation-delay:.06s}
@@ -291,20 +288,20 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <div class="hero-content">
       <div class="brandline">
         <div class="emblem" style="background-image:url('__LOGO__')"></div>
-        <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+        <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات أمانة منطقة الرياض</small></div>
       </div>
       <div class="wordmark">
         <h1>R<span class="amp">&amp;</span>D</h1>
-        <span class="sub">Research &amp; Development — Food-Safety Lab Analytics</span>
+        <span class="sub">Research &amp; Development — Riyadh Municipality Labs</span>
       </div>
       <div class="rule"></div>
-      <p class="lede">Two laboratories, one 2024–2025 record. Enter each lab's hub for its
-        <b>dashboard</b>, <b>GSO &amp; quality</b>, <b>report</b>, and <b>visualisations</b>.
-        <span class="ar">مختبران، سجلّ واحد ٢٠٢٤–٢٠٢٥ — لكل مختبر لوحته وتقاريره وعروضه.</span>
+      <p class="lede">Analytics hub for Riyadh Municipality laboratories. Select a laboratory to explore its
+        <b>dashboard</b>, <b>GSO guidelines</b>, <b>analytical reports</b>, and <b>interactive visualisations</b>.
+        <span class="ar">المنصة التحليلية المتكاملة لمختبرات أمانة منطقة الرياض — استعرض اللوحات التفاعلية والتقارير.</span>
       </p>
     </div>
     <div class="hero-image">
-      <img src="__RND_HEADER_IMG__" alt="Nano Banana R&D Food Safety Labs" />
+      <img src="__RND_HEADER_IMG__" alt="Riyadh Municipality R&D Labs" />
     </div>
   </header>
 
@@ -312,12 +309,12 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <!-- Microbiology -->
     <a class="lab micro" href="microbiology/index.html">
       <div class="lab-top">
-        <div class="plate">
-          <div class="ring micro"></div>
-          <span class="glyph">۞</span>
+        <div class="emblem-shield micro">
+          <div class="emblem-img" style="background-image:url('__LOGO__')"></div>
+          <span class="badge-ico">🧫</span>
         </div>
         <div class="names">
-          <div class="kicker">Laboratory</div>
+          <div class="kicker">مختبرات أمانة منطقة الرياض</div>
           <h2>Microbiology</h2>
           <div class="ar">الأحياء الدقيقة</div>
         </div>
@@ -338,12 +335,12 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <!-- Chemistry -->
     <a class="lab chem" href="chemistry/index.html">
       <div class="lab-top">
-        <div class="plate">
-          <div class="ring chem"></div>
-          <span class="glyph">۞</span>
+        <div class="emblem-shield chem">
+          <div class="emblem-img" style="background-image:url('__LOGO__')"></div>
+          <span class="badge-ico">🧪</span>
         </div>
         <div class="names">
-          <div class="kicker">Laboratory</div>
+          <div class="kicker">مختبرات أمانة منطقة الرياض</div>
           <h2>Chemistry</h2>
           <div class="ar">الكيمياء</div>
         </div>
@@ -364,25 +361,25 @@ body.labpage .portals>.portal:nth-child(3){animation-delay:.12s}
     <!-- Genome -->
     <a class="lab genome" href="genome/index.html">
       <div class="lab-top">
-        <div class="plate">
-          <div class="ring genome"></div>
-          <span class="glyph">۞</span>
+        <div class="emblem-shield genome">
+          <div class="emblem-img" style="background-image:url('__LOGO__')"></div>
+          <span class="badge-ico">🧬</span>
         </div>
         <div class="names">
-          <div class="kicker">Laboratory</div>
+          <div class="kicker">مختبرات أمانة منطقة الرياض</div>
           <h2>Genome</h2>
-          <div class="ar">الجينوم</div>
+          <div class="ar">الجينوم (Amplicon)</div>
         </div>
       </div>
-      <div class="stat"><span class="n">0</span><span class="u">records · Under Construction</span></div>
-      <div class="desc">Pipeline construction flow — from raw data and trimming to assembly, annotation, and metagenomics.</div>
+      <div class="stat"><span class="n">Amplicon</span><span class="u">16S rRNA &amp; ITS Pipeline</span></div>
+      <div class="desc">Amplicon-based sequencing pipeline (16S &amp; ITS profiling) for bacterial and fungal community analysis. (Metagenomics planned for future expansion).</div>
       <div class="entries">
         <div class="card-dests">
-          <span class="dest">🧬 Raw Data</span>
-          <span class="dest">✂️ Trimming</span>
-          <span class="dest">🧩 Assembly</span>
-          <span class="dest">🏷️ Annotation</span>
-          <span class="dest">🔬 Metagenomics</span>
+          <span class="dest">🧬 Amplicon Reads</span>
+          <span class="dest">✂️ Primer Removal</span>
+          <span class="dest">🧩 ASV Denoising</span>
+          <span class="dest">🏷️ Taxonomy</span>
+          <span class="dest">🔬 Metagenomics (Future)</span>
         </div>
         <div class="enter">Enter lab <span class="arrow">→</span></div>
       </div>
@@ -408,19 +405,19 @@ LAB_BODY = r"""<body class="labpage__ACCENT__">
   <header class="hero" style="padding-bottom:6px">
     <div class="brandline">
       <div class="emblem" style="background-image:url('__LOGO__')"></div>
-      <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات سلامة الغذاء</small></div>
+      <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات أمانة منطقة الرياض</small></div>
     </div>
   </header>
 
   <nav class="crumb"><a href="../index.html">← R&amp;D</a><span class="sep">/</span><span>__NAME__</span></nav>
 
   <section class="lab-hero">
-    <div class="plate">
-      <div class="ring __RING__"></div>
-      <span class="glyph">۞</span>
+    <div class="emblem-shield __RING__" style="width:84px; height:84px">
+      <div class="emblem-img" style="width:52px; height:52px; background-image:url('__LOGO__')"></div>
+      <span class="badge-ico" style="font-size:18px">۞</span>
     </div>
     <div class="h-txt">
-      <div class="kicker">Laboratory · مختبر</div>
+      <div class="kicker">مختبرات أمانة منطقة الرياض</div>
       <h1>__NAME__</h1>
       <div class="ar">__AR__</div>
     </div>
@@ -465,10 +462,8 @@ __VIZ__
     <a class="sp signout" href="../index.html">← Back to R&amp;D</a>
     <img src="__VISION__" alt="Saudi Vision 2030" style="height:32px; object-fit:contain; opacity:0.85;" />
     <span>build __STAMP__</span>
-  </div>
 </footer>
 </body></html>"""
-
 
 
 GENOME_BODY = r"""<body class="labpage genome">

@@ -192,7 +192,7 @@ button:hover{background:var(--green-2)}button:active{transform:translateY(1px)}
 <form class="card" method="post" action="/login">
   <div class="top">
     <div class="emblem" style="background-image:url('__LOGO__')"></div>
-    <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · سلامة الغذاء</small></div>
+    <div class="ar">أمانة منطقة الرياض<small>البحث والتطوير · مختبرات أمانة منطقة الرياض</small></div>
   </div>
   <h1>R<span class="amp">&amp;</span>D</h1>
   <div class="sub">Sign in to open the food-safety lab analytics.</div>

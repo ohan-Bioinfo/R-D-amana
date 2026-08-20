@@ -524,8 +524,8 @@ def build_facets(df: pd.DataFrame) -> dict:
     severity = ["indicator_only", "pathogen", "multi_pathogen"]
     years = sorted([int(y) for y in df["year"].dropna().unique().tolist()])
     # 5-sector canonical order (East → North → West → Central → South).
-    # All 5 sectors are always listed so empty ones still appear (at zero).
-    sectors = list(SECTORS_5)
+    # Discard 'Special' from sector filters per user direction.
+    sectors = [s for s in SECTORS_5 if s != "Special"]
     # GSO categories — combine the 15 real 2024 categories with the 12
     # 2025-derived categories (from sample_type) for one cross-year list.
     cat_counts: dict[str, int] = {}
@@ -1044,15 +1044,6 @@ tbody tr:hover { background: var(--sand-100); }
   <span class="year-bar-label" style="margin-right:2px">Active</span>
 </div>
 
-<div class="year-bar" id="bookmark_bar" style="gap:8px">
-  <span class="year-bar-label">Views</span>
-  <button class="btn" data-bm="path2025">2025 · pathogens only</button>
-  <button class="btn" data-bm="central">Central sector</button>
-  <button class="btn" data-bm="noncomp">Non-compliant only</button>
-  <button class="btn" data-bm="rte">Ready-to-Eat foods</button>
-  <button class="btn" id="btn_copy_link" style="margin-left:auto">🔗 Copy view link</button>
-</div>
-
 <div class="year-bar" id="suite_bar" style="gap:8px; background:linear-gradient(135deg, var(--green-900), var(--green-700)); color:#faf6ee; padding:10px 14px; border-radius:6px; margin-bottom:14px">
   <span class="year-bar-label" style="color:var(--gold-200); font-weight:700">🔬 Deep-Dive Modules</span>
   <a class="btn" href="microbiology_sankey.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🌊 Sankey Flow</a>
@@ -1061,10 +1052,11 @@ tbody tr:hover { background: var(--sand-100); }
   <a class="btn" href="microbiology_sunburst.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">☀️ Sunburst D3</a>
   <a class="btn" href="microbiology_network.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">🕸️ Taxa Network</a>
   <a class="btn" href="microbiology_streamgraph.html" target="_blank" style="background:rgba(255,255,255,0.12); color:#fff; border:1px solid rgba(200,168,90,0.4); text-decoration:none">📈 Streamgraph</a>
+  <button class="btn" id="btn_copy_link" style="margin-left:auto; background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.3)">🔗 Copy view link</button>
 </div>
 
 <div class="filter-section">
-  <div class="section-title">Time & Compliance</div>
+  <div class="section-title">Time, Compliance & Facility Privacy</div>
   <div class="filters">
     <div class="filter-group">
       <label>Date range</label>
@@ -1081,6 +1073,10 @@ tbody tr:hover { background: var(--sand-100); }
       <label>Severity tier</label>
       <div class="chips" id="f_severity"></div>
     </div>
+    <div class="filter-group">
+      <label>Facility Names / أسماء المنشآت</label>
+      <button class="btn" id="btn_toggle_facility" onclick="toggleFacilityNames()" style="padding:6px 12px; font-family:'Tajawal',sans-serif; font-size:12px; font-weight:600; border-radius:6px; cursor:pointer; background:var(--gold-200); color:var(--gold-800); border:1px solid var(--gold-400)">👁️ إظهار أسماء المنشآت (Show Names)</button>
+    </div>
     <div class="filter-group" style="min-width: 200px;">
       <label>Min Facility/Chain Volume: <b id="val_min_vol">1</b> sample(s)</label>
       <input type="range" id="f_min_vol" min="1" max="25" value="1" style="width:100%; accent-color:var(--green-700); cursor:pointer" oninput="state.min_vol = parseInt(this.value, 10) || 1; document.getElementById('val_min_vol').textContent = this.value; applyFilters();">
@@ -1089,7 +1085,7 @@ tbody tr:hover { background: var(--sand-100); }
 </div>
 
 <div class="filter-section">
-  <div class="section-title">Location <span class="section-note">— filter by sector (قطاع): 5 sectors + Special, matching the Annual Report</span></div>
+  <div class="section-title">Location <span class="section-note">— filter by sector (قطاع): 5 municipal sectors</span></div>
   <div class="filters">
     <div class="filter-group">
       <label>Sector (قطاع)</label>
@@ -1365,6 +1361,7 @@ const state = {
   pathogen_only: false,
   repeat_only: false,
   exclude_raw_meat: false,        // restored 2026-06-18: meat-sample noise distorts pathogen rates
+  show_facility: true,            // Toggle establishment/facility names visibility
 };
 
 const COMPLIANCE_OPTIONS = ['Compliant', 'Non-compliant', 'Unknown'];
@@ -1455,6 +1452,27 @@ function applyBookmark(name) {
   else if (name === 'rte') { state.gso_category.add('Ready to Eat Foods'); }
   syncAllChips();
   applyFilters();
+}
+
+function hashString(s) {
+  let h = 0;
+  for (let i = 0; i < String(s || '').length; i++) h = (Math.imul(31, h) + String(s).charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+function toggleFacilityNames() {
+  state.show_facility = !state.show_facility;
+  const btn = document.getElementById('btn_toggle_facility');
+  if (btn) {
+    btn.classList.toggle('active', state.show_facility);
+    btn.textContent = state.show_facility ? '👁️ إظهار أسماء المنشآت (Show Names)' : '🙈 إخفاء أسماء المنشآت (Hide Names)';
+    btn.style.background = state.show_facility ? 'var(--gold-200)' : 'var(--sand-200)';
+    btn.style.color = state.show_facility ? 'var(--gold-800)' : 'var(--muted)';
+  }
+  applyFilters();
+  if (typeof renderModalTable === 'function' && document.getElementById('records_modal') && document.getElementById('records_modal').style.display !== 'none') {
+    renderModalTable();
+  }
 }
 
 // Copy the current shareable view link (URL + hash) to the clipboard.
@@ -2590,16 +2608,21 @@ function renderChains(rows) {
     document.getElementById('chart_chains').innerHTML = '<div class="muted" style="padding:30px">No chain data in current view (2024 has no facility data).</div>';
     return;
   }
+  const getChainName = (s, idx) => {
+    if (!state.show_facility) return `سلسلة منشآت #${top.length - idx}`;
+    return s.chain.length > 35 ? s.chain.slice(0, 33) + '…' : s.chain;
+  };
+  const yLabels = top.map((s, idx) => getChainName(s, idx));
   reactChart('chart_chains', [
     { type: 'bar', orientation: 'h',
-      y: top.map(s => s.chain.length > 35 ? s.chain.slice(0, 33) + '…' : s.chain),
+      y: yLabels,
       x: top.map(s => s.indicatorOnly), name: 'Indicator-only',
       marker: { color: '#d97706' },
       customdata: top.map(s => [s.total, s.rate.toFixed(1)]),
       hovertemplate: '<b>%{y}</b><br>%{x} indicator-only (of %{customdata[0]} samples · %{customdata[1]}% non-compliance)<extra></extra>',
     },
     { type: 'bar', orientation: 'h',
-      y: top.map(s => s.chain.length > 35 ? s.chain.slice(0, 33) + '…' : s.chain),
+      y: yLabels,
       x: top.map(s => s.path), name: 'Pathogen',
       marker: { color: '#dc2626' },
       hovertemplate: '<b>%{y}</b><br>%{x} pathogen<extra></extra>',
@@ -3430,13 +3453,15 @@ function renderModalTable() {
       const dt = r[COLS.date] || '—';
       const sId = r[COLS.sample_id] || '—';
       const sNm = r[COLS.sample_name] || '—';
-      const fac = (r[COLS.chain] ? `<b>${r[COLS.chain]}</b> · ` : '') + (r[COLS.facility] || '—');
+      const fac = state.show_facility
+        ? ((r[COLS.chain] ? `<b>${escapeHtml(r[COLS.chain])}</b> · ` : '') + escapeHtml(r[COLS.facility] || '—'))
+        : `منشأة حيوية #${(hashString(r[COLS.sample_id] || r[COLS.facility] || '100') % 9000) + 1000}`;
       const sec = r[COLS.sector] || '—';
       const cat = r[COLS.gso_category] || '—';
       const isFail = r[COLS.failure] === 1;
       const tests = (r[COLS.failed_tests] || []).join(', ');
       const badge = isFail ? `<span class="badge-red">Non-compliant (${tests || 'Failed'})</span>` : `<span class="badge-green">Compliant</span>`;
-      return `<tr><td>${yr}</td><td>${dt}</td><td><code>${escapeHtml(sId)}</code></td><td class="ar">${escapeHtml(sNm)}</td><td>${escapeHtml(fac)}</td><td>${sec}</td><td>${cat}</td><td>${badge}</td></tr>`;
+      return `<tr><td>${yr}</td><td>${dt}</td><td><code>${escapeHtml(sId)}</code></td><td class="ar">${escapeHtml(sNm)}</td><td>${fac}</td><td>${sec}</td><td>${cat}</td><td>${badge}</td></tr>`;
     }).join('');
   }
 
@@ -3457,7 +3482,10 @@ function exportModalCSV() {
   let csv = 'Year,Date,Sample ID,Sample Name,Facility,Sector,Category,Failure,Failed Tests\n';
   rows.forEach(r => {
     const tests = (r[COLS.failed_tests] || []).join(';');
-    csv += `"${r[COLS.year]}","${r[COLS.date] || ''}","${r[COLS.sample_id] || ''}","${(r[COLS.sample_name] || '').replace(/"/g, '""')}","${(r[COLS.facility] || '').replace(/"/g, '""')}","${r[COLS.sector] || ''}","${r[COLS.gso_category] || ''}","${r[COLS.failure]}","${tests}"\n`;
+    const facVal = state.show_facility
+      ? (r[COLS.facility] || '')
+      : `منشأة حيوية #${(hashString(r[COLS.sample_id] || r[COLS.facility] || '100') % 9000) + 1000}`;
+    csv += `"${r[COLS.year]}","${r[COLS.date] || ''}","${r[COLS.sample_id] || ''}","${(r[COLS.sample_name] || '').replace(/"/g, '""')}","${facVal.replace(/"/g, '""')}","${r[COLS.sector] || ''}","${r[COLS.gso_category] || ''}","${r[COLS.failure]}","${tests}"\n`;
   });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
