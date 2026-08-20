@@ -339,6 +339,7 @@ DATA_COLS = [
     "dq_flags",      # 24  Pipe-separated data_quality_flags from the cleaner
     "panel_gap_kind",# 25  'systematic'/'sporadic'/null — why the GSO panel is incomplete (2024-only)
     "gso_code_rule_applied",# 26  'cooked_to_P'/'sauce_to_G'/null — GSO code set/overridden by the name-rule layer (2026-08-09)
+    "sample_id",     # 27  raw sample identifier — powers the Inspect-Records modal search + CSV (appended at the end so existing column indices are unchanged)
 ]
 
 
@@ -502,6 +503,7 @@ def build_data(df: pd.DataFrame) -> dict:
                 _val(getattr(r, "gso_tests_missing", None)),
             )),
             _val(getattr(r, "gso_code_rule_applied", None)),
+            _sid,  # 27  sample_id (already computed above) — for modal search + CSV
         ])
     return {"cols": DATA_COLS, "rows": rows}
 
@@ -1057,7 +1059,7 @@ tbody tr:hover { background: var(--sand-100); }
     </div>
     <div class="filter-group" style="min-width: 200px;">
       <label>Min Facility/Chain Volume: <b id="val_min_vol">1</b> sample(s)</label>
-      <input type="range" id="f_min_vol" min="1" max="25" value="1" style="width:100%; accent-color:var(--green-700); cursor:pointer" oninput="document.getElementById('val_min_vol').textContent = this.value; applyFilters();">
+      <input type="range" id="f_min_vol" min="1" max="25" value="1" style="width:100%; accent-color:var(--green-700); cursor:pointer" oninput="state.min_vol = parseInt(this.value, 10) || 1; document.getElementById('val_min_vol').textContent = this.value; applyFilters();">
     </div>
   </div>
 </div>
@@ -1335,6 +1337,7 @@ const state = {
   severity: new Set(),
   gso_category: new Set(),
   microbe: new Set(),             // Set of pathogen names + optional INDICATOR_TOKEN; empty = no constraint
+  min_vol: 1,                     // Min Facility/Chain volume threshold (1 = no constraint)
   pathogen_only: false,
   repeat_only: false,
   exclude_raw_meat: false,        // restored 2026-06-18: meat-sample noise distorts pathogen rates
@@ -1389,6 +1392,7 @@ function serializeState() {
   if (state.exclude_raw_meat) p.push('xmeat=1');
   if (state.date_from && state.date_from !== FACETS.date_min) p.push('df=' + encodeURIComponent(state.date_from));
   if (state.date_to && state.date_to !== FACETS.date_max) p.push('dt=' + encodeURIComponent(state.date_to));
+  if (state.min_vol > 1) p.push('mv=' + state.min_vol);
   if (window.__activeTab && window.__activeTab !== 'overview') p.push('tab=' + window.__activeTab);
   return p.join('&');
 }
@@ -1410,6 +1414,8 @@ function syncAllChips() {
   const pt = document.getElementById('t_pathogen'); if (pt) pt.classList.toggle('active', state.pathogen_only);
   const rp = document.getElementById('t_repeat'); if (rp) rp.classList.toggle('active', state.repeat_only);
   const xm = document.getElementById('x_raw_meat'); if (xm) xm.classList.toggle('active', state.exclude_raw_meat);
+  const mvEl = document.getElementById('f_min_vol');
+  if (mvEl) { mvEl.value = state.min_vol; const mvl = document.getElementById('val_min_vol'); if (mvl) mvl.textContent = String(state.min_vol); }
 }
 
 // One-click preset views. Each clears state, sets its combo, syncs UI, re-renders.
@@ -1417,6 +1423,7 @@ function applyBookmark(name) {
   state.years.clear(); state.compliance.clear(); state.sector.clear();
   state.severity.clear(); state.gso_category.clear(); state.microbe.clear();
   state.pathogen_only = false; state.repeat_only = false; state.exclude_raw_meat = false;
+  state.min_vol = 1;
   state.date_from = FACETS.date_min; state.date_to = FACETS.date_max;
   if (name === 'path2025') { state.years.add(2025); state.pathogen_only = true; }
   else if (name === 'central') { state.sector.add('Central'); }
@@ -1463,6 +1470,7 @@ function deserializeState(hash) {
   if (params.get('xmeat') === '1') state.exclude_raw_meat = true;
   const df = params.get('df'); if (df) state.date_from = decodeURIComponent(df);
   const dt = params.get('dt'); if (dt) state.date_to = decodeURIComponent(dt);
+  const mv = params.get('mv'); if (mv) state.min_vol = Math.max(1, parseInt(mv, 10) || 1);
   syncAllChips();
   const _tab = params.get('tab');
   if (_tab && document.querySelector('.tabpanel[data-tab="' + _tab + '"]')) showTab(_tab);
@@ -1614,6 +1622,7 @@ document.getElementById('btn_reset').addEventListener('click', () => {
   state.gso_category.clear();
   state.pathogen_only = false; state.repeat_only = false;
   state.exclude_raw_meat = false;
+  state.min_vol = 1;
   document.getElementById('f_date_from').value = FACETS.date_min;
   document.getElementById('f_date_to').value = FACETS.date_max;
   syncAllChips();
@@ -1702,6 +1711,7 @@ function applyFilters() {
   if (state.repeat_only) activeCount++;
   if (state.exclude_raw_meat) activeCount++;
   if (state.date_from !== FACETS.date_min || state.date_to !== FACETS.date_max) activeCount++;
+  if (state.min_vol > 1) activeCount++;
   const pill = document.getElementById('filter_status');
   const btn  = document.getElementById('btn_reset');
   if (activeCount === 0) {
@@ -1742,8 +1752,7 @@ function applyFilters() {
   }
 
   let rowsFiltered = ROWS.filter(isPass);
-  const minVolEl = document.getElementById('f_min_vol');
-  const minVol = minVolEl ? parseInt(minVolEl.value, 10) : 1;
+  const minVol = state.min_vol || 1;   // source of truth is state (kept in sync by the slider + reset/bookmarks)
   if (minVol > 1) {
     const facCounts = new Map();
     for (const r of rowsFiltered) {
@@ -1759,6 +1768,7 @@ function applyFilters() {
   // Filter banner: show whenever any filter is active.
   const anyActive = activeChips.length > 0 || complianceActive || microActive
                   || activeShowOnly.length > 0 || activeExcludes.length > 0
+                  || state.min_vol > 1
                   || state.date_from !== FACETS.date_min || state.date_to !== FACETS.date_max;
   const banner = document.getElementById('slice-banner');
   if (banner) {

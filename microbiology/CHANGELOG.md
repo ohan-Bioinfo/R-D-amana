@@ -1,5 +1,26 @@
 # Microbiology Changelog
 
+## 2026-08-20 — Audit fixes: modal Sample-ID + Min-Volume slider state
+
+Audit of the 2026-08-20 additions confirmed the core filter logic and all numbers
+are correct (compliance multi-select OR-fix works; totals reconcile to source).
+Two secondary defects were found and fixed:
+
+- **`sample_id` was missing from the dashboard payload** (`DATA_COLS`), so
+  `COLS.sample_id` was `undefined`: the Inspect-Records modal's Sample-ID search
+  never matched and the CSV/modal "Sample ID" column was always blank. Added
+  `sample_id` at the end of `DATA_COLS` (index 27, so existing indices are
+  unchanged) and appended the already-computed `_sid`. Verified: all 20,881 rows
+  now carry a real ID; modal search + CSV work.
+- **The Min Facility/Chain Volume slider bypassed `state`** (read straight from the
+  DOM in `applyFilters`), so it wasn't cleared by "Reset all filters", wasn't in
+  the URL hash, and wasn't counted — "All filters cleared" could lie while the
+  slider still filtered charts. Wired `state.min_vol` through the slider `oninput`,
+  `applyFilters`, `btn_reset`, `applyBookmark`, `syncAllChips`, `serializeState`
+  (`mv=`), `deserializeState`, the active-count, and the filter banner.
+
+Emitted JS passes `node --check`; totals unchanged (20,881 rows).
+
 ## 2026-08-20 — Core Filter Refactor, Heatmap Sector Fix, and Interactive Sample Records Drawer
 
 - **Fixed Multi-Select Compliance Filter Logic (`applyFilters`):**
