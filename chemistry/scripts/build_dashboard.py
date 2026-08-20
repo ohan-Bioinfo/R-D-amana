@@ -753,6 +753,7 @@ footer::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
       </div>
       <div class="control-group" style="margin-top:auto; flex-direction:row; align-items:center; justify-content:space-between">
         <button class="btn" id="btn-reset" style="padding: 7px 16px; background: var(--accent); color: #fff; border: none; font-weight: 600; letter-spacing: 0.3px; cursor: pointer; border-radius: 4px; font-size: 12px; transition: all 0.15s;">Reset filters</button>
+        <span class="muted" style="font-size:11px">💡 Tip: click a slice of the validity, sector-map, GSO or municipality chart to filter</span>
         <span class="muted" id="filter-status" style="font-size:11px"></span>
       </div>
     </div>
@@ -1304,6 +1305,15 @@ try {
       textinfo: 'label+percent', textposition: 'outside',
     }], {paper_bgcolor:'transparent', font:{color:'#1c2742'},
         margin:{t:10,r:10,b:10,l:10}, height:300, showlegend:false}, PLOTLY_CONFIG);
+    // Click-to-filter: tapping a slice toggles that compliance filter.
+    const _vaN = document.getElementById('chart-validity');
+    _vaN.removeAllListeners && _vaN.removeAllListeners('plotly_click');
+    _vaN.on('plotly_click', e => {
+      const lbl = e.points[0].label;
+      if (lbl !== 'Compliant' && lbl !== 'Non-compliant') return;
+      if (activeCompliance.has(lbl)) activeCompliance.delete(lbl); else activeCompliance.add(lbl);
+      renderAll();
+    });
   }
 
   // Test-name normalisation: maps the cleaner's internal labels (mixed
@@ -1677,6 +1687,15 @@ try {
       margin: { t: 0, r: 0, b: 0, l: 0 },
       mapbox: { style: 'carto-positron', center: { lat: 24.7136, lon: 46.6753 }, zoom: 9.3 },
     }, PLOTLY_CONFIG);
+    // Click-to-filter: tapping a sector bubble toggles that sector (same
+    // vocabulary as the municipality bars — both filter on r[municipality]).
+    node.removeAllListeners && node.removeAllListeners('plotly_click');
+    node.on('plotly_click', e => {
+      const s = present[e.points[0].pointNumber];
+      if (!s) return;
+      if (activeSectors.has(s)) activeSectors.delete(s); else activeSectors.add(s);
+      renderAll();
+    });
   }
 
   function renderFacilities() {

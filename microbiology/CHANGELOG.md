@@ -1,5 +1,19 @@
 # Microbiology Changelog
 
+## 2026-08-20 — Cross-filter: monthly-trend click-to-scope
+
+Extended click-to-drill so tapping a month on the **Monthly trend** chart
+(`chart_trend`) scopes the date range to that month (`YYYY-MM-01`…`-31`); tapping
+the same month again clears back to the full range. Wired through `state`
+(`syncAllChips` + `applyFilters`), so it appears in the date inputs, the
+active-filter count, the URL hash, and Reset — consistent with the other filters.
+The existing click-to-filter charts (Riyadh map→sector, sector bars→sector,
+top-microbes→microbe, severity→severity, heatmap→GSO category, GSO bar→category,
+treemap→microbe) are unchanged. Charts with no matching filter dimension
+(sample-type, chains, day-of-week, YoY) remain non-interactive — adding those
+filters is separate feature work. Verified against the payload: month-click
+`2024-01` → exactly the 817 Jan-2024 rows, no leakage. `node --check` clean.
+
 ## 2026-08-20 — Audit fixes: modal Sample-ID + Min-Volume slider state
 
 Audit of the 2026-08-20 additions confirmed the core filter logic and all numbers

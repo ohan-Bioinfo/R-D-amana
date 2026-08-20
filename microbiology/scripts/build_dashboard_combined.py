@@ -2354,6 +2354,21 @@ function renderTrend(rows) {
     yaxis2: { overlaying: 'y', side: 'right', title: 'Total samples', showgrid: false, rangemode: 'tozero' },
     legend: { orientation: 'h', y: -0.18, font: { size: 11 } }, hovermode: 'x unified',
   }, PLOTLY_CONFIG);
+  // Click-to-filter: tap a month to scope the date range to it (re-click clears).
+  const _trNode = document.getElementById('chart_trend');
+  _trNode.removeAllListeners && _trNode.removeAllListeners('plotly_click');
+  _trNode.on('plotly_click', e => {
+    const m = e.points && e.points[0] && e.points[0].x;
+    if (!/^\d{4}-\d{2}$/.test(m)) return;
+    const from = m + '-01', to = m + '-31';
+    if (state.date_from === from && state.date_to === to) {
+      state.date_from = FACETS.date_min; state.date_to = FACETS.date_max;
+    } else {
+      state.date_from = from; state.date_to = to;
+    }
+    syncAllChips();
+    applyFilters();
+  });
 }
 
 function renderYoY(rows) {

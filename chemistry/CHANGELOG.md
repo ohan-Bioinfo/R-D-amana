@@ -5,6 +5,24 @@ the convention in `microbiology/CHANGELOG.md`.
 
 ---
 
+## 2026-08-20 — Cross-filter: validity + Riyadh-map charts click-to-filter
+
+Brought the chemistry dashboard toward micro's interactivity. Two more charts are
+now click-to-filter (joining the existing GSO-category and municipality bars):
+
+- **Validity pie (`chart-validity`)** → tapping the *Compliant* or *Non-compliant*
+  slice toggles that compliance filter (same `activeCompliance` set as the chips;
+  `renderAll()` re-syncs the chip UI, so state and UI never diverge).
+- **Riyadh sector map (`chart-map`)** → tapping a sector bubble toggles that sector
+  (same `municipality` vocabulary the bars use).
+- Added a "💡 Tip: click a chart to filter" hint by the Reset button.
+
+Charts with no matching filter dimension (monthly trend, failed-tests) stay
+non-interactive — a month/test filter would be new feature work. Verified against
+the payload: validity-click Compliant→14,677, Non-compliant→1,101, both→15,778
+(unknowns excluded); map-click Central→4,588; Central + Non-compliant→302
+(cross-dimension AND). `node --check` clean; totals unchanged (15,876).
+
 ## 2026-08-20 — Compliance Filter Scope Refactor
 
 - **Fixed Multi-Select Compliance Filter Scope (`applyScopeFilters`):**
