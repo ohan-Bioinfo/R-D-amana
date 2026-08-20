@@ -1,5 +1,40 @@
 # Microbiology Changelog
 
+## 2026-08-20 — Careful audit: 3 fixes + removable active-filter pills
+
+Full re-audit of `build_dashboard_combined.py` (data half + JS render/interaction
+half + core filter path) against the real payload. Core filter logic, all
+cross-filter click handlers (label→raw mapping via `LABEL_TO_RAW`), KPIs, and the
+chip-count invariant were all verified correct. Node simulation confirmed data
+integrity: 0 column-length mismatches, facet↔data alignment for sector/GSO/severity,
+and `chip count == click result` exactly. Three genuine defects were fixed:
+
+- **Modal CSV export ignored the in-modal search/verdict filter** (`exportModalCSV`).
+  `renderModalTable` computed the search+verdict-filtered set but discarded it;
+  export re-read the full `modalRows`. A user who searched "sal" + "Non-compliant"
+  saw 330 rows but exported all 20,881. Hoisted the filtered set into
+  `modalFilteredRows` so the CSV mirrors the table. Verified: 330 → 330.
+- **`n_failed` (col 14) double-counted 6 rows** that repeat one organism spelling
+  in `invalid_tests` (`n_failed=2` beside a 1-element deduped `failed_tests`).
+  Emit `len(failed)` so the count matches the deduped list the frontend trusts;
+  the "Total failed test results" KPI drops from 7,639 to the correct 7,633.
+- **GSO-category facet ordering was computed from double-counted totals**
+  (`build_facets` summed native `gso_category_name_en` + `sample_type`-mapped
+  counts for the ~14k rows carrying both, inflating totals ~2×). Reordered the
+  facet by each row's single *resolved* category from `build_data`, so the
+  category chips and heatmap axis read in true per-sample volume order.
+  Display-only; no cell counts change.
+
+**Enhancement — removable active-filter pills.** A new **Active** bar renders one
+pill per active constraint (year, compliance, sector, severity, category, organism,
+pathogen/repeat/exclude toggles, min-volume, date range). Each pill's × removes just
+that value (re-syncs chips + re-applies); a "clear all" mirrors Reset. Especially
+useful after cross-filtering by clicking charts — users can now see and peel back
+individual filters instead of only a count + full Reset. Styled to the green theme.
+Runtime-tested with a mock DOM (all 11 pills correct labels, removal mutates state);
+emitted JS passes `node --check`; headless screenshot confirms layout. Totals
+unchanged (20,881 rows).
+
 ## 2026-08-20 — Cross-filter: monthly-trend click-to-scope
 
 Extended click-to-drill so tapping a month on the **Monthly trend** chart

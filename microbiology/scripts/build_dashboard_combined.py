@@ -485,7 +485,9 @@ def build_data(df: pd.DataFrame) -> dict:
             failure_b,
             pathogen_b,
             sev_raw,
-            int(r.n_failed_tests) if pd.notna(r.n_failed_tests) else 0,
+            len(failed),  # distinct failed tests — matches the deduped failed_tests
+                          # list (col 16); raw n_failed_tests double-counts the 6 rows
+                          # that repeat one organism spelling. (audit 2026-08-20)
             int(r.chain_invalid_count_90d) if pd.notna(r.chain_invalid_count_90d) else 0,
             failed,
             gso_cat,
@@ -793,6 +795,21 @@ h2::before { content: "۞"; color: var(--gold-500); margin-right: 8px;
   border: none; font-weight: 600; letter-spacing: 0.3px; cursor: pointer;
   border-radius: 8px; font-size: 12px; transition: all 0.15s; }
 .year-bar .btn-reset:hover { background: #0f1a3d; transform: translateY(-1px); }
+.active-filters { display: flex; }
+.af-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 6px 4px 11px;
+  background: #eef4ee; border: 1px solid var(--green-700, #4a7c59); border-radius: 999px;
+  font-size: 11.5px; color: var(--green-900, #244a34); font-weight: 500; max-width: 320px; }
+.af-pill .af-k { text-transform: uppercase; letter-spacing: 0.4px; font-size: 9.5px;
+  color: var(--muted); font-weight: 700; }
+.af-pill .af-v { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.af-pill .af-x { display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; border-radius: 50%; background: rgba(0,0,0,0.08);
+  color: var(--green-900, #244a34); font-size: 12px; line-height: 1; cursor: pointer;
+  border: none; padding: 0; transition: background 0.12s; }
+.af-pill .af-x:hover { background: #dc2626; color: #fff; }
+.active-filters .af-clear { padding: 4px 10px; background: transparent; border: none;
+  color: var(--muted); font-size: 11px; cursor: pointer; text-decoration: underline; }
+.active-filters .af-clear:hover { color: var(--accent, #1c2742); }
 .year-bar .btn-reset:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; }
 .card.hidden-by-year { display: none; }
 .year-required-badge { display: inline-block; margin-left: 8px; padding: 2px 8px;
@@ -1018,6 +1035,13 @@ tbody tr:hover { background: var(--sand-100); }
   <span class="filter-pill" id="filter_status">All filters cleared</span>
   <span class="filter-pill" style="background:var(--sand-100)">💡 click any chart to filter</span>
   <button class="btn-reset" id="btn_reset" style="margin-left:auto" disabled>Reset all filters</button>
+</div>
+
+<!-- Active-filter summary: one removable pill per active constraint, so users
+     can see and undo individual filters (esp. after cross-filtering by clicking
+     charts) without a full Reset. (enhancement 2026-08-20) -->
+<div class="active-filters" id="active_filters" style="display:none; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:14px">
+  <span class="year-bar-label" style="margin-right:2px">Active</span>
 </div>
 
 <div class="year-bar" id="bookmark_bar" style="gap:8px">
@@ -1658,6 +1682,51 @@ const EXCLUDE_TOGGLES = [
     test: r => r[COLS.gso_category] === 'Meat, Poultry and its Products' },
 ];
 
+// Render one removable pill per active constraint into #active_filters. Each
+// pill's × removes just that value (then re-syncs chips + re-applies), so users
+// can peel back individual filters — especially handy after cross-filtering by
+// clicking charts. (enhancement 2026-08-20)
+function renderActiveFilters() {
+  const host = document.getElementById('active_filters');
+  if (!host) return;
+  const pills = [];
+  const add = (k, label, onRemove) => pills.push({ k, label, onRemove });
+  state.years.forEach(y => add('Year', String(y), () => state.years.delete(y)));
+  state.compliance.forEach(c => add('Compliance', c, () => state.compliance.delete(c)));
+  state.sector.forEach(s => add('Sector', s, () => state.sector.delete(s)));
+  state.severity.forEach(s => add('Severity', SEVERITY_LABEL[s] || s, () => state.severity.delete(s)));
+  state.gso_category.forEach(g => add('Category', g, () => state.gso_category.delete(g)));
+  state.microbe.forEach(m => add('Organism',
+    m === INDICATOR_TOKEN ? 'Any indicator failure' : m, () => state.microbe.delete(m)));
+  if (state.pathogen_only) add('Only', 'Pathogen failures', () => { state.pathogen_only = false; });
+  if (state.repeat_only) add('Only', 'Repeat offenders (≥2)', () => { state.repeat_only = false; });
+  if (state.exclude_raw_meat) add('Exclude', 'Meat & poultry', () => { state.exclude_raw_meat = false; });
+  if (state.min_vol > 1) add('Min volume', '≥ ' + state.min_vol + ' per facility', () => { state.min_vol = 1; });
+  if (state.date_from !== FACETS.date_min || state.date_to !== FACETS.date_max) {
+    add('Date', state.date_from + ' → ' + state.date_to, () => {
+      state.date_from = FACETS.date_min; state.date_to = FACETS.date_max;
+    });
+  }
+  host.querySelectorAll('.af-pill, .af-clear').forEach(el => el.remove());
+  if (!pills.length) { host.style.display = 'none'; return; }
+  host.style.display = 'flex';
+  pills.forEach(p => {
+    const el = document.createElement('span');
+    el.className = 'af-pill';
+    const kEl = document.createElement('span'); kEl.className = 'af-k'; kEl.textContent = p.k;
+    const vEl = document.createElement('span'); vEl.className = 'af-v'; vEl.textContent = p.label; vEl.title = p.label;
+    const x = document.createElement('button');
+    x.className = 'af-x'; x.type = 'button'; x.textContent = '×'; x.title = 'Remove this filter';
+    x.addEventListener('click', () => { p.onRemove(); syncAllChips(); applyFilters(); });
+    el.appendChild(kEl); el.appendChild(vEl); el.appendChild(x);
+    host.appendChild(el);
+  });
+  const clr = document.createElement('button');
+  clr.className = 'af-clear'; clr.type = 'button'; clr.textContent = 'clear all';
+  clr.addEventListener('click', () => document.getElementById('btn_reset').click());
+  host.appendChild(clr);
+}
+
 function applyFilters() {
   const cD = COLS.date, cF = COLS.failure;
   const fCo = state.compliance;
@@ -1723,6 +1792,7 @@ function applyFilters() {
     pill.classList.add('active');
     btn.disabled = false;
   }
+  renderActiveFilters();
 
   // ─── Single filter tier (2026-07-16) ────────────────────────────────────
   // Every active filter — year, date, compliance, sector, gso_category,
@@ -3304,6 +3374,10 @@ function renderAll(rows) {
 let modalPage = 1;
 const modalPageSize = 50;
 let modalRows = [];
+// The rows currently shown in the modal AFTER the in-modal search box + verdict
+// dropdown are applied. Kept in sync by renderModalTable so the CSV export
+// matches what the user sees, not the pre-search set. (audit 2026-08-20)
+let modalFilteredRows = [];
 
 function openRecordsModal(customRows, title) {
   modalRows = customRows || window.__mapRows || ROWS || [];
@@ -3334,6 +3408,7 @@ function renderModalTable() {
     const chn = String(r[COLS.chain] || '').toLowerCase();
     return sId.includes(query) || sNm.includes(query) || fac.includes(query) || chn.includes(query);
   });
+  modalFilteredRows = filtered;   // export mirrors the on-screen (searched) set
 
   const total = filtered.length;
   const totalPages = Math.ceil(total / modalPageSize) || 1;
@@ -3375,7 +3450,9 @@ function prevModalPage() { modalPage--; renderModalTable(); }
 function nextModalPage() { modalPage++; renderModalTable(); }
 
 function exportModalCSV() {
-  const rows = modalRows || [];
+  // Export exactly what the table shows (after the in-modal search + verdict
+  // filter), falling back to the full set if the table hasn't rendered yet.
+  const rows = (modalFilteredRows && modalFilteredRows.length) ? modalFilteredRows : (modalRows || []);
   if (!rows.length) return alert('No data to export.');
   let csv = 'Year,Date,Sample ID,Sample Name,Facility,Sector,Category,Failure,Failed Tests\n';
   rows.forEach(r => {
@@ -3492,9 +3569,24 @@ def main() -> None:
         if _c not in combined.columns:
             combined[_c] = None
 
+    data = build_data(combined)
+    facets = build_facets(combined)
+    # Order the GSO-category facet by each row's single RESOLVED category
+    # (build_data assigns exactly one per sample), NOT build_facets' native +
+    # sample_type tally which double-counts the ~14k rows carrying both — so the
+    # category filter chips and heatmap axis read in true per-sample volume
+    # order. Purely a display-ordering fix; no cell count changes. (audit 2026-08-20)
+    _gci = data["cols"].index("gso_category")
+    _res_counts: dict[str, int] = {}
+    for _row in data["rows"]:
+        _c = _row[_gci]
+        if _c:
+            _res_counts[_c] = _res_counts.get(_c, 0) + 1
+    facets["gso_categories"] = sorted(
+        facets["gso_categories"], key=lambda c: (-_res_counts.get(c, 0), c))
     payload = {
-        "data": build_data(combined),
-        "facets": build_facets(combined),
+        "data": data,
+        "facets": facets,
     }
     from datetime import datetime
     import base64
