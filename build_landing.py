@@ -602,11 +602,11 @@ GENOME_BODY = r"""<body class="labpage genome">
     </div>
     <div class="h-stat"><span class="n" style="font-size:24px">Building Pipeline</span></div>
   </section>
-  <p class="lab-desc">Pipeline construction flow — from raw data to metagenomics.</p>
-  
+  <p class="lab-desc">Targeted metagenomics (amplicon) pipeline — 16S rRNA &amp; ITS marker-gene profiling of bacterial and fungal communities, from raw reads to diversity.</p>
+
   <div class="section-head">
     <h3>Pipeline Construction Flow</h3>
-    <span class="sh-sub">Analysis stages</span>
+    <span class="sh-sub">Amplicon analysis stages · 16S / ITS</span>
   </div>
   
   <div class="viz-grid" style="margin-top:16px; margin-bottom:32px;">
@@ -619,32 +619,32 @@ GENOME_BODY = r"""<body class="labpage genome">
     <div class="portal uc">
       <div class="uc-badge">Building</div>
       <div class="p-ico">🧬</div>
-      <div class="p-lb">Raw Data</div>
-      <div class="p-sub">Initial sequencing reads, FASTQC quality assessment, and error profiling.</div>
+      <div class="p-lb">Amplicon Reads</div>
+      <div class="p-sub">Demultiplexed 16S rRNA &amp; ITS marker-gene reads; FASTQC quality assessment and per-run QC.</div>
     </div>
     <div class="portal uc">
       <div class="uc-badge">Building</div>
       <div class="p-ico">✂️</div>
-      <div class="p-lb">Trimming</div>
-      <div class="p-sub">Adapter removal, sliding-window read filtering, and sequence stabilization.</div>
+      <div class="p-lb">Primer Removal &amp; QC</div>
+      <div class="p-sub">Cutadapt primer/adapter trimming and DADA2 quality filtering, truncation, and error-rate learning.</div>
     </div>
     <div class="portal uc">
       <div class="uc-badge">Building</div>
-      <div class="p-ico">🧩</div>
-      <div class="p-lb">Assembly</div>
-      <div class="p-sub">De novo contig generation, scaffolding, and genome reconstruction metrics.</div>
+      <div class="p-ico">🧮</div>
+      <div class="p-lb">Denoising → ASVs</div>
+      <div class="p-sub">DADA2 error-model denoising into exact amplicon sequence variants (ASVs), read merging, and chimera removal.</div>
     </div>
     <div class="portal uc">
       <div class="uc-badge">Building</div>
       <div class="p-ico">🏷️</div>
-      <div class="p-lb">Annotation</div>
-      <div class="p-sub">Gene prediction, functional assignment, and pathway mapping workflows.</div>
+      <div class="p-lb">Taxonomic Classification</div>
+      <div class="p-sub">ASV taxonomy against curated references — SILVA / GTDB for 16S bacteria, UNITE for ITS fungi.</div>
     </div>
     <div class="portal uc">
       <div class="uc-badge">Building</div>
-      <div class="p-ico">🔬</div>
-      <div class="p-lb">Metagenomics</div>
-      <div class="p-sub">Taxonomic profiling, community composition, and strain-level analysis.</div>
+      <div class="p-ico">📊</div>
+      <div class="p-lb">Community &amp; Diversity</div>
+      <div class="p-sub">Alpha/beta diversity, community composition, and differential-abundance analysis across samples.</div>
     </div>
   </div>
 </div>
